@@ -2,8 +2,9 @@
 
 <!DOCTYPE PLUGIN [
   <!ENTITY name       "plexstreamsplus">
+  <!ENTITY title      "PlexStrems Plus">
   <!ENTITY author     "alexphillips-dev">
-  <!ENTITY version    "2026.03.09.4">
+  <!ENTITY version    "2026.03.09.5">
   <!ENTITY launch     "Settings/PlexStreamsPlus">
   <!ENTITY branch     "main">
   <!ENTITY gitURL     "https://raw.githubusercontent.com/alexphillips-dev/PlexStreams-Plus/&branch;">
@@ -12,10 +13,10 @@
   <!ENTITY emhttp     "/usr/local/emhttp/plugins/&name;">
   <!ENTITY plgPATH    "/boot/config/plugins/&name;">
   <!ENTITY plgNAME    "&name;-&version;-x86_64-1">
-  <!ENTITY md5        "59115588f682b151cb0f7b63aae94cae">
+  <!ENTITY md5        "99ce819f6a3fc3f8d4feb984242a4bbb">
 ]>
 
-<PLUGIN  name="&name;"
+<PLUGIN  name="&title;"
          author="&author;"
          version="&version;"
          pluginURL="&pluginURL;"
@@ -26,6 +27,9 @@
 
     <CHANGES>
     ##&name;
+###2026.03.09.5
+- Set plugin display title to PlexStrems Plus while keeping stable internal plugin IDs for update checks.
+
 ###2026.03.09.4
 - Revert unsafe PLUGIN display-name metadata to restore Unraid update checks; keep nav tab label as Plex Streams.
 
