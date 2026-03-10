@@ -1,23 +1,36 @@
 # PlexStreams Plus
 
-Unraid plugin to display active Plex streams in the dashboard and tools pages.
+PlexStreams Plus is an Unraid plugin that shows active Plex sessions in both the dashboard widget and the tools pages so you can quickly see who is streaming, what is playing, and stream/transcode status.
+
+## What It Does
+
+- Displays active streams for your configured Plex server(s)
+- Adds a dashboard widget for quick stream visibility
+- Adds tools pages with stream detail views
+- Supports multiple servers and legacy Unraid display paths
+- Stores plugin settings in `/boot/config/plugins/plexstreamsplus/plexstreamsplus.cfg`
 
 ## Install In Unraid
 
-In Unraid, go to `Plugins` -> `Install Plugin` and paste:
+In Unraid:
 
-`https://raw.githubusercontent.com/alexphillips-dev/PlexStreams-Plus/main/plexstreamsplus.plg`
+1. Open `Plugins`
+2. Click `Install Plugin`
+3. Paste one of the URLs below
 
-For legacy installs that still track the old plugin filename, this compatibility URL is also available:
+Primary install URL:
 
-`https://raw.githubusercontent.com/alexphillips-dev/PlexStreams-Plus/main/plexstreams.plg`
+```text
+https://raw.githubusercontent.com/alexphillips-dev/PlexStreams-Plus/main/plexstreamsplus.plg
+```
 
-## Release Pipeline
+Legacy compatibility URL (for older installs still tracking `plexstreams.plg`):
 
-Use GitHub Actions to publish new plugin updates:
+```text
+https://raw.githubusercontent.com/alexphillips-dev/PlexStreams-Plus/main/plexstreams.plg
+```
 
-1. Open `Actions` in GitHub and run the `Release Plugin` workflow.
-2. Leave inputs empty for auto mode:
-   - Date uses `America/New_York` (`YYYY.MM.DD`)
-   - Revision auto-increments as `.1`, `.2`, `.3`, etc.
-3. The workflow builds both archives, updates md5 values, updates plugin versions, commits, and pushes to `main`.
+## Support
+
+- Issues: `https://github.com/alexphillips-dev/PlexStreams-Plus/issues`
+- Repository: `https://github.com/alexphillips-dev/PlexStreams-Plus`
