@@ -5,10 +5,10 @@
 <PluginAuthor>alexphillips-dev</PluginAuthor>
 <Beta>False</Beta>
 <Category>Tools:System</Category>
-<Name>PlexStrems Plus</Name>
+<Name>PlexStreams Plus</Name>
 <CA>AddOn</CA>
 <Description>
-Legacy compatibility entry for PlexStrems Plus. Displays active Plex streams in Unraid with dashboard and tools views.
+Legacy compatibility entry for PlexStreams Plus. Displays active Plex streams in Unraid with dashboard and tools views.
 </Description>
 <Date>2026-03-09</Date>
 <MinVer>6.9.0</MinVer>

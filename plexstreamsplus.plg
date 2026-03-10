@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
   <!ENTITY name       "plexstreamsplus">
   <!ENTITY author     "alexphillips-dev">
-  <!ENTITY version    "2026.03.09.7">
+  <!ENTITY version    "2026.03.09.8">
   <!ENTITY launch     "Settings/PlexStreamsPlus">
   <!ENTITY branch     "main">
   <!ENTITY gitURL     "https://raw.githubusercontent.com/alexphillips-dev/PlexStreams-Plus/&branch;">
@@ -12,7 +12,7 @@
   <!ENTITY emhttp     "/usr/local/emhttp/plugins/&name;">
   <!ENTITY plgPATH    "/boot/config/plugins/&name;">
   <!ENTITY plgNAME    "&name;-&version;-x86_64-1">
-  <!ENTITY md5        "82e7f78924872ea1e1259439a32b5a44">
+  <!ENTITY md5        "18f4d1db8c1b76d6605410a951ec28db">
 ]>
 
 <PLUGIN  name="&name;"
@@ -26,14 +26,17 @@
 
     <CHANGES>
     ##&name;
+###2026.03.09.8
+- Correct branding typo to PlexStreams Plus across plugin README and metadata.
+
 ###2026.03.09.7
 - Fix Plugins tab display name/description by shipping plugin README metadata for plexstreamsplus and legacy plexstreams IDs.
 
 ###2026.03.09.6
-- Restore stable plugin IDs to fix update spinner and add CA metadata XML entries for PlexStrems Plus naming/description.
+- Restore stable plugin IDs to fix update spinner and add CA metadata XML entries for PlexStreams Plus naming/description.
 
 ###2026.03.09.5
-- Set plugin display title to PlexStrems Plus while keeping stable internal plugin IDs for update checks.
+- Set plugin display title to PlexStreams Plus while keeping stable internal plugin IDs for update checks.
 
 ###2026.03.09.4
 - Revert unsafe PLUGIN display-name metadata to restore Unraid update checks; keep nav tab label as Plex Streams.
