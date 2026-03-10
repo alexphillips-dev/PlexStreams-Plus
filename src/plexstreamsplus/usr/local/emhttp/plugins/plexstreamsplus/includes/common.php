@@ -2,7 +2,7 @@
     if (isset($GLOBALS['unRaidSettings'])) {
         define('OS_VERSION', 'Unraid ' . $GLOBALS['unRaidSettings']['version']);
     }
-    define('PLUGIN_VERSION', '2026.03.09.17');
+    define('PLUGIN_VERSION', '2026.03.09.18');
 
     function normalizeHostUrl($host) {
         $host = trim((string)$host);

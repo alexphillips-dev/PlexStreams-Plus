@@ -26,7 +26,7 @@
         width: 100%;
     }
 
-    #streams-container ul {
+    #streams-container > ul {
         display: flex;
         flex-wrap: wrap;
         gap: 14px;
@@ -94,20 +94,24 @@
         padding: 12px 14px 35px 0;
     }
 
-    .detail-list {
-        display: grid;
-        row-gap: 5px;
+    .stream-details .detail-list {
+        display: flex;
+        flex-direction: column;
+        flex-wrap: nowrap;
+        gap: 2px;
         list-style: none;
         margin: 0;
         padding: 0;
     }
 
-    .detail-list li {
+    .stream-details .detail-list li {
         display: flex;
+        width: 100%;
+        flex: 0 0 auto;
         align-items: baseline;
-        gap: 8px;
+        gap: 6px;
         margin-bottom: 0;
-        line-height: 16px;
+        line-height: 14px;
     }
 
     .detail-list .label {

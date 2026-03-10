@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
   <!ENTITY name       "plexstreams">
   <!ENTITY author     "alexphillips-dev">
-  <!ENTITY version    "2026.03.09.17">
+  <!ENTITY version    "2026.03.09.18">
   <!ENTITY launch     "Settings/PlexStreamsPlus">
   <!ENTITY branch     "main">
   <!ENTITY gitURL     "https://raw.githubusercontent.com/alexphillips-dev/PlexStreams-Plus/&branch;">
@@ -12,7 +12,7 @@
   <!ENTITY emhttp     "/usr/local/emhttp/plugins/plexstreamsplus">
   <!ENTITY plgPATH    "/boot/config/plugins/&name;">
   <!ENTITY plgNAME    "&name;-&version;-x86_64-1">
-  <!ENTITY md5        "3a381f3dfd1b44fd80887252b61bff58">
+  <!ENTITY md5        "8bcda13d773c1b9f9d7abab9f35524f6">
 ]>
 
 <PLUGIN  name="&name;"
@@ -26,6 +26,9 @@
 
     <CHANGES>
     ##&name;
+###2026.03.09.18
+- Fix stream detail row ordering and tighten card detail spacing
+
 ###2026.03.09.17
 - Normalize stream cards and fix cross-card updates
 
