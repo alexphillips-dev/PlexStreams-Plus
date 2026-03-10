@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
   <!ENTITY name       "plexstreamsplus">
   <!ENTITY author     "alexphillips-dev">
-  <!ENTITY version    "2026.03.09.12">
+  <!ENTITY version    "2026.03.09.13">
   <!ENTITY launch     "Settings/PlexStreamsPlus">
   <!ENTITY branch     "main">
   <!ENTITY gitURL     "https://raw.githubusercontent.com/alexphillips-dev/PlexStreams-Plus/&branch;">
@@ -12,7 +12,7 @@
   <!ENTITY emhttp     "/usr/local/emhttp/plugins/&name;">
   <!ENTITY plgPATH    "/boot/config/plugins/&name;">
   <!ENTITY plgNAME    "&name;-&version;-x86_64-1">
-  <!ENTITY md5        "f3b8ce3bc2ae3c09b9a13c018719617f">
+  <!ENTITY md5        "ce809ed6864432016a9ca504acfbbfad">
 ]>
 
 <PLUGIN  name="&name;"
@@ -26,6 +26,9 @@
 
     <CHANGES>
     ##&name;
+###2026.03.09.13
+- Add release guard/smoke script suite and replace bundled plugin icons with the updated PlexStreams icon asset.
+
 ###2026.03.09.12
 - Align release versioning/update flow with FolderView Plus (zero-padded numeric revisions and archive-driven incrementing).
 

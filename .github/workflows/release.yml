@@ -35,6 +35,9 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
+      - name: Tooling doctor
+        run: bash scripts/doctor.sh
+
       - name: Build release artifacts and update manifests
         id: release
         env:
@@ -44,6 +47,12 @@ jobs:
           TZ: America/New_York
         run: bash scripts/release.sh
 
+      - name: Release guard checks
+        run: bash scripts/release_guard.sh
+
+      - name: Install smoke checks
+        run: bash scripts/install_smoke.sh
+
       - name: Commit and push
         run: |
           if git diff --quiet; then
@@ -51,6 +60,6 @@ jobs:
             exit 0
           fi
 
-          git add archive plexstreams.plg plexstreamsplus.plg src/plexstreamsplus/usr/local/emhttp/plugins/plexstreamsplus/includes/common.php
+          git add archive plexstreams.plg plexstreamsplus.plg plexstreams.xml plexstreamsplus.xml src/plexstreamsplus/usr/local/emhttp/plugins/plexstreamsplus/includes/common.php
           git commit -m "release: ${{ steps.release.outputs.version }}"
           git push

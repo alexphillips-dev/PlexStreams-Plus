@@ -7,6 +7,8 @@ cd "${REPO_ROOT}"
 
 PLUS_MANIFEST="plexstreamsplus.plg"
 LEGACY_MANIFEST="plexstreams.plg"
+PLUS_CA_TEMPLATE="plexstreamsplus.xml"
+LEGACY_CA_TEMPLATE="plexstreams.xml"
 COMMON_FILE="src/plexstreamsplus/usr/local/emhttp/plugins/plexstreamsplus/includes/common.php"
 SOURCE_DIR="src/plexstreamsplus"
 ARCHIVE_DIR="archive"
@@ -29,7 +31,7 @@ if [[ $# -ge 3 && -n "${3:-}" ]]; then
   changelog_note="$3"
 fi
 
-for required_file in "${PLUS_MANIFEST}" "${LEGACY_MANIFEST}" "${COMMON_FILE}"; do
+for required_file in "${PLUS_MANIFEST}" "${LEGACY_MANIFEST}" "${PLUS_CA_TEMPLATE}" "${LEGACY_CA_TEMPLATE}" "${COMMON_FILE}"; do
   if [[ ! -f "${required_file}" ]]; then
     echo "Missing required file: ${required_file}" >&2
     exit 1
@@ -201,6 +203,10 @@ update_manifest() {
 
 update_manifest "${PLUS_MANIFEST}"
 update_manifest "${LEGACY_MANIFEST}"
+
+xml_date="${release_date//./-}"
+sed -E -i "s|(<Date>)[^<]+(</Date>)|\1${xml_date}\2|" "${PLUS_CA_TEMPLATE}"
+sed -E -i "s|(<Date>)[^<]+(</Date>)|\1${xml_date}\2|" "${LEGACY_CA_TEMPLATE}"
 
 echo "Release version: ${version}"
 echo "Package md5: ${md5}"
