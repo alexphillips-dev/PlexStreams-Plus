@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
   <!ENTITY name       "plexstreams">
   <!ENTITY author     "alexphillips-dev">
-  <!ENTITY version    "2026.03.09.10">
+  <!ENTITY version    "2026.03.10.11">
   <!ENTITY launch     "Settings/PlexStreamsPlus">
   <!ENTITY branch     "main">
   <!ENTITY gitURL     "https://raw.githubusercontent.com/alexphillips-dev/PlexStreams-Plus/&branch;">
@@ -26,6 +26,10 @@
 
     <CHANGES>
     ##&name;
+###2026.03.10.11
+- Fix legacy manifest XML parsing bug that blocked updates
+- Bump version so Unraid detects the upgrade
+
 ###2026.03.09.10
 - Compatibility update path for legacy "plexstreams" installs
 - Rebrand to PlexStreams Plus
@@ -309,18 +313,18 @@
             OLD_CFG=/boot/config/plugins/plexstreams/plexstreams.cfg
             NEW_CFG=/boot/config/plugins/plexstreamsplus/plexstreamsplus.cfg
             mkdir -p /boot/config/plugins/plexstreamsplus
-            if [[ ! -f "$NEW_CFG" && -f "$OLD_CFG" ]]; then
-                cp -f "$OLD_CFG" "$NEW_CFG"
+            if [[ ! -f "$NEW_CFG" ]]; then
+                if [[ -f "$OLD_CFG" ]]; then
+                    cp -f "$OLD_CFG" "$NEW_CFG"
+                fi
             fi
             if [[ ! -f "$NEW_CFG" ]]; then
-                cat > "$NEW_CFG" <<EOF
-HOST=""
-TOKEN=""
-CUSTOM_SERVERS=""
-DISPLAY_WIDGET="1"
-DISPLAY_NAV="1"
-FORCE_PLEX_HTTPS="0"
-EOF
+                echo 'HOST=""' > "$NEW_CFG"
+                echo 'TOKEN=""' >> "$NEW_CFG"
+                echo 'CUSTOM_SERVERS=""' >> "$NEW_CFG"
+                echo 'DISPLAY_WIDGET="1"' >> "$NEW_CFG"
+                echo 'DISPLAY_NAV="1"' >> "$NEW_CFG"
+                echo 'FORCE_PLEX_HTTPS="0"' >> "$NEW_CFG"
             fi
 
             WIDGET_OFF_FILE=/usr/local/emhttp/plugins/plexstreamsplus/PlexStreamsPlus_dashboard.page.off
