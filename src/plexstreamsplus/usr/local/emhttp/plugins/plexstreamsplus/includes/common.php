@@ -2,7 +2,7 @@
     if (isset($GLOBALS['unRaidSettings'])) {
         define('OS_VERSION', 'Unraid ' . $GLOBALS['unRaidSettings']['version']);
     }
-    define('PLUGIN_VERSION', '2026.03.09.13');
+    define('PLUGIN_VERSION', '2026.03.09.14');
 
     function normalizeHostUrl($host) {
         $host = trim((string)$host);
@@ -442,7 +442,8 @@
                                 'alias' => $alias,
                                 'id' => $media['@attributes']['id'],
                                 'type' => 'video',
-                                'player' => $video['Player']['@attributes']['product'],
+                                'product' => $video['Player']['@attributes']['product'],
+                                'player' => $video['Player']['@attributes']['title'] ?? $video['Player']['@attributes']['product'],
                                 'title' => $title,
                                 'titleString' => $title,
                                 'key' => $video['@attributes']['key'],
@@ -504,6 +505,11 @@
                                     } else if ($stream['@attributes']['streamType'] === '1') {
                                         $mergedStream['streamInfo']['video'] = $stream;
                                         $mergedStream['streamInfo']['video']['@attributes']['decision'] = $mergedStream['streamInfo']['video']['@attributes']['decision'] ?? 'direct play';
+                                    } else if ($stream['@attributes']['streamType'] === '3') {
+                                        $mergedStream['streamInfo']['subtitle'] = $stream;
+                                        $mergedStream['streamInfo']['subtitle']['@attributes']['decision'] =
+                                            $mergedStream['streamInfo']['subtitle']['@attributes']['decision'] ??
+                                            ($mergedStream['streamInfo']['subtitle']['@attributes']['displayTitle'] ?? 'none');
                                     }
                                 }
                             }
@@ -589,7 +595,8 @@
                                         'alias'=> $alias,
                                         'id' => $media['@attributes']['id'],
                                         'type' => 'audio',
-                                        'player' => $audio['Player']['@attributes']['product'],
+                                        'product' => $audio['Player']['@attributes']['product'],
+                                        'player' => $audio['Player']['@attributes']['title'] ?? $audio['Player']['@attributes']['product'],
                                         'title' => $title,
                                         'titleString' => $titleString,
                                         'key' => $audio['@attributes']['key'],
@@ -644,8 +651,15 @@
                                         $mergedStream['streamDecision'] = 'Direct Play';
                                     }
 
-                                    $mergedStream['streamInfo']['audio'] = $stream;
-                                    $mergedStream['streamInfo']['audio']['@attributes']['decision'] = $mergedStream['streamInfo']['audio']['@attributes']['decision'] ?? 'direct play';
+                                    if (($stream['@attributes']['streamType'] ?? '') === '3') {
+                                        $mergedStream['streamInfo']['subtitle'] = $stream;
+                                        $mergedStream['streamInfo']['subtitle']['@attributes']['decision'] =
+                                            $mergedStream['streamInfo']['subtitle']['@attributes']['decision'] ??
+                                            ($mergedStream['streamInfo']['subtitle']['@attributes']['displayTitle'] ?? 'none');
+                                    } else {
+                                        $mergedStream['streamInfo']['audio'] = $stream;
+                                        $mergedStream['streamInfo']['audio']['@attributes']['decision'] = $mergedStream['streamInfo']['audio']['@attributes']['decision'] ?? 'direct play';
+                                    }
 
                                     $mergedStreams[] = $mergedStream;
                                 }

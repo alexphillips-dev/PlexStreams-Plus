@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
   <!ENTITY name       "plexstreamsplus">
   <!ENTITY author     "alexphillips-dev">
-  <!ENTITY version    "2026.03.09.13">
+  <!ENTITY version    "2026.03.09.14">
   <!ENTITY launch     "Settings/PlexStreamsPlus">
   <!ENTITY branch     "main">
   <!ENTITY gitURL     "https://raw.githubusercontent.com/alexphillips-dev/PlexStreams-Plus/&branch;">
@@ -12,7 +12,7 @@
   <!ENTITY emhttp     "/usr/local/emhttp/plugins/&name;">
   <!ENTITY plgPATH    "/boot/config/plugins/&name;">
   <!ENTITY plgNAME    "&name;-&version;-x86_64-1">
-  <!ENTITY md5        "ce809ed6864432016a9ca504acfbbfad">
+  <!ENTITY md5        "c0c45ddbf61c8ec87c644201e0dfde8a">
 ]>
 
 <PLUGIN  name="&name;"
@@ -26,6 +26,9 @@
 
     <CHANGES>
     ##&name;
+###2026.03.09.14
+- Restyle active stream cards to a Tautulli-style layout with richer session detail fields and updated live card rendering.
+
 ###2026.03.09.13
 - Add release guard/smoke script suite and replace bundled plugin icons with the updated PlexStreams icon asset.
 

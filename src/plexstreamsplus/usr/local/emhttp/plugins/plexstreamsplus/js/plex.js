@@ -160,41 +160,254 @@ function uCWord(str) {
     return str ? str.charAt(0).toUpperCase() + str.slice(1) : '';
 }
 
+function decisionLabel(value) {
+    var label = safeText(value).replace(/[_-]/g, ' ').trim();
+    if (!label) {
+        return 'None';
+    }
+    if (label.toLowerCase() === 'directplay') {
+        return 'Direct Play';
+    }
+    return label.replace(/\b\w/g, function(letter) {
+        return letter.toUpperCase();
+    });
+}
+
+function streamAttr(stream, mediaKey, attrKey) {
+    if (!stream || !stream.streamInfo || !stream.streamInfo[mediaKey]) {
+        return '';
+    }
+    var media = stream.streamInfo[mediaKey];
+    var attrs = media['@attributes'] || media;
+    if (!attrs || attrs[attrKey] === undefined || attrs[attrKey] === null) {
+        return '';
+    }
+    return safeText(attrs[attrKey]);
+}
+
+function streamProductName(stream) {
+    return safeText(stream.product || stream.player || 'Plex');
+}
+
+function streamPlayerName(stream) {
+    return safeText(stream.player || stream.product || 'Plex');
+}
+
+function streamBadgeLabel(stream) {
+    var source = streamProductName(stream).replace(/^Plex\s+(for|on)\s+/i, '').trim();
+    if (!source) {
+        return 'PLEX';
+    }
+    var badge = source.split(/\s+/)[0].toUpperCase();
+    return badge.length > 8 ? badge.slice(0, 8) : badge;
+}
+
+function streamQualityValue(stream) {
+    var mode = safeText(stream.streamDecision).toLowerCase() === 'transcode' ? 'Transcode' : 'Original';
+    var bandwidth = safeText(stream.bandwidth);
+    return bandwidth ? mode + ' (' + bandwidth + ' Mbps)' : mode;
+}
+
+function streamContainerValue(stream) {
+    var container = streamAttr(stream, 'video', 'container') || streamAttr(stream, 'audio', 'container');
+    if (!container) {
+        return safeText(stream.type).toLowerCase() === 'audio' ? 'Audio' : 'Unknown';
+    }
+    return decisionLabel(container);
+}
+
+function streamVideoValue(stream) {
+    if (!stream.streamInfo || !stream.streamInfo.video) {
+        return 'N/A';
+    }
+    var value = decisionLabel(streamAttr(stream, 'video', 'decision') || streamAttr(stream, 'video', 'displayTitle') || 'Direct Play');
+    var displayTitle = streamAttr(stream, 'video', 'displayTitle');
+    if (displayTitle && value.toLowerCase().indexOf(displayTitle.toLowerCase()) === -1) {
+        value += ' (' + displayTitle + ')';
+    }
+    return value;
+}
+
+function streamAudioValue(stream) {
+    if (!stream.streamInfo || !stream.streamInfo.audio) {
+        return 'N/A';
+    }
+    return decisionLabel(streamAttr(stream, 'audio', 'decision') || 'Direct Play');
+}
+
+function streamSubtitleValue(stream) {
+    if (!stream.streamInfo || !stream.streamInfo.subtitle) {
+        return 'None';
+    }
+    var subtitle = streamAttr(stream, 'subtitle', 'displayTitle') ||
+        streamAttr(stream, 'subtitle', 'title') ||
+        streamAttr(stream, 'subtitle', 'decision');
+    return decisionLabel(subtitle || 'None');
+}
+
+function streamEpisodeMeta(stream) {
+    var streamType = safeText(stream.type).toLowerCase();
+    if (streamType !== 'video') {
+        return 'Audio Session';
+    }
+
+    var title = safeText(stream.title);
+    var seasonMatch = title.match(/Season\s+(\d+)\s*-\s*([^\(]+)/i);
+    if (seasonMatch) {
+        return 'S' + seasonMatch[1] + ' · ' + seasonMatch[2].trim();
+    }
+
+    var episodeMatch = title.match(/S(\d+)\s*E(\d+)/i);
+    if (episodeMatch) {
+        return 'S' + episodeMatch[1] + ' · E' + episodeMatch[2];
+    }
+
+    var movieMatch = title.match(/\((20\d{2}|19\d{2})\)\s*$/);
+    if (movieMatch) {
+        return 'Movie · ' + movieMatch[1];
+    }
+
+    return 'Video Session';
+}
+
+function streamPositionHtml(stream) {
+    if (stream.duration === null || stream.duration === undefined || stream.duration === '') {
+        return 'N/A';
+    }
+    return '<span class="currentPositionHours">' + safeText(stream.currentPositionHours).toString().padStart(2, 0) + '</span>:' +
+        '<span class="currentPositionMinutes">' + safeText(stream.currentPositionMinutes).toString().padStart(2, 0) + '</span>:' +
+        '<span class="currentPositionSeconds">' + safeText(stream.currentPositionSeconds).toString().padStart(2, 0) + '</span> / ' +
+        plexStreamsPlusEscapeHtml(stream.lengthDisplay);
+}
+
+function streamDetailUrl(stream) {
+    return '/plugins/plexstreamsplus/movieDetails.php?details=' + encodeURIComponent(stream.key) + '&host=' + encodeURIComponent(stream['@host']);
+}
+
+function buildStreamTitleMarkup(stream) {
+    var safeTitle = plexStreamsPlusEscapeHtml(stream.title);
+    if (safeText(stream.type).toLowerCase() === 'video') {
+        var url = streamDetailUrl(stream).replace(/'/g, "\\'");
+        return '<a class="stream-title-link" href="#" onclick="openBox(\'' + url + '\',\'Details\',600,900); return false;">' + safeTitle + '</a>';
+    }
+    return '<span class="stream-title-link">' + safeTitle + '</span>';
+}
+
+function buildFullStreamCard(stream) {
+    var safeId = plexStreamsPlusEscapeHtml(stream.id);
+    var safeType = plexStreamsPlusEscapeHtml(stream.type || '');
+    var safeArt = plexStreamsPlusEscapeHtml(stream.artUrl);
+    var safeThumb = plexStreamsPlusEscapeHtml(stream.thumbUrl);
+    var safeUser = plexStreamsPlusEscapeHtml(stream.user);
+    var safeUserAvatar = plexStreamsPlusEscapeHtml(stream.userAvatar);
+    var safeLocation = plexStreamsPlusEscapeHtml(stream.locationDisplay || '');
+    var safeState = plexStreamsPlusEscapeHtml(uCWord(stream.state));
+    var safeStateIcon = plexStreamsPlusEscapeHtml(stream.stateIcon);
+    var safeBadge = plexStreamsPlusEscapeHtml(streamBadgeLabel(stream));
+    var safeProduct = plexStreamsPlusEscapeHtml(streamProductName(stream));
+    var safePlayer = plexStreamsPlusEscapeHtml(streamPlayerName(stream));
+    var safeQuality = plexStreamsPlusEscapeHtml(streamQualityValue(stream));
+    var safeStream = plexStreamsPlusEscapeHtml(decisionLabel(stream.streamDecision));
+    var safeContainer = plexStreamsPlusEscapeHtml(streamContainerValue(stream));
+    var safeVideo = plexStreamsPlusEscapeHtml(streamVideoValue(stream));
+    var safeAudio = plexStreamsPlusEscapeHtml(streamAudioValue(stream));
+    var safeSubtitle = plexStreamsPlusEscapeHtml(streamSubtitleValue(stream));
+    var safeEpisode = plexStreamsPlusEscapeHtml(streamEpisodeMeta(stream));
+    var positionHtml = streamPositionHtml(stream);
+    var duration = plexStreamsPlusEscapeHtml(stream.duration || 0);
+    var percentPlayed = plexStreamsPlusEscapeHtml(stream.percentPlayed || 0);
+    var titleHtml = buildStreamTitleMarkup(stream);
+
+    return '<li class="stream-container" id="' + safeId + '" data-stream-type="' + safeType + '">' +
+        '<article class="stream-card">' +
+            '<div class="stream-media">' +
+                '<div class="stream-backdrop" style="background-image:url(\'' + safeArt + '\');"></div>' +
+                '<div class="stream-overlay"></div>' +
+                '<div class="stream-poster" style="background-image:url(\'' + safeThumb + '\');"></div>' +
+                '<div class="stream-details">' +
+                    '<ul class="detail-list">' +
+                        '<li><div class="label">' + _('Product') + '</div><div class="value product-value">' + safeProduct + '</div></li>' +
+                        '<li><div class="label">' + _('Player') + '</div><div class="value player-value">' + safePlayer + '</div></li>' +
+                        '<li><div class="label">' + _('Quality') + '</div><div class="value quality-value">' + safeQuality + '</div></li>' +
+                        '<li><div class="label">' + _('Stream') + '</div><div class="value stream-value">' + safeStream + '</div></li>' +
+                        '<li><div class="label">' + _('Container') + '</div><div class="value container-value">' + safeContainer + '</div></li>' +
+                        '<li><div class="label">' + _('Video') + '</div><div class="value video-value">' + safeVideo + '</div></li>' +
+                        '<li><div class="label">' + _('Audio') + '</div><div class="value audio-value">' + safeAudio + '</div></li>' +
+                        '<li><div class="label">' + _('Subtitle') + '</div><div class="value subtitle-value">' + safeSubtitle + '</div></li>' +
+                        '<li><div class="label">' + _('Location') + '</div><div class="value location-value" title="' + safeLocation + '">' + safeLocation + '</div></li>' +
+                    '</ul>' +
+                '</div>' +
+                '<div class="player-badge" title="' + safeProduct + '">' + safeBadge + '</div>' +
+                '<div class="progress-wrap">' +
+                    '<div class="progressBar" duration="' + duration + '" style="width:' + percentPlayed + '%;"></div>' +
+                    '<div class="position">' + positionHtml + '</div>' +
+                '</div>' +
+            '</div>' +
+            '<div class="stream-footer">' +
+                '<div class="footer-top">' +
+                    '<span class="status"><i class="fa fa-' + safeStateIcon + '" title="' + safeState + '"></i></span>' +
+                    '<span class="stream-title-cell">' + titleHtml + '</span>' +
+                '</div>' +
+                '<div class="footer-bottom">' +
+                    '<span class="episode-meta-wrap"><i class="fa fa-tv"></i><span class="episode-meta">' + safeEpisode + '</span></span>' +
+                    '<span class="session-user">' +
+                        '<span class="session-user-avatar" title="' + safeUser + '" style="background-image:url(\'' + safeUserAvatar + '\');"></span>' +
+                        '<span class="session-user-name">' + safeUser + '</span>' +
+                    '</span>' +
+                '</div>' +
+            '</div>' +
+        '</article>' +
+    '</li>';
+}
+
+function refreshStreamCard($container, stream) {
+    var percentPlayed = stream.percentPlayed || 0;
+    var location = safeText(stream.locationDisplay || '');
+    var user = safeText(stream.user);
+
+    $container.find('.stream-backdrop').css('background-image', 'url("' + safeText(stream.artUrl) + '")');
+    $container.find('.stream-poster').css('background-image', 'url("' + safeText(stream.thumbUrl) + '")');
+    $container.find('.session-user-avatar').css('background-image', 'url("' + safeText(stream.userAvatar) + '")').attr('title', user);
+    $container.find('.session-user-name').text(user);
+    $container.find('.player-badge').text(streamBadgeLabel(stream)).attr('title', streamProductName(stream));
+    $container.find('.status i').attr('class', 'fa fa-' + safeText(stream.stateIcon)).attr('title', uCWord(stream.state));
+    $container.find('.stream-title-cell').html(buildStreamTitleMarkup(stream));
+    $container.find('.episode-meta').text(streamEpisodeMeta(stream));
+
+    $container.find('.product-value').text(streamProductName(stream));
+    $container.find('.player-value').text(streamPlayerName(stream));
+    $container.find('.quality-value').text(streamQualityValue(stream));
+    $container.find('.stream-value').text(decisionLabel(stream.streamDecision));
+    $container.find('.container-value').text(streamContainerValue(stream));
+    $container.find('.video-value').text(streamVideoValue(stream));
+    $container.find('.audio-value').text(streamAudioValue(stream));
+    $container.find('.subtitle-value').text(streamSubtitleValue(stream));
+    $container.find('.location-value').text(location).attr('title', location);
+
+    $container.find('.progressBar').css('width', percentPlayed + '%').attr('duration', safeText(stream.duration || 0));
+    $container.find('.position').html(streamPositionHtml(stream));
+}
+
 function updateFullStreamInfo() {
     $.ajax('/plugins/plexstreamsplus/ajax.php').done(function(streams){
         if (streams.length > 0) {
             var currentDate = new Date();
             var lastUpdate = currentDate.getTime();
-            var $streamHolder = $('#streams-container');
+            var $streamHolder = $('#streams-container ul');
             if ($streamHolder.length === 0) {
-                $('.no_streams').replaceWith('<div id="streams-container"><ul></ul>');
+                $('#no-streams, .no_streams').replaceWith('<div id="streams-container"><ul></ul></div>');
                 $streamHolder = $('#streams-container ul');
             }
+            if ($streamHolder.length === 0) {
+                return;
+            }
             streams.forEach(function(stream) {
-                var audioDecision = (stream.streamInfo && stream.streamInfo.audio && stream.streamInfo.audio['@attributes']) ? stream.streamInfo.audio['@attributes'].decision : '';
-                var videoDecision = (stream.streamInfo && stream.streamInfo.video && stream.streamInfo.video['@attributes']) ? stream.streamInfo.video['@attributes'].decision : '';
                 var node = $('#' + stream.id + '.stream-container')[0];
                 var $container = $(node);
                 if ($container.length > 0) {
-                    var $status = $container.find('.status i');
-                    var $progressBar = $container.find('.progressBar');
-                    $progressBar.css({
-                        width: stream.percentPlayed + '%'
-                    });
-                    
-                    $status.attr('class', 'fa fa-' + stream.stateIcon);
-                    $status.attr('title', uCWord(stream.state));
-                    var $details = $container.find('.details');
-                    $details.find('.stream.value').text(uCWord(stream.streamDecision));
-                    $details.find('.bandwidth.value').text(stream.bandwidth);
-                    $details.find('.audio.value').text(uCWord(audioDecision));
-                    if (videoDecision !== '') {
-                        $details.find('.video.value').text(uCWord(videoDecision));
-                    }
+                    refreshStreamCard($container, stream);
                 } else {
-                    var serverName = plexStreamsPlusEscapeHtml(streamServerName(stream));
-                    var detailUrl = '/plugins/plexstreamsplus/movieDetails.php?details=' + encodeURIComponent(stream.key) + '&host=' + encodeURIComponent(stream['@host']);
-                    $container = $('<li class="stream-container" id="' + plexStreamsPlusEscapeHtml(stream.id) + '"><div class="stream-subcontainer"><div class="stream" style="background-image:url(' + plexStreamsPlusEscapeHtml(stream.artUrl)  + ');"><div class="blur"><div class="details"><ul class="detail-list"><li><div class="label">' + _('Server') + '</div><div class="value">' + serverName + '</div></li><li><div class="label">' + _('Length') + '</div><div class="value">' + plexStreamsPlusEscapeHtml(stream.lengthDisplay || stream.duration) + '</div></li><li><div class="label">' + _('Stream') + '</div><div class="stream value">' + plexStreamsPlusEscapeHtml(uCWord(stream.streamDecision)) + '</div></li><li><div class="label">' + _('Location') + '</div><div class="value" title="' + plexStreamsPlusEscapeHtml(stream.locationDisplay) + '" style="pointer:default;">' + plexStreamsPlusEscapeHtml(stream.locationDisplay) + '</div></li><li><div class="label">' + _('Bandwidth') + '</div><div class="bandwidth value">' + plexStreamsPlusEscapeHtml(stream.bandwidth) + '</div></li><li><div class="label">' + _('Audio') + '</div><div class="audio value">' + plexStreamsPlusEscapeHtml(uCWord(audioDecision)) + '</div></li><li>' +  (videoDecision !== '' ? '<div class="label">' + _('Video') + '</div><div class="video value">' + plexStreamsPlusEscapeHtml(uCWord(videoDecision)) + '</div></li>' : '') + '</ul></div><div class="poster" style="background-image:url(' + plexStreamsPlusEscapeHtml(stream.thumbUrl) + ');"></div><div class="userIcon" title="' + plexStreamsPlusEscapeHtml(stream.user) + '" style="background-image:url(' + plexStreamsPlusEscapeHtml(stream.userAvatar) + ')"></div></div></div><div class="bottom-box"><div class="progressBar" duration="' + plexStreamsPlusEscapeHtml(stream.duration) + '" style="width:' + plexStreamsPlusEscapeHtml(stream.percentPlayed) + '%;"><div class="position"><span class="currentPositionHours">' + stream.currentPositionHours.toString().padStart(2, 0) + '</span>:<span class="currentPositionMinutes">' + stream.currentPositionMinutes.toString().padStart(2, 0) + '</span>:<span class="currentPositionSeconds">' + stream.currentPositionSeconds.toString().padStart(2, 0) + '</span>  / ' + plexStreamsPlusEscapeHtml(stream.lengthDisplay) + '</div></div><div class="title"><a href="#" onclick="openBox(\'' + detailUrl + '\',\'Details\',600,900); return false;">' + plexStreamsPlusEscapeHtml(stream.title) +'</a><div class="status"><i class="fa fa-' + plexStreamsPlusEscapeHtml(stream.stateIcon) + '" title="' + plexStreamsPlusEscapeHtml(stream.state) + '"></i></div></div></div></div></li>').appendTo($streamHolder);
+                    $container = $(buildFullStreamCard(stream)).appendTo($streamHolder);
                     node = $container[0];
                 }
                 updateDuration(node, stream);
@@ -214,12 +427,17 @@ function updateFullStreamInfo() {
             });
         } else {
             if ($('#streams-container').length > 0) {
-                $('#streams-container').replaceWith('<div class="no_streams"><span class="w100"><p style="text-align:center;font-style:italic;font-size:13px;">' + _('There are currently no active streams') + '</p></div>');
+                $('#streams-container').replaceWith('<div class="no_streams"><p id="no-streams">' + _('There are currently no active streams') + '</p></div>');
             }
         }
     }).fail(function(jqXHR) {
         if (jqXHR.status == '500') {
-            $('#plexstreamsplus_streams').html('<tr><td colspan="4" align="center"><p style="text-align:center;font-style:italic">' + _('Please make sure you have') + ' <a href="/Settings/PlexStreamsPlus">' + _('setup') + '</a> ' + _('the plugin first') + '</p></td></tr>');
+            var setupMessage = '<div class="no_streams"><p id="no-streams">' + _('Please make sure you have') + ' <a href="/Settings/PlexStreamsPlus">' + _('setup') + '</a> ' + _('the plugin first') + '</p></div>';
+            if ($('#streams-container').length > 0) {
+                $('#streams-container').replaceWith(setupMessage);
+            } else if ($('#no-streams').length > 0) {
+                $('#no-streams').closest('.no_streams').replaceWith(setupMessage);
+            }
         }
     });
 }

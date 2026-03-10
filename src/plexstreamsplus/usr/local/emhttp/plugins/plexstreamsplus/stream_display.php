@@ -4,14 +4,15 @@
         padding-left: 76px;
         margin: 16px -40px;
         padding: 16px 50px;
-        background-color:  rgb(254, 239, 227);
+        background-color: rgb(254, 239, 227);
         color: rgb(191, 54, 12);
         display: block;
         font-weight: bolder;
         font-size: 14px;
     }
+
     .caution i {
-        font-size:15pt;
+        font-size: 15pt;
     }
 
     .caution .text {
@@ -21,181 +22,328 @@
     }
 
     #streams-container {
-        display: inline;
+        display: block;
+        width: 100%;
     }
 
-    #streams-container ul{
+    #streams-container ul {
         display: flex;
         flex-wrap: wrap;
+        gap: 14px;
+        margin: 12px 0 0;
+        padding: 0;
+        list-style: none;
     }
 
     .stream-container {
-        list-style: none;
-        flex: 0 0 30%;
-        position: relative;
-        margin-right: 10px;
-        margin-bottom: 10px;
-    }
-
-    .stream-subcontainer {
-        width: 500px;
-        background-color: #000;
-    }
-
-    .stream {
-        background-position: center;
-        background-repeat: no-repeat;
-        background-size: contain;
-    }
-
-    .blur {
-        backdrop-filter: blur(3px);
-    }
-
-    .stream .blur {
-        width: 100%;
-        height: 100%;
-    }
-
-    .stream .poster {
-        background-position: center;
-        background-repeat: no-repeat;
-        background-size: cover;
-        width: 150px;
-        height: 225px;
-        z-index: 997;
-    }
-
-    .stream-container .bottom-box {
-        width: 500px;
-        position:absolute;
-        bottom: 0;
-        background: rgb(70,67,67,0.55);
-        color: #fff;
-        font-weight: bolder;
-        height: 63px;
-        z-index: 998;
-    }
-
-    .stream-container .bottom-box .progressBar {
-        height: 5px;
-        background-color: #cc0000;
-    }
-
-    .stream-container .bottom-box .progressBar .position {
-        position: absolute;
-        right: 5px;
-        top: 0;
-        width: 100px;
-        font-size:9px;
-        color: #fff;
-        text-align:right;
-    }
-
-    .stream-container .bottom-box .title {
-        padding: 10px;
-        z-index: 999;
-    }
-
-    .stream-container .bottom-box .title a {
-        text-decoration: none;
-        color: #fff;
-    }
-
-    .stream-container .bottom-box .title a:hover {
-        text-decoration: none;
-    }
-
-    .stream-container .title .status {
-        float:right;
-        color: #fff;
-    }
-
-    .userIcon {
-        border-radius: 50%;
-        overflow: hidden;
-        position: absolute;
-        top: 5px;
-        right: 5px;
+        flex: 1 1 520px;
+        min-width: 420px;
+        max-width: 520px;
         margin: 0;
-        height: 75px;
-        width: 75px;
+    }
+
+    .stream-card {
+        background: #10161d;
+        border: 1px solid #28313b;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+    }
+
+    .stream-media {
+        position: relative;
+        display: flex;
+        height: 250px;
+        overflow: hidden;
+        background: #0a0f14;
+    }
+
+    .stream-backdrop {
+        position: absolute;
+        inset: 0;
         background-position: center;
         background-repeat: no-repeat;
         background-size: cover;
+        filter: blur(8px);
+        transform: scale(1.08);
     }
 
-    .details {
-        opacity: 0;
-        transition: visibility 0s, opacity 0.5s ease-out ;
+    .stream-overlay {
         position: absolute;
-        opacity: 0;
-        left: 160px;
-        top: 5px;
-        background: rgb(34, 34, 34, 0.80);
-        color: #fff;
-        width: 244px;
-        height: 175px;
-        font-weight:bold;
+        inset: 0;
+        background: linear-gradient(90deg, rgba(6, 9, 12, 0.35) 0%, rgba(9, 13, 17, 0.72) 38%, rgba(9, 13, 17, 0.9) 100%);
     }
 
-    .details:hover {
-        opacity: 1;
+    .stream-poster {
+        position: relative;
+        z-index: 2;
+        width: 116px;
+        min-width: 116px;
+        height: 174px;
+        margin: 16px 12px 0 16px;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        box-shadow: 0 8px 18px rgba(0, 0, 0, 0.4);
     }
 
-    .details ul {
-        margin-top: 0;
-        padding-left: 0;
+    .stream-details {
+        position: relative;
+        z-index: 2;
+        flex: 1;
+        min-width: 0;
+        padding: 11px 14px 37px 0;
+    }
+
+    .detail-list {
         list-style: none;
-        font-size:14px;
+        margin: 0;
+        padding: 0;
     }
-    
-    .details li {
+
+    .detail-list li {
         display: flex;
-        flex-direction: row;
-        flex-wrap: nowrap;
         align-items: baseline;
-        width:100%;
-        margin-bottom:5px;
-        box-sizing: border-box;
-        color: #fff;
-        font-size: 12px;
-        line-height: 17px;
+        gap: 10px;
+        margin-bottom: 3px;
+        line-height: 18px;
     }
 
-    .details li div {
-        color: #aaa;
+    .detail-list .label {
+        width: 86px;
+        min-width: 86px;
+        font-size: 11px;
+        color: #a0abba;
+        letter-spacing: 0.08em;
+        font-weight: 700;
+        text-transform: uppercase;
         text-align: right;
-        line-height: 14px;
-    }
-    
-    .details li .label {
-        color: #aaa;
-        width:91px;
     }
 
-    .details li .value {
-        color: #fff;
+    .detail-list .value {
+        min-width: 0;
+        flex: 1;
+        font-size: 13px;
+        color: #f3f7fb;
         text-overflow: ellipsis;
         overflow: hidden;
         white-space: nowrap;
-        flex-grow: 1;
-        min-width:165px;
-        text-align: left;
-        margin-left: 10px;
+    }
+
+    .player-badge {
+        position: absolute;
+        z-index: 4;
+        top: 10px;
+        right: 10px;
+        min-width: 58px;
+        max-width: 90px;
+        padding: 6px 10px;
+        border-radius: 2px;
+        color: #fdfdfd;
+        background: linear-gradient(135deg, #2166b3, #24518c);
+        font-size: 12px;
+        font-weight: 700;
+        text-align: center;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+        box-shadow: 0 5px 14px rgba(0, 0, 0, 0.38);
+    }
+
+    .progress-wrap {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 24px;
+        z-index: 4;
+        background: linear-gradient(0deg, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.05));
+    }
+
+    .progressBar {
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        height: 4px;
+        background-color: #f2a126;
+    }
+
+    .position {
+        position: absolute;
+        right: 8px;
+        bottom: 6px;
+        font-size: 11px;
+        font-weight: 600;
+        color: #f3f7fb;
+        text-align: right;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.75);
+    }
+
+    .stream-footer {
+        border-top: 1px solid #27313d;
+        background: #11171f;
+        padding: 9px 12px 10px;
+    }
+
+    .footer-top {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+    }
+
+    .status {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        width: 16px;
+        min-width: 16px;
+        color: #f6f8fa;
+        font-size: 14px;
+    }
+
+    .stream-title-cell {
+        min-width: 0;
+        flex: 1;
+    }
+
+    .stream-title-link {
+        display: block;
+        color: #f8f9fa;
+        text-decoration: none;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+        font-size: 29px;
+        font-weight: 700;
+        line-height: 1.2;
+        font-family: "Open Sans", sans-serif;
+    }
+
+    .stream-title-link:hover {
+        color: #ffffff;
+        text-decoration: none;
+    }
+
+    .footer-bottom {
+        margin-top: 7px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        min-width: 0;
+    }
+
+    .episode-meta-wrap {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        min-width: 0;
+        color: #d5dce7;
+        font-size: 14px;
+    }
+
+    .episode-meta-wrap i {
+        font-size: 12px;
+        color: #c8d2df;
+    }
+
+    .episode-meta {
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+    }
+
+    .session-user {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+    }
+
+    .session-user-avatar {
+        width: 28px;
+        height: 28px;
+        min-width: 28px;
+        border-radius: 50%;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+    }
+
+    .session-user-name {
+        color: #d5dce7;
+        font-size: 14px;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+    }
+
+    #no-streams {
+        text-align: center;
+        font-style: italic;
     }
 
     .sb-overlay {
         backdrop-filter: blur(7px);
     }
 
+    @media (max-width: 1350px) {
+        .stream-container {
+            min-width: 380px;
+            max-width: 100%;
+        }
+    }
+
+    @media (max-width: 1100px) {
+        .stream-container {
+            min-width: 100%;
+        }
+    }
+
+    @media (max-width: 680px) {
+        .stream-media {
+            height: 240px;
+        }
+
+        .stream-poster {
+            width: 94px;
+            min-width: 94px;
+            height: 142px;
+            margin-left: 12px;
+            margin-right: 10px;
+        }
+
+        .detail-list .label {
+            width: 68px;
+            min-width: 68px;
+        }
+
+        .detail-list .value {
+            font-size: 12px;
+        }
+
+        .stream-title-link {
+            font-size: 24px;
+        }
+
+        .session-user-name {
+            max-width: 130px;
+        }
+    }
 </style>
 <script>
-    function openBox(cmd,title,height,width,load,func,id) {
-    // open shadowbox window (run in foreground)
-    var run = cmd.split('?')[0].substr(-4)=='.php' ? cmd : '/logging.htm?cmd='+cmd+'&csrf_token=91E90CB5E22139F9';
-    var options = {overlayOpacity: 0.90};
-    Shadowbox.open({content:run, player:'iframe', title:title, height:Math.min(height,screen.availHeight), width:Math.min(width,screen.availWidth), options:options});
+    function openBox(cmd, title, height, width, load, func, id) {
+        var run = cmd.split('?')[0].substr(-4) === '.php' ? cmd : '/logging.htm?cmd=' + cmd + '&csrf_token=91E90CB5E22139F9';
+        var options = {overlayOpacity: 0.90};
+        Shadowbox.open({
+            content: run,
+            player: 'iframe',
+            title: title,
+            height: Math.min(height, screen.availHeight),
+            width: Math.min(width, screen.availWidth),
+            options: options
+        });
     }
 </script>
 <?php
@@ -211,12 +359,62 @@
         }
     }
 
+    if (!function_exists('decisionLabel')) {
+        function decisionLabel($value) {
+            $value = trim(str_replace(['_', '-'], ' ', (string)$value));
+            if ($value === '') {
+                return 'None';
+            }
+            if (strcasecmp($value, 'directplay') === 0) {
+                return 'Direct Play';
+            }
+            return ucwords($value);
+        }
+    }
+
+    if (!function_exists('playerBadgeLabel')) {
+        function playerBadgeLabel($product, $player) {
+            $source = trim($product !== '' ? $product : $player);
+            $source = preg_replace('/^Plex\s+(for|on)\s+/i', '', $source);
+            if ($source === '') {
+                return 'PLEX';
+            }
+            $tokens = preg_split('/\s+/', $source);
+            $badge = strtoupper((string)($tokens[0] ?? 'PLEX'));
+            if (strlen($badge) > 8) {
+                $badge = substr($badge, 0, 8);
+            }
+            return $badge;
+        }
+    }
+
+    if (!function_exists('episodeMetaLabel')) {
+        function episodeMetaLabel($title, $type) {
+            $title = trim((string)$title);
+            if (strtolower((string)$type) !== 'video') {
+                return 'Audio Session';
+            }
+
+            if (preg_match('/Season\s+([0-9]+)\s*-\s*([^\\(]+)/i', $title, $matches)) {
+                return 'S' . $matches[1] . ' · ' . trim($matches[2]);
+            }
+
+            if (preg_match('/S([0-9]+)\s*E([0-9]+)/i', $title, $matches)) {
+                return 'S' . $matches[1] . ' · E' . $matches[2];
+            }
+
+            if (preg_match('/\((20[0-9]{2}|19[0-9]{2})\)\s*$/', $title, $matches)) {
+                return 'Movie · ' . $matches[1];
+            }
+
+            return 'Video Session';
+        }
+    }
+
     if ($translations) {
-        // add translations
         $_SERVER['REQUEST_URI'] = 'plexstreamsplus';
         require_once "$docroot/webGui/include/Translations.php";
     } else {
-        // legacy support (without javascript)
         $noscript = true;
         require_once "$docroot/plugins/$plugin/includes/Legacy.php";
     }
@@ -225,13 +423,12 @@
 
     if (!empty($cfg['TOKEN'])) {
         $streams = getStreams($cfg);
-        
         $mergedStreams = mergeStreams($streams, $cfg);
-        echo('<h4 style="margin-bottom:0px;display:none;" id="hover-message">' . _('Hover the stream for details') . '</h4>');
+
         if (count($mergedStreams) > 0) {
-            echo ('<div id="streams-container"><ul>');     
-               
-            foreach($mergedStreams as $idx => $stream) {
+            echo '<div id="streams-container"><ul>';
+
+            foreach ($mergedStreams as $stream) {
                 $streamId = h($stream['id']);
                 $streamArt = h($stream['artUrl']);
                 $streamThumb = h($stream['thumbUrl']);
@@ -240,65 +437,106 @@
                 $streamAddress = h($stream['address'] ?? '');
                 $streamAlias = h($stream['alias'] ?? '');
                 $serverLabel = ($streamAlias !== '') ? $streamAlias : $streamAddress;
-                $locationDisplay = h($stream['locationDisplay'] ?? '');
-                $streamBandwidth = h($stream['bandwidth'] ?? '');
-                $audioDecision = h(ucwords($stream['streamInfo']['audio']['@attributes']['decision'] ?? $stream['streamInfo']['audio']['decision'] ?? ''));
-                $videoDecision = h(ucwords($stream['streamInfo']['video']['@attributes']['decision'] ?? $stream['streamInfo']['video']['decision'] ?? ''));
+                $locationDisplayRaw = (string)($stream['locationDisplay'] ?? '');
+                $locationDisplay = h($locationDisplayRaw);
+                $streamBandwidthRaw = (string)($stream['bandwidth'] ?? '');
+                $streamBandwidth = h($streamBandwidthRaw);
+
+                $videoAttrs = $stream['streamInfo']['video']['@attributes'] ?? [];
+                $audioAttrs = $stream['streamInfo']['audio']['@attributes'] ?? [];
+                $subtitleAttrs = $stream['streamInfo']['subtitle']['@attributes'] ?? [];
+
+                $streamProductRaw = trim((string)($stream['product'] ?? ($stream['player'] ?? 'Plex')));
+                if ($streamProductRaw === '') {
+                    $streamProductRaw = 'Plex';
+                }
+                $streamPlayerRaw = trim((string)($stream['player'] ?? $streamProductRaw));
+                if ($streamPlayerRaw === '') {
+                    $streamPlayerRaw = $streamProductRaw;
+                }
+
+                $qualityLabelRaw = (($stream['streamDecision'] ?? '') === 'transcode') ? 'Transcode' : 'Original';
+                if ($streamBandwidthRaw !== '') {
+                    $qualityLabelRaw .= ' (' . $streamBandwidthRaw . ' Mbps)';
+                }
+
+                $containerLabelRaw = (string)($videoAttrs['container'] ?? $audioAttrs['container'] ?? ($stream['type'] === 'audio' ? 'Audio' : 'Unknown'));
+                $streamDecisionRaw = decisionLabel($stream['streamDecision'] ?? '');
+                $videoDecisionRaw = isset($stream['streamInfo']['video']) ? decisionLabel($videoAttrs['decision'] ?? ($videoAttrs['displayTitle'] ?? 'Direct Play')) : 'N/A';
+                if (($videoAttrs['displayTitle'] ?? '') !== '' && stripos($videoDecisionRaw, (string)$videoAttrs['displayTitle']) === false) {
+                    $videoDecisionRaw .= ' (' . $videoAttrs['displayTitle'] . ')';
+                }
+                $audioDecisionRaw = isset($stream['streamInfo']['audio']) ? decisionLabel($audioAttrs['decision'] ?? 'Direct Play') : 'N/A';
+                $subtitleDecisionRaw = decisionLabel((string)($subtitleAttrs['displayTitle'] ?? $subtitleAttrs['title'] ?? $subtitleAttrs['decision'] ?? 'None'));
+
                 $duration = is_null($stream['duration']) ? '0' : h($stream['duration']);
-                $percentPlayed = !is_null($stream['duration']) ? $stream['percentPlayed'] : '0';
-                $currentPositionDisplay = !is_null($stream['duration']) ? '<span class="currentPositionHours">' . str_pad($stream['currentPositionHours'], 2, 0, STR_PAD_LEFT) . '</span>:<span class="currentPositionMinutes">' . str_pad($stream['currentPositionMinutes'], 2, 0, STR_PAD_LEFT) . '</span>:<span class="currentPositionSeconds">' . str_pad($stream['currentPositionSeconds'], 2, 0, STR_PAD_LEFT) . '</span>  / ' . h($stream['lengthDisplay']) : '';
+                $percentPlayed = !is_null($stream['duration']) ? h($stream['percentPlayed']) : '0';
+                $currentPositionDisplay = !is_null($stream['duration'])
+                    ? '<span class="currentPositionHours">' . str_pad($stream['currentPositionHours'], 2, '0', STR_PAD_LEFT) . '</span>:<span class="currentPositionMinutes">' . str_pad($stream['currentPositionMinutes'], 2, '0', STR_PAD_LEFT) . '</span>:<span class="currentPositionSeconds">' . str_pad($stream['currentPositionSeconds'], 2, '0', STR_PAD_LEFT) . '</span> / ' . h($stream['lengthDisplay'])
+                    : h(_('N/A'));
+
                 $streamTitle = h($stream['title']);
                 $streamState = h(ucwords($stream['state']));
                 $streamStateIcon = h($stream['stateIcon']);
-                $streamLengthDisplay = h($stream['lengthDisplay'] ?? '');
-                $streamDecision = h(ucwords($stream['streamDecision'] ?? ''));
+                $streamType = h($stream['type']);
+                $episodeMeta = h(episodeMetaLabel((string)($stream['title'] ?? ''), (string)($stream['type'] ?? 'video')));
+                $playerBadge = h(playerBadgeLabel($streamProductRaw, $streamPlayerRaw));
                 $movieDetailUrl = '/plugins/plexstreamsplus/movieDetails.php?details=' . urlencode($stream['key']) . '&host=' . urlencode($stream['@host']);
 
-                echo('
-                    <li class="stream-container" id="' . $streamId . '">
-                        <div class="stream-subcontainer">
-                            <div class="stream" style="background-image:url(\'' . $streamArt . '\');">
-                                <div class="blur">
-                                    <div class="details">
-                                        <ul class="detail-list">
-                                            <li><div class="label">' . _('Server') . '</div><div class="value">' . $serverLabel .'</div></li>
-                                            ' . (isset($stream['lengthDisplay']) ? '<li><div class="label">' . _('Length') . '</div><div class="value">' . $streamLengthDisplay .'</div></li>' : '' ) .'
-                                            <li><div class="label">' . _('Stream') . '</div><div class="stream value">' . $streamDecision .'</div></li>
-                                            <li><div class="label">' . _('Location') . '</div><div class="value" title="' . $locationDisplay . '" style="pointer:default;">' .$locationDisplay .'</div></li>
-                                            <li><div class="label">' . _('Bandwidth') . '</div><div class="bandwidth value">' .$streamBandwidth . ' Mbps</div></li>
-                                            <li><div class="label">' . _('Audio') . '</div><div class="audio value">' . $audioDecision . '</div></li>
-                ');
-                if (isset($stream['streamInfo']['video'])) {
-                    echo('                  <li><div class="label">' . _('Video') . '</div><div class="video value">' . $videoDecision . '</div></li>');
-                }
+                $titleMarkup = ($stream['type'] === 'video')
+                    ? '<a class="stream-title-link" href="#" onclick="openBox(\'' . h($movieDetailUrl) . '\',\'Details\',600,900); return false;">' . $streamTitle . '</a>'
+                    : '<span class="stream-title-link">' . $streamTitle . '</span>';
 
-                echo('
-                                        </ul>
-                                    </div>
-                                    <div class="poster" style="background-image:url(\'' .$streamThumb . '\');">
-                                    </div>
-                                    <div class="userIcon" title="' . $streamUser . '" style="background-image:url(\'' . $streamUserAvatar . '\')">
-                                    </div>
+                echo '
+                    <li class="stream-container" id="' . $streamId . '" data-stream-type="' . $streamType . '">
+                        <article class="stream-card">
+                            <div class="stream-media">
+                                <div class="stream-backdrop" style="background-image:url(\'' . $streamArt . '\');"></div>
+                                <div class="stream-overlay"></div>
+                                <div class="stream-poster" style="background-image:url(\'' . $streamThumb . '\');"></div>
+                                <div class="stream-details">
+                                    <ul class="detail-list">
+                                        <li><div class="label">' . _('Product') . '</div><div class="value product-value">' . h($streamProductRaw) . '</div></li>
+                                        <li><div class="label">' . _('Player') . '</div><div class="value player-value">' . h($streamPlayerRaw) . '</div></li>
+                                        <li><div class="label">' . _('Quality') . '</div><div class="value quality-value">' . h($qualityLabelRaw) . '</div></li>
+                                        <li><div class="label">' . _('Stream') . '</div><div class="value stream-value">' . h($streamDecisionRaw) . '</div></li>
+                                        <li><div class="label">' . _('Container') . '</div><div class="value container-value">' . h(ucwords(strtolower($containerLabelRaw))) . '</div></li>
+                                        <li><div class="label">' . _('Video') . '</div><div class="value video-value">' . h($videoDecisionRaw) . '</div></li>
+                                        <li><div class="label">' . _('Audio') . '</div><div class="value audio-value">' . h($audioDecisionRaw) . '</div></li>
+                                        <li><div class="label">' . _('Subtitle') . '</div><div class="value subtitle-value">' . h($subtitleDecisionRaw) . '</div></li>
+                                        <li><div class="label">' . _('Location') . '</div><div class="value location-value" title="' . $locationDisplay . '">' . $locationDisplay . '</div></li>
+                                    </ul>
+                                </div>
+                                <div class="player-badge" title="' . h($streamProductRaw) . '">' . $playerBadge . '</div>
+                                <div class="progress-wrap">
+                                    <div class="progressBar" duration="' . $duration . '" style="width:' . $percentPlayed . '%;"></div>
+                                    <div class="position">' . $currentPositionDisplay . '</div>
                                 </div>
                             </div>
-                            <div class="bottom-box">
-                                <div class="progressBar" duration="' . $duration .'" style="width:' .
-                                    $percentPlayed .
-                                    '%"><div class="position">' . 
-                                    $currentPositionDisplay .'</div></div>
-                                <div class="title">' . ($stream['type'] === 'video' ? '<a href="#" onclick="openBox(\'' . h($movieDetailUrl) . '\',\'Details\',600,900); return false;">' : '') . $streamTitle . ($stream['type'] === 'video' ? '</a>' : '' ) . '<div class="status"><i class="fa fa-' .$streamStateIcon  . '" title="' .$streamState .'"></i></div></div>
+                            <div class="stream-footer">
+                                <div class="footer-top">
+                                    <span class="status"><i class="fa fa-' . $streamStateIcon . '" title="' . $streamState . '"></i></span>
+                                    <span class="stream-title-cell">' . $titleMarkup . '</span>
+                                </div>
+                                <div class="footer-bottom">
+                                    <span class="episode-meta-wrap"><i class="fa fa-tv"></i><span class="episode-meta">' . $episodeMeta . '</span></span>
+                                    <span class="session-user">
+                                        <span class="session-user-avatar" title="' . $streamUser . '" style="background-image:url(\'' . $streamUserAvatar . '\');"></span>
+                                        <span class="session-user-name">' . $streamUser . '</span>
+                                    </span>
+                                </div>
                             </div>
-                        </div>
+                        </article>
                     </li>
-                ');
+                ';
             }
-            echo('</ul></div>');
-            echo('<script>$(\'#hover-message\').show();</script>');
+
+            echo '</ul></div>';
         } else {
-            echo('<p style="text-align:center;font-style:italic;" id="no-streams">' . _('There are currently no active streams') . '</p>');
+            echo '<p id="no-streams">' . _('There are currently no active streams') . '</p>';
         }
     } else {
-        echo('<div class="caution"><i class="fa fa-exclamation-triangle"></i><div class="text">' . _('Please provide server details under Settings -> Network Services -> PlexStreams Plus or') . ' <a href="/Settings/PlexStreamsPlus">' . _('click here') .'</a></div></div>');
+        echo '<div class="caution"><i class="fa fa-exclamation-triangle"></i><div class="text">' . _('Please provide server details under Settings -> Network Services -> PlexStreams Plus or') . ' <a href="/Settings/PlexStreamsPlus">' . _('click here') . '</a></div></div>';
     }
 ?>
 <script src="<?autov('/plugins/plexstreamsplus/js/plex.js')?>"></script>
