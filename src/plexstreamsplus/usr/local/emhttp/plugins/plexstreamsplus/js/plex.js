@@ -543,6 +543,10 @@ function updateServerList(dest) {
         list.push($(this).val());
     });
     $('#' + dest).val(list.join(','));
+    var $selectedCount = $('#psplus-selected-count');
+    if ($selectedCount.length > 0) {
+        $selectedCount.text(list.length.toString());
+    }
 }
 
 function getServers(containerSelector, selected) {
@@ -558,7 +562,7 @@ function getServers(containerSelector, selected) {
             for (var id in plexStreamsPlusServerList) {
                 if (plexStreamsPlusServerList.hasOwnProperty(id)) {
                     var server = plexStreamsPlusServerList[id];
-                    plexStreamsPlusServerList[id].Connections.forEach(function(connection) {
+                    plexStreamsPlusServerList[id].Connections.forEach(function(connection, connectionIndex) {
                         if (connection !== null) {
                             var shortHost = connection.uri;
                             shortHost = shortHost.replace(connection.protocol  + '://', '');
@@ -570,15 +574,31 @@ function getServers(containerSelector, selected) {
                             var safeUri = plexStreamsPlusEscapeHtml(connection.uri);
                             var safeAddress = plexStreamsPlusEscapeHtml(connection.address);
                             var safePort = plexStreamsPlusEscapeHtml(connection.port);
+                            var checkboxId = 'hostbox-' + aliasKey + '-' + safeText(id).replace(/[^A-Za-z0-9_-]/g, '_') + '-' + connectionIndex;
+                            var isRemote = safeText(connection.local) === '0';
+                            var scopeLabel = isRemote ? _('Remote') : _('Local');
+                            var scopeClass = isRemote ? 'is-remote' : 'is-local';
                             $host.append('<input type="hidden" name="ALIAS-' + aliasKey + '" value="' + safeServerName + '"/>');
-                            $host.append('<input type="checkbox" onchange="updateServerList(\'HOST\')" name="hostbox" id="' + safeUri + '" data-id="' + plexStreamsPlusEscapeHtml(id) + '"' + (selected.indexOf(connection.uri) > -1 ? ' checked="checked"' : '' ) + ' value="' + safeUri + '" data-address="' + safeAddress + '" data-name="' + safeServerName + '"/> <label for="' + safeUri + '"> ' + safeServerName + ' (' +  safeAddress + ':' + safePort + ')' + (connection.local === '0' ? ' - Remote' : '') + '</label><br/>');
+                            $host.append(
+                                '<div class="psplus-server-item">' +
+                                    '<input type="checkbox" onchange="updateServerList(\'HOST\')" name="hostbox" id="' + checkboxId + '" data-id="' + plexStreamsPlusEscapeHtml(id) + '"' + (selected.indexOf(connection.uri) > -1 ? ' checked="checked"' : '' ) + ' value="' + safeUri + '" data-address="' + safeAddress + '" data-name="' + safeServerName + '"/>' +
+                                    '<label class="psplus-server-label" for="' + checkboxId + '">' +
+                                        '<span class="psplus-server-main">' +
+                                            '<span class="psplus-server-name">' + safeServerName + '</span>' +
+                                            '<span class="psplus-server-address">' + safeAddress + ':' + safePort + '</span>' +
+                                        '</span>' +
+                                        '<span class="psplus-server-scope ' + scopeClass + '">' + plexStreamsPlusEscapeHtml(scopeLabel) + '</span>' +
+                                    '</label>' +
+                                '</div>'
+                            );
                         }
                     });
                 }
             }
         } else {
-            $host.html('<p>No Servers found, please enter server in Custom Servers Field');
+            $host.html('<p class="psplus-server-empty">' + _('No servers found. Add one under Custom Servers.') + '</p>');
         }
+        updateServerList('HOST');
         $host.show();
         $('.lds-dual-ring').hide();
     });

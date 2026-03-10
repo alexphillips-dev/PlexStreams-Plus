@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
   <!ENTITY name       "plexstreams">
   <!ENTITY author     "alexphillips-dev">
-  <!ENTITY version    "2026.03.09.25">
+  <!ENTITY version    "2026.03.09.26">
   <!ENTITY launch     "Settings/PlexStreamsPlus">
   <!ENTITY branch     "main">
   <!ENTITY gitURL     "https://raw.githubusercontent.com/alexphillips-dev/PlexStreams-Plus/&branch;">
@@ -12,7 +12,7 @@
   <!ENTITY emhttp     "/usr/local/emhttp/plugins/plexstreamsplus">
   <!ENTITY plgPATH    "/boot/config/plugins/&name;">
   <!ENTITY plgNAME    "&name;-&version;-x86_64-1">
-  <!ENTITY md5        "16d25ff13cbddc7bbaa8388507c891ac">
+  <!ENTITY md5        "701cf656de0009455bccc198f636709d">
 ]>
 
 <PLUGIN  name="&name;"
@@ -26,6 +26,9 @@
 
     <CHANGES>
     ##&name;
+###2026.03.09.26
+- Complete settings-page overhaul with modern cards, cleaner controls, and improved server selection UX.
+
 ###2026.03.09.25
 - Improve update checks with cache-busting manifest URL fetches
 
