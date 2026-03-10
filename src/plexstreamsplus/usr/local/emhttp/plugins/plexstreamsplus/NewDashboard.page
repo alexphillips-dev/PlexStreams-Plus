@@ -26,8 +26,33 @@ p.plexstream-time {
     padding: 0 0 0 0;
     margin: 0 0 10px 0;
     font-size:10px;
-    width: 125px;
+    width: 100%;
+    white-space: nowrap;
+    overflow: visible;
+    text-overflow: clip;
     text-align: right;
+}
+
+td.plexstreamsplus-widget-header {
+    position: relative;
+    padding-right: 64px;
+}
+
+.plexstreamsplus-widget-header .section {
+    line-height: 1.55rem !important;
+}
+
+.plexstreamsplus-widget-actions {
+    position: absolute;
+    top: 2px;
+    right: 0;
+    display: inline-flex;
+    align-items: flex-start;
+    gap: 2px;
+}
+
+.plexstreamsplus-time-col {
+    overflow: visible !important;
 }
 </style>
 <?PHP
@@ -87,8 +112,33 @@ p.plexstream-time {
             padding: 0 0 0 0;
             margin: 0 0 10px 0;
             font-size:10px;
-            width: 125px;
+            width: 100%;
+            white-space: nowrap;
+            overflow: visible;
+            text-overflow: clip;
             text-align: right;
+        }
+
+        td.plexstreamsplus-widget-header {
+            position: relative;
+            padding-right: 64px;
+        }
+
+        .plexstreamsplus-widget-header .section {
+            line-height: 1.55rem !important;
+        }
+
+        .plexstreamsplus-widget-actions {
+            position: absolute;
+            top: 2px;
+            right: 0;
+            display: inline-flex;
+            align-items: flex-start;
+            gap: 2px;
+        }
+
+        .plexstreamsplus-time-col {
+            overflow: visible !important;
         }
 </style>
 <?php
@@ -96,11 +146,13 @@ $mytiles[$plugin]['column1'] =
 <<<EOT
 <tbody class="sortable" title="_(PlexStreams Plus)_">
     <tr>
-        <td>
+        <td class="plexstreamsplus-widget-header">
             <i style="font-size:32px;vertical-align:top;" class="fa fa-film icon"></i>
             <div class="section" style="line-height:2rem;">_(PlexStreams Plus)_<br><span id="stream_count_container"><span id="plexstreamsplus_count">0</span> _(Active Stream(s))_</span></div>
-            <a href="/Settings/PlexStreamsPlus" title="_(PlexStreams Plus Setup page)_"><i class="fa fa-fw fa-cog control"></i></a>
-            <a href="/Tools/PlexStreamsPlusTools" title="_(View Streams)_"><i class="fa fa-fw fa-film control"></i></a>
+            <span class="plexstreamsplus-widget-actions">
+                <a href="/Settings/PlexStreamsPlus" title="_(PlexStreams Plus Setup page)_"><i class="fa fa-fw fa-cog control"></i></a>
+                <a href="/Tools/PlexStreamsPlusTools" title="_(View Streams)_"><i class="fa fa-fw fa-film control"></i></a>
+            </span>
         </td>
     </tr>
     <tr>
@@ -108,7 +160,7 @@ $mytiles[$plugin]['column1'] =
             <span class="w36">_(Name)_</span>
             <span class="w18" align="center">_(Status)_</span>
             <span class="w18">_(User)_</span>
-            <span class="w18" align="right">_(Time)_</span>
+            <span class="w26 plexstreamsplus-time-col" align="right">_(Time)_</span>
         </td>
     </tr>
     <tr>

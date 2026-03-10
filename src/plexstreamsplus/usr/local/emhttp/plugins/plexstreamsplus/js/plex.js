@@ -55,7 +55,7 @@ function updateDashboardStreamsNew() {
                         '<span class="w36"><p class="plexstream-title" title="' + plexStreamsPlusEscapeHtml(stream.titleString) + '">' + plexStreamsPlusEscapeHtml(stream.title) +  '</p></span>' +
                         '<span class="w18" style="text-align:center;"><i class="fa fa-' + plexStreamsPlusEscapeHtml(stream.stateIcon) + '" title="' + plexStreamsPlusEscapeHtml(stream.state) + '"></i></span>' +
                         '<span class="w18" style="text-align:center;"><p class="plexstream-user" title="' + plexStreamsPlusEscapeHtml(stream.user) + '">' + plexStreamsPlusEscapeHtml(stream.user) + '</p></span>' +
-                        '<span class="w18" style="text-align:right;"><p class="plexstream-time">' + streamTimeHtml(stream, true) + '</p></span>' +
+                        '<span class="w26 plexstreamsplus-time-col" style="text-align:right;"><p class="plexstream-time">' + streamTimeHtml(stream, true) + '</p></span>' +
                     '</div>').appendTo('#plexstreamsplus_streams');
                     var node = $container[0];
                 } else {
