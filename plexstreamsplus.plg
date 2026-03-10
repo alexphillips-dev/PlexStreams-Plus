@@ -2,10 +2,8 @@
 
 <!DOCTYPE PLUGIN [
   <!ENTITY name       "plexstreamsplus">
-  <!ENTITY displayName "PlexStreams Plus">
   <!ENTITY author     "alexphillips-dev">
-  <!ENTITY description "Display active Plex streams in Unraid dashboard and tools with live stream details.">
-  <!ENTITY version    "2026.03.09.3">
+  <!ENTITY version    "2026.03.09.4">
   <!ENTITY launch     "Settings/PlexStreamsPlus">
   <!ENTITY branch     "main">
   <!ENTITY gitURL     "https://raw.githubusercontent.com/alexphillips-dev/PlexStreams-Plus/&branch;">
@@ -14,21 +12,23 @@
   <!ENTITY emhttp     "/usr/local/emhttp/plugins/&name;">
   <!ENTITY plgPATH    "/boot/config/plugins/&name;">
   <!ENTITY plgNAME    "&name;-&version;-x86_64-1">
-  <!ENTITY md5        "e9bc3b4eb243bf576f75e20c53681437">
+  <!ENTITY md5        "59115588f682b151cb0f7b63aae94cae">
 ]>
 
-<PLUGIN  name="&displayName;"
+<PLUGIN  name="&name;"
          author="&author;"
          version="&version;"
          pluginURL="&pluginURL;"
          support="https://github.com/alexphillips-dev/PlexStreams-Plus"
          launch="&launch;"
          IconFA="film"
-         icon="film"
-         description="&description;">
+         icon="film">
 
     <CHANGES>
     ##&name;
+###2026.03.09.4
+- Revert unsafe PLUGIN display-name metadata to restore Unraid update checks; keep nav tab label as Plex Streams.
+
 ###2026.03.09.3
 - Show plugin as PlexStreams Plus with description metadata and rename nav tab to Plex Streams.
 
