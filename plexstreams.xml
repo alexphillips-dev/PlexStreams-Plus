@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Containers>
+<Plugin>True</Plugin>
+<PluginURL>https://raw.githubusercontent.com/alexphillips-dev/PlexStreams-Plus/main/plexstreams.plg</PluginURL>
+<PluginAuthor>alexphillips-dev</PluginAuthor>
+<Beta>False</Beta>
+<Category>Tools:System</Category>
+<Name>PlexStrems Plus</Name>
+<CA>AddOn</CA>
+<Description>
+Legacy compatibility entry for PlexStrems Plus. Displays active Plex streams in Unraid with dashboard and tools views.
+</Description>
+<Date>2026-03-09</Date>
+<MinVer>6.9.0</MinVer>
+<ExtraSearchTerms>plex streams dashboard monitoring playback transcoding sessions legacy</ExtraSearchTerms>
+<Support>https://github.com/alexphillips-dev/PlexStreams-Plus/issues</Support>
+<Project>https://github.com/alexphillips-dev/PlexStreams-Plus</Project>
+</Containers>

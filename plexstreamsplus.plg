@@ -2,9 +2,8 @@
 
 <!DOCTYPE PLUGIN [
   <!ENTITY name       "plexstreamsplus">
-  <!ENTITY title      "PlexStrems Plus">
   <!ENTITY author     "alexphillips-dev">
-  <!ENTITY version    "2026.03.09.5">
+  <!ENTITY version    "2026.03.09.6">
   <!ENTITY launch     "Settings/PlexStreamsPlus">
   <!ENTITY branch     "main">
   <!ENTITY gitURL     "https://raw.githubusercontent.com/alexphillips-dev/PlexStreams-Plus/&branch;">
@@ -13,10 +12,10 @@
   <!ENTITY emhttp     "/usr/local/emhttp/plugins/&name;">
   <!ENTITY plgPATH    "/boot/config/plugins/&name;">
   <!ENTITY plgNAME    "&name;-&version;-x86_64-1">
-  <!ENTITY md5        "99ce819f6a3fc3f8d4feb984242a4bbb">
+  <!ENTITY md5        "24369f6f86bc14d3c1d9614fc2c310ef">
 ]>
 
-<PLUGIN  name="&title;"
+<PLUGIN  name="&name;"
          author="&author;"
          version="&version;"
          pluginURL="&pluginURL;"
@@ -27,6 +26,9 @@
 
     <CHANGES>
     ##&name;
+###2026.03.09.6
+- Restore stable plugin IDs to fix update spinner and add CA metadata XML entries for PlexStrems Plus naming/description.
+
 ###2026.03.09.5
 - Set plugin display title to PlexStrems Plus while keeping stable internal plugin IDs for update checks.
 
