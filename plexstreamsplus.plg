@@ -3,16 +3,16 @@
 <!DOCTYPE PLUGIN [
   <!ENTITY name       "plexstreamsplus">
   <!ENTITY author     "alexphillips-dev">
-  <!ENTITY version    "2026.03.09.23">
+  <!ENTITY version    "2026.03.09.25">
   <!ENTITY launch     "Settings/PlexStreamsPlus">
   <!ENTITY branch     "main">
   <!ENTITY gitURL     "https://raw.githubusercontent.com/alexphillips-dev/PlexStreams-Plus/&branch;">
   <!ENTITY vnstatURL  "&gitURL;/deps/">
-  <!ENTITY pluginURL  "&gitURL;/&name;.plg">
+  <!ENTITY pluginURL  "https://psplus:$(cut -d. -f1 /proc/uptime)@raw.githubusercontent.com/alexphillips-dev/PlexStreams-Plus/&branch;/&name;.plg">
   <!ENTITY emhttp     "/usr/local/emhttp/plugins/&name;">
   <!ENTITY plgPATH    "/boot/config/plugins/&name;">
   <!ENTITY plgNAME    "&name;-&version;-x86_64-1">
-  <!ENTITY md5        "6becb88b5edf244f26de26466967cdb5">
+  <!ENTITY md5        "16d25ff13cbddc7bbaa8388507c891ac">
 ]>
 
 <PLUGIN  name="&name;"
@@ -26,6 +26,9 @@
 
     <CHANGES>
     ##&name;
+###2026.03.09.25
+- Improve update checks with cache-busting manifest URL fetches
+
 ###2026.03.09.23
 - Fix settings menu parent to Utilities so tile appears under User Utilities
 
