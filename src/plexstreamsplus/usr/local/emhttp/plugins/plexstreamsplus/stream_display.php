@@ -91,10 +91,12 @@
         z-index: 2;
         flex: 1;
         min-width: 0;
-        padding: 11px 14px 37px 0;
+        padding: 12px 14px 35px 0;
     }
 
     .detail-list {
+        display: grid;
+        row-gap: 5px;
         list-style: none;
         margin: 0;
         padding: 0;
@@ -103,17 +105,17 @@
     .detail-list li {
         display: flex;
         align-items: baseline;
-        gap: 10px;
-        margin-bottom: 3px;
-        line-height: 18px;
+        gap: 8px;
+        margin-bottom: 0;
+        line-height: 16px;
     }
 
     .detail-list .label {
-        width: 86px;
-        min-width: 86px;
-        font-size: 11px;
+        width: 78px;
+        min-width: 78px;
+        font-size: 10px;
         color: #a0abba;
-        letter-spacing: 0.08em;
+        letter-spacing: 0.06em;
         font-weight: 700;
         text-transform: uppercase;
         text-align: right;
@@ -122,7 +124,7 @@
     .detail-list .value {
         min-width: 0;
         flex: 1;
-        font-size: 13px;
+        font-size: 12px;
         color: #f3f7fb;
         text-overflow: ellipsis;
         overflow: hidden;
@@ -181,7 +183,7 @@
     .stream-footer {
         border-top: 1px solid #27313d;
         background: #11171f;
-        padding: 9px 12px 10px;
+        padding: 8px 12px 9px;
     }
 
     .footer-top {
@@ -213,9 +215,9 @@
         text-overflow: ellipsis;
         overflow: hidden;
         white-space: nowrap;
-        font-size: 29px;
+        font-size: 16px;
         font-weight: 700;
-        line-height: 1.2;
+        line-height: 1.25;
         font-family: "Open Sans", sans-serif;
     }
 
@@ -225,7 +227,7 @@
     }
 
     .footer-bottom {
-        margin-top: 7px;
+        margin-top: 5px;
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -239,7 +241,7 @@
         gap: 6px;
         min-width: 0;
         color: #d5dce7;
-        font-size: 14px;
+        font-size: 13px;
     }
 
     .episode-meta-wrap i {
@@ -273,7 +275,7 @@
 
     .session-user-name {
         color: #d5dce7;
-        font-size: 14px;
+        font-size: 13px;
         text-overflow: ellipsis;
         overflow: hidden;
         white-space: nowrap;
@@ -315,16 +317,16 @@
         }
 
         .detail-list .label {
-            width: 68px;
-            min-width: 68px;
+            width: 64px;
+            min-width: 64px;
         }
 
         .detail-list .value {
-            font-size: 12px;
+            font-size: 11px;
         }
 
         .stream-title-link {
-            font-size: 24px;
+            font-size: 14px;
         }
 
         .session-user-name {
