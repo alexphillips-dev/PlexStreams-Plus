@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
   <!ENTITY name       "plexstreams">
   <!ENTITY author     "alexphillips-dev">
-  <!ENTITY version    "2026.03.10.12">
+  <!ENTITY version    "2026.03.10.1">
   <!ENTITY launch     "Settings/PlexStreamsPlus">
   <!ENTITY branch     "main">
   <!ENTITY gitURL     "https://raw.githubusercontent.com/alexphillips-dev/PlexStreams-Plus/&branch;">
@@ -26,9 +26,9 @@
 
     <CHANGES>
     ##&name;
-###2026.03.10.12
+###2026.03.10.1
+- Reset revision scheme to .1, .2, .3, etc.
 - Simplify post-install script for maximum Unraid compatibility
-- Bump version to force update detection
 
 ###2026.03.10.11
 - Fix legacy manifest XML parsing bug that blocked updates
