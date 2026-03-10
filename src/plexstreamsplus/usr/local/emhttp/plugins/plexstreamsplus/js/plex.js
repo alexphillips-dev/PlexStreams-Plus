@@ -185,6 +185,29 @@ function streamAttr(stream, mediaKey, attrKey) {
     return safeText(attrs[attrKey]);
 }
 
+function streamDomId(streamId) {
+    var rawId = safeText(streamId);
+    var normalized = rawId.replace(/[^A-Za-z0-9_-]/g, '_');
+    if (!normalized) {
+        normalized = 'stream';
+    }
+
+    var hash = 0;
+    for (var i = 0; i < rawId.length; i += 1) {
+        hash = ((hash << 5) - hash) + rawId.charCodeAt(i);
+        hash |= 0;
+    }
+
+    return 'psplus-stream-' + normalized.slice(0, 36) + '-' + (hash >>> 0).toString(16);
+}
+
+function streamContainersByDataId($scope, streamId) {
+    var expectedId = safeText(streamId);
+    return $scope.children('.stream-container').filter(function() {
+        return safeText($(this).attr('data-stream-id')) === expectedId;
+    });
+}
+
 function streamProductName(stream) {
     return safeText(stream.product || stream.player || 'Plex');
 }
@@ -294,7 +317,9 @@ function buildStreamTitleMarkup(stream) {
 }
 
 function buildFullStreamCard(stream) {
-    var safeId = plexStreamsPlusEscapeHtml(stream.id);
+    var streamIdRaw = safeText(stream.id);
+    var safeId = plexStreamsPlusEscapeHtml(streamDomId(streamIdRaw));
+    var safeStreamId = plexStreamsPlusEscapeHtml(streamIdRaw);
     var safeType = plexStreamsPlusEscapeHtml(stream.type || '');
     var safeArt = plexStreamsPlusEscapeHtml(stream.artUrl);
     var safeThumb = plexStreamsPlusEscapeHtml(stream.thumbUrl);
@@ -305,20 +330,17 @@ function buildFullStreamCard(stream) {
     var safeStateIcon = plexStreamsPlusEscapeHtml(stream.stateIcon);
     var safeBadge = plexStreamsPlusEscapeHtml(streamBadgeLabel(stream));
     var safeProduct = plexStreamsPlusEscapeHtml(streamProductName(stream));
-    var safePlayer = plexStreamsPlusEscapeHtml(streamPlayerName(stream));
     var safeQuality = plexStreamsPlusEscapeHtml(streamQualityValue(stream));
     var safeStream = plexStreamsPlusEscapeHtml(decisionLabel(stream.streamDecision));
-    var safeContainer = plexStreamsPlusEscapeHtml(streamContainerValue(stream));
     var safeVideo = plexStreamsPlusEscapeHtml(streamVideoValue(stream));
     var safeAudio = plexStreamsPlusEscapeHtml(streamAudioValue(stream));
-    var safeSubtitle = plexStreamsPlusEscapeHtml(streamSubtitleValue(stream));
     var safeEpisode = plexStreamsPlusEscapeHtml(streamEpisodeMeta(stream));
     var positionHtml = streamPositionHtml(stream);
     var duration = plexStreamsPlusEscapeHtml(stream.duration || 0);
     var percentPlayed = plexStreamsPlusEscapeHtml(stream.percentPlayed || 0);
     var titleHtml = buildStreamTitleMarkup(stream);
 
-    return '<li class="stream-container" id="' + safeId + '" data-stream-type="' + safeType + '">' +
+    return '<li class="stream-container" id="' + safeId + '" data-stream-id="' + safeStreamId + '" data-stream-type="' + safeType + '">' +
         '<article class="stream-card">' +
             '<div class="stream-media">' +
                 '<div class="stream-backdrop" style="background-image:url(\'' + safeArt + '\');"></div>' +
@@ -327,13 +349,10 @@ function buildFullStreamCard(stream) {
                 '<div class="stream-details">' +
                     '<ul class="detail-list">' +
                         '<li><div class="label">' + _('Product') + '</div><div class="value product-value">' + safeProduct + '</div></li>' +
-                        '<li><div class="label">' + _('Player') + '</div><div class="value player-value">' + safePlayer + '</div></li>' +
                         '<li><div class="label">' + _('Quality') + '</div><div class="value quality-value">' + safeQuality + '</div></li>' +
                         '<li><div class="label">' + _('Stream') + '</div><div class="value stream-value">' + safeStream + '</div></li>' +
-                        '<li><div class="label">' + _('Container') + '</div><div class="value container-value">' + safeContainer + '</div></li>' +
                         '<li><div class="label">' + _('Video') + '</div><div class="value video-value">' + safeVideo + '</div></li>' +
                         '<li><div class="label">' + _('Audio') + '</div><div class="value audio-value">' + safeAudio + '</div></li>' +
-                        '<li><div class="label">' + _('Subtitle') + '</div><div class="value subtitle-value">' + safeSubtitle + '</div></li>' +
                         '<li><div class="label">' + _('Location') + '</div><div class="value location-value" title="' + safeLocation + '">' + safeLocation + '</div></li>' +
                     '</ul>' +
                 '</div>' +
@@ -375,13 +394,10 @@ function refreshStreamCard($container, stream) {
     $container.find('.episode-meta').text(streamEpisodeMeta(stream));
 
     $container.find('.product-value').text(streamProductName(stream));
-    $container.find('.player-value').text(streamPlayerName(stream));
     $container.find('.quality-value').text(streamQualityValue(stream));
     $container.find('.stream-value').text(decisionLabel(stream.streamDecision));
-    $container.find('.container-value').text(streamContainerValue(stream));
     $container.find('.video-value').text(streamVideoValue(stream));
     $container.find('.audio-value').text(streamAudioValue(stream));
-    $container.find('.subtitle-value').text(streamSubtitleValue(stream));
     $container.find('.location-value').text(location).attr('title', location);
 
     $container.find('.progressBar').css('width', percentPlayed + '%').attr('duration', safeText(stream.duration || 0));
@@ -402,10 +418,22 @@ function updateFullStreamInfo() {
                 return;
             }
             streams.forEach(function(stream) {
-                var node = $('#' + stream.id + '.stream-container')[0];
-                var $container = $(node);
+                var $matches = streamContainersByDataId($streamHolder, stream.id);
+                if ($matches.length > 1) {
+                    $matches.slice(1).each(function() {
+                        if (this.timer) {
+                            clearInterval(this.timer);
+                        }
+                        $(this).remove();
+                    });
+                    $matches = $matches.first();
+                }
+
+                var $container = $matches.first();
+                var node;
                 if ($container.length > 0) {
                     refreshStreamCard($container, stream);
+                    node = $container[0];
                 } else {
                     $container = $(buildFullStreamCard(stream)).appendTo($streamHolder);
                     node = $container[0];
@@ -415,7 +443,7 @@ function updateFullStreamInfo() {
                 node.prevState = stream.state;
             });
 
-            $('.stream-container[updatedat]').each(function() {
+            $streamHolder.children('.stream-container[updatedat]').each(function() {
                 if ($(this).is('[updatedat]')) {
                     if ($(this).attr('updatedat') !== lastUpdate.toString()) {
                         if (this.timer) {

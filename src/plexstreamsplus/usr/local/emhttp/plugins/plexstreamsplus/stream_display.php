@@ -390,6 +390,12 @@
         }
     }
 
+    if (!function_exists('streamDomId')) {
+        function streamDomId($streamId) {
+            return 'psplus-stream-' . substr(sha1((string)$streamId), 0, 16);
+        }
+    }
+
     if (!function_exists('episodeMetaLabel')) {
         function episodeMetaLabel($title, $type) {
             $title = trim((string)$title);
@@ -431,7 +437,9 @@
             echo '<div id="streams-container"><ul>';
 
             foreach ($mergedStreams as $stream) {
-                $streamId = h($stream['id']);
+                $streamIdRaw = (string)($stream['id'] ?? '');
+                $streamId = h(streamDomId($streamIdRaw));
+                $streamDataId = h($streamIdRaw);
                 $streamArt = h($stream['artUrl']);
                 $streamThumb = h($stream['thumbUrl']);
                 $streamUser = h($stream['user']);
@@ -446,7 +454,6 @@
 
                 $videoAttrs = $stream['streamInfo']['video']['@attributes'] ?? [];
                 $audioAttrs = $stream['streamInfo']['audio']['@attributes'] ?? [];
-                $subtitleAttrs = $stream['streamInfo']['subtitle']['@attributes'] ?? [];
 
                 $streamProductRaw = trim((string)($stream['product'] ?? ($stream['player'] ?? 'Plex')));
                 if ($streamProductRaw === '') {
@@ -462,14 +469,12 @@
                     $qualityLabelRaw .= ' (' . $streamBandwidthRaw . ' Mbps)';
                 }
 
-                $containerLabelRaw = (string)($videoAttrs['container'] ?? $audioAttrs['container'] ?? ($stream['type'] === 'audio' ? 'Audio' : 'Unknown'));
                 $streamDecisionRaw = decisionLabel($stream['streamDecision'] ?? '');
                 $videoDecisionRaw = isset($stream['streamInfo']['video']) ? decisionLabel($videoAttrs['decision'] ?? ($videoAttrs['displayTitle'] ?? 'Direct Play')) : 'N/A';
                 if (($videoAttrs['displayTitle'] ?? '') !== '' && stripos($videoDecisionRaw, (string)$videoAttrs['displayTitle']) === false) {
                     $videoDecisionRaw .= ' (' . $videoAttrs['displayTitle'] . ')';
                 }
                 $audioDecisionRaw = isset($stream['streamInfo']['audio']) ? decisionLabel($audioAttrs['decision'] ?? 'Direct Play') : 'N/A';
-                $subtitleDecisionRaw = decisionLabel((string)($subtitleAttrs['displayTitle'] ?? $subtitleAttrs['title'] ?? $subtitleAttrs['decision'] ?? 'None'));
 
                 $duration = is_null($stream['duration']) ? '0' : h($stream['duration']);
                 $percentPlayed = !is_null($stream['duration']) ? h($stream['percentPlayed']) : '0';
@@ -490,7 +495,7 @@
                     : '<span class="stream-title-link">' . $streamTitle . '</span>';
 
                 echo '
-                    <li class="stream-container" id="' . $streamId . '" data-stream-type="' . $streamType . '">
+                    <li class="stream-container" id="' . $streamId . '" data-stream-id="' . $streamDataId . '" data-stream-type="' . $streamType . '">
                         <article class="stream-card">
                             <div class="stream-media">
                                 <div class="stream-backdrop" style="background-image:url(\'' . $streamArt . '\');"></div>
@@ -499,13 +504,10 @@
                                 <div class="stream-details">
                                     <ul class="detail-list">
                                         <li><div class="label">' . _('Product') . '</div><div class="value product-value">' . h($streamProductRaw) . '</div></li>
-                                        <li><div class="label">' . _('Player') . '</div><div class="value player-value">' . h($streamPlayerRaw) . '</div></li>
                                         <li><div class="label">' . _('Quality') . '</div><div class="value quality-value">' . h($qualityLabelRaw) . '</div></li>
                                         <li><div class="label">' . _('Stream') . '</div><div class="value stream-value">' . h($streamDecisionRaw) . '</div></li>
-                                        <li><div class="label">' . _('Container') . '</div><div class="value container-value">' . h(ucwords(strtolower($containerLabelRaw))) . '</div></li>
                                         <li><div class="label">' . _('Video') . '</div><div class="value video-value">' . h($videoDecisionRaw) . '</div></li>
                                         <li><div class="label">' . _('Audio') . '</div><div class="value audio-value">' . h($audioDecisionRaw) . '</div></li>
-                                        <li><div class="label">' . _('Subtitle') . '</div><div class="value subtitle-value">' . h($subtitleDecisionRaw) . '</div></li>
                                         <li><div class="label">' . _('Location') . '</div><div class="value location-value" title="' . $locationDisplay . '">' . $locationDisplay . '</div></li>
                                     </ul>
                                 </div>

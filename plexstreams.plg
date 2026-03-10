@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
   <!ENTITY name       "plexstreams">
   <!ENTITY author     "alexphillips-dev">
-  <!ENTITY version    "2026.03.09.16">
+  <!ENTITY version    "2026.03.09.17">
   <!ENTITY launch     "Settings/PlexStreamsPlus">
   <!ENTITY branch     "main">
   <!ENTITY gitURL     "https://raw.githubusercontent.com/alexphillips-dev/PlexStreams-Plus/&branch;">
@@ -12,7 +12,7 @@
   <!ENTITY emhttp     "/usr/local/emhttp/plugins/plexstreamsplus">
   <!ENTITY plgPATH    "/boot/config/plugins/&name;">
   <!ENTITY plgNAME    "&name;-&version;-x86_64-1">
-  <!ENTITY md5        "1c33d56b1b851b404dda91cf3ed5a5a4">
+  <!ENTITY md5        "3a381f3dfd1b44fd80887252b61bff58">
 ]>
 
 <PLUGIN  name="&name;"
@@ -26,6 +26,9 @@
 
     <CHANGES>
     ##&name;
+###2026.03.09.17
+- Normalize stream cards and fix cross-card updates
+
 ###2026.03.09.16
 - Force a fresh revision bump to clear Unraid update detection/cache and pull latest stream card spacing/title styling.
 
