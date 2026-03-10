@@ -1,7 +1,7 @@
 <?xml version='1.0' standalone='yes'?>
 
 <!DOCTYPE PLUGIN [
-  <!ENTITY name       "plexstreamsplus">
+  <!ENTITY name       "plexstreams">
   <!ENTITY author     "alexphillips-dev">
   <!ENTITY version    "2026.03.09.10">
   <!ENTITY launch     "Settings/PlexStreamsPlus">
@@ -9,7 +9,7 @@
   <!ENTITY gitURL     "https://raw.githubusercontent.com/alexphillips-dev/PlexStreams-Plus/&branch;">
   <!ENTITY vnstatURL  "&gitURL;/deps/">
   <!ENTITY pluginURL  "&gitURL;/&name;.plg">
-  <!ENTITY emhttp     "/usr/local/emhttp/plugins/&name;">
+  <!ENTITY emhttp     "/usr/local/emhttp/plugins/plexstreamsplus">
   <!ENTITY plgPATH    "/boot/config/plugins/&name;">
   <!ENTITY plgNAME    "&name;-&version;-x86_64-1">
   <!ENTITY md5        "fdb6d1968421dfb24eb3af01c43f1a03">
@@ -27,6 +27,7 @@
     <CHANGES>
     ##&name;
 ###2026.03.09.10
+- Compatibility update path for legacy "plexstreams" installs
 - Rebrand to PlexStreams Plus
 - Update author and GitHub repository metadata
 - Internal rename to plexstreamsplus paths/pages
@@ -305,15 +306,32 @@
     <!-- POST-INSTALL SCRIPT -->
     <FILE Run="/bin/bash">
         <INLINE>
+            OLD_CFG=/boot/config/plugins/plexstreams/plexstreams.cfg
+            NEW_CFG=/boot/config/plugins/plexstreamsplus/plexstreamsplus.cfg
+            mkdir -p /boot/config/plugins/plexstreamsplus
+            if [[ ! -f "$NEW_CFG" && -f "$OLD_CFG" ]]; then
+                cp -f "$OLD_CFG" "$NEW_CFG"
+            fi
+            if [[ ! -f "$NEW_CFG" ]]; then
+                cat > "$NEW_CFG" <<EOF
+HOST=""
+TOKEN=""
+CUSTOM_SERVERS=""
+DISPLAY_WIDGET="1"
+DISPLAY_NAV="1"
+FORCE_PLEX_HTTPS="0"
+EOF
+            fi
+
             WIDGET_OFF_FILE=/usr/local/emhttp/plugins/plexstreamsplus/PlexStreamsPlus_dashboard.page.off
-            WIDGET_SETTING=$(php -r '$c=@parse_ini_file("/boot/config/plugins/plexstreamsplus/plexstreamsplus.cfg", false); echo $c["DISPLAY_WIDGET"] ?? "1";')
+            WIDGET_SETTING=$(PS_CFG="$NEW_CFG" php -r '$f=getenv("PS_CFG"); $c=@parse_ini_file($f, false); echo $c["DISPLAY_WIDGET"] ?? "1";')
             if [[ -f "$WIDGET_OFF_FILE" || "$WIDGET_SETTING" == "0" ]]; then
                 rm -f /usr/local/emhttp/plugins/plexstreamsplus/PlexStreamsPlus_dashboard.page.off
                 mv -f /usr/local/emhttp/plugins/plexstreamsplus/PlexStreamsPlus_dashboard.page /usr/local/emhttp/plugins/plexstreamsplus/PlexStreamsPlus_dashboard.page.off
             fi
             
             NAV_OFF=/usr/local/emhttp/plugins/plexstreamsplus/PlexStreamsPlusNav.page.off
-            NAV_SETTING=$(php -r '$c=@parse_ini_file("/boot/config/plugins/plexstreamsplus/plexstreamsplus.cfg", false); echo $c["DISPLAY_NAV"] ?? "1";')
+            NAV_SETTING=$(PS_CFG="$NEW_CFG" php -r '$f=getenv("PS_CFG"); $c=@parse_ini_file($f, false); echo $c["DISPLAY_NAV"] ?? "1";')
             if [[ -f "$NAV_OFF" || "$NAV_SETTING" == "0" ]]; then
                 rm -f /usr/local/emhttp/plugins/plexstreamsplus/PlexStreamsPlusNav.page.off
                 mv -f /usr/local/emhttp/plugins/plexstreamsplus/PlexStreamsPlusNav.page /usr/local/emhttp/plugins/plexstreamsplus/PlexStreamsPlusNav.page.off
