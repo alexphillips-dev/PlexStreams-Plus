@@ -1,4 +1,4 @@
-var serverList = [];
+var plexStreamsPlusServerList = [];
 
 function safeText(value) {
     if (value === undefined || value === null) {
@@ -296,12 +296,12 @@ function getServers(containerSelector, selected) {
     selected = selected.split(',');
     $host.html('');
     $.get(url).done(function(data) {
-        serverList = data.serverList;
-        if (Object.keys(serverList).length > 0) {
-            for (var id in serverList) {
-                if (serverList.hasOwnProperty(id)) {
-                    var server = serverList[id];
-                    serverList[id].Connections.forEach(function(connection) {
+        plexStreamsPlusServerList = data.serverList;
+        if (Object.keys(plexStreamsPlusServerList).length > 0) {
+            for (var id in plexStreamsPlusServerList) {
+                if (plexStreamsPlusServerList.hasOwnProperty(id)) {
+                    var server = plexStreamsPlusServerList[id];
+                    plexStreamsPlusServerList[id].Connections.forEach(function(connection) {
                         if (connection !== null) {
                             var shortHost = connection.uri;
                             shortHost = shortHost.replace(connection.protocol  + '://', '');
@@ -327,13 +327,13 @@ function getServers(containerSelector, selected) {
     });
 }
 
-function setLocalStorage(key, value, path) {
+function plexStreamsPlusSetLocalStorage(key, value, path) {
     if (path !== false) {
         key = key + '_' + window.location.pathname;
     }
     localStorage.setItem(key, value);
 }
-function getLocalStorage(key, default_value, path) {
+function plexStreamsPlusGetLocalStorage(key, default_value, path) {
     if (path !== false) {
         key = key + '_' + window.location.pathname;
     }
@@ -341,7 +341,7 @@ function getLocalStorage(key, default_value, path) {
     if (value !== null) {
         return value
     } else if (default_value !== undefined) {
-        setLocalStorage(key, default_value, path);
+        plexStreamsPlusSetLocalStorage(key, default_value, path);
         return default_value
     }
 }
@@ -424,7 +424,7 @@ function getPlexHeaders() {
         'Accept': 'application/json',
         'X-Plex-Product': 'Unraid PlexStreams Plus Plugin',
         'X-Plex-Version': PLUGIN_VERSION,
-        'X-Plex-Client-Identifier': getLocalStorage('UnraidPlexStreamsPlus_ClientID', uuidv4(), false),
+        'X-Plex-Client-Identifier': plexStreamsPlusGetLocalStorage('UnraidPlexStreamsPlus_ClientID', uuidv4(), false),
         'X-Plex-Platform': 'unraid',
         'X-Plex-Platform-Version': OS_VERSION,
         'X-Plex-Model': 'Plex OAuth',
@@ -435,7 +435,7 @@ function getPlexHeaders() {
     };
 }
 
-getPlexOAuthPin = function () {
+var plexStreamsPlusGetPlexOAuthPin = function () {
     var x_plex_headers = getPlexHeaders();
     var deferred = $.Deferred();
 
@@ -470,7 +470,7 @@ function PlexOAuth(success, error, pre) {
     plex_oauth_window = PopupCenter('', 'Plex-OAuth', 600, 700);
     $(plex_oauth_window.document.body).html(plex_oauth_loader);
 
-    getPlexOAuthPin().then(function (data) {
+    plexStreamsPlusGetPlexOAuthPin().then(function (data) {
         var x_plex_headers = getPlexHeaders();
         const pin = data.pin;
         const code = data.code;

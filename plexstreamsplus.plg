@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
   <!ENTITY name       "plexstreamsplus">
   <!ENTITY author     "alexphillips-dev">
-  <!ENTITY version    "2026.03.09.1">
+  <!ENTITY version    "2026.03.09.2">
   <!ENTITY launch     "Settings/PlexStreamsPlus">
   <!ENTITY branch     "main">
   <!ENTITY gitURL     "https://raw.githubusercontent.com/alexphillips-dev/PlexStreams-Plus/&branch;">
@@ -12,7 +12,7 @@
   <!ENTITY emhttp     "/usr/local/emhttp/plugins/&name;">
   <!ENTITY plgPATH    "/boot/config/plugins/&name;">
   <!ENTITY plgNAME    "&name;-&version;-x86_64-1">
-  <!ENTITY md5        "d349a540201a88042dad59dbee505037">
+  <!ENTITY md5        "2686b790272e83a00f7115637a1c9918">
 ]>
 
 <PLUGIN  name="&name;"
@@ -26,6 +26,9 @@
 
     <CHANGES>
     ##&name;
+###2026.03.09.2
+- Fix dashboard JS namespace collisions with other plugins (FolderView Plus compatibility).
+
 ###2026.03.09.1
 - Correct date stamp to 2026.03.09 and reset revision scheme to .1, .2, .3, etc.
 - Simplify post-install script for maximum Unraid compatibility
