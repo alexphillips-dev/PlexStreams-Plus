@@ -2,8 +2,10 @@
 
 <!DOCTYPE PLUGIN [
   <!ENTITY name       "plexstreams">
+  <!ENTITY displayName "PlexStreams Plus">
   <!ENTITY author     "alexphillips-dev">
-  <!ENTITY version    "2026.03.09.2">
+  <!ENTITY description "Display active Plex streams in Unraid dashboard and tools with live stream details.">
+  <!ENTITY version    "2026.03.09.3">
   <!ENTITY launch     "Settings/PlexStreamsPlus">
   <!ENTITY branch     "main">
   <!ENTITY gitURL     "https://raw.githubusercontent.com/alexphillips-dev/PlexStreams-Plus/&branch;">
@@ -12,20 +14,24 @@
   <!ENTITY emhttp     "/usr/local/emhttp/plugins/plexstreamsplus">
   <!ENTITY plgPATH    "/boot/config/plugins/&name;">
   <!ENTITY plgNAME    "&name;-&version;-x86_64-1">
-  <!ENTITY md5        "2686b790272e83a00f7115637a1c9918">
+  <!ENTITY md5        "e9bc3b4eb243bf576f75e20c53681437">
 ]>
 
-<PLUGIN  name="&name;"
+<PLUGIN  name="&displayName;"
          author="&author;"
          version="&version;"
          pluginURL="&pluginURL;"
          support="https://github.com/alexphillips-dev/PlexStreams-Plus"
          launch="&launch;"
          IconFA="film"
-         icon="film">
+         icon="film"
+         description="&description;">
 
     <CHANGES>
     ##&name;
+###2026.03.09.3
+- Show plugin as PlexStreams Plus with description metadata and rename nav tab to Plex Streams.
+
 ###2026.03.09.2
 - Fix dashboard JS namespace collisions with other plugins (FolderView Plus compatibility).
 
