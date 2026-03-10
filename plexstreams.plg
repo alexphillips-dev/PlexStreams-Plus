@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
   <!ENTITY name       "plexstreams">
   <!ENTITY author     "alexphillips-dev">
-  <!ENTITY version    "2026.03.09.27">
+  <!ENTITY version    "2026.03.09.28">
   <!ENTITY launch     "Settings/PlexStreamsPlus">
   <!ENTITY branch     "main">
   <!ENTITY gitURL     "https://raw.githubusercontent.com/alexphillips-dev/PlexStreams-Plus/&branch;">
@@ -12,7 +12,7 @@
   <!ENTITY emhttp     "/usr/local/emhttp/plugins/plexstreamsplus">
   <!ENTITY plgPATH    "/boot/config/plugins/&name;">
   <!ENTITY plgNAME    "&name;-&version;-x86_64-1">
-  <!ENTITY md5        "c4d127178c924564f0765b861580e631">
+  <!ENTITY md5        "887616d133ccaa5344753e9d0599adf1">
 ]>
 
 <PLUGIN  name="&name;"
@@ -26,6 +26,9 @@
 
     <CHANGES>
     ##&name;
+###2026.03.09.28
+- Audit cleanup + performance/safety/dev-quality pass: adaptive polling, diff-based stream card updates, scoped styles, token mask/verify controls, fixture tests, and stronger release guard metadata checks.
+
 ###2026.03.09.27
 - Fix settings page rendering (remove markdown form parsing) and add second-pass UX polish with token/server status and custom-server validation.
 

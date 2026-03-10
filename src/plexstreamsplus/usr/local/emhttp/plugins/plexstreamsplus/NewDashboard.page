@@ -4,7 +4,7 @@ Tag="film"
 Cond="parse_ini_file('/boot/config/plugins/plexstreamsplus/plexstreamsplus.cfg')['DISPLAY_WIDGET'] == '1' && version_compare(parse_ini_file('/etc/unraid-version')['version'],'6.12.0-beta5', '>')"
 ---
 <style>
-p.plexstream-title {
+#plexstreamsplus_streams p.plexstream-title {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -13,7 +13,7 @@ p.plexstream-title {
     margin: 0 0 10px 0;
 }
 
-p.plexstream-user {
+#plexstreamsplus_streams p.plexstream-user {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -22,7 +22,7 @@ p.plexstream-user {
     margin: 0 0 10px 0;
 }
 
-p.plexstream-time {
+#plexstreamsplus_streams p.plexstream-time {
     padding: 0 0 0 0;
     margin: 0 0 10px 0;
     font-size:10px;
@@ -90,7 +90,7 @@ td.plexstreamsplus-widget-header {
             padding-top: 0px;
             padding-bottom: 0px;
         }
-        p.plexstream-title {
+        #plexstreamsplus_streams p.plexstream-title {
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -99,7 +99,7 @@ td.plexstreamsplus-widget-header {
             margin: 0 0 10px 0;
         }
 
-        p.plexstream-user {
+        #plexstreamsplus_streams p.plexstream-user {
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -108,7 +108,7 @@ td.plexstreamsplus-widget-header {
             margin: 0 0 10px 0;
         }
 
-        p.plexstream-time {
+        #plexstreamsplus_streams p.plexstream-time {
             padding: 0 0 0 0;
             margin: 0 0 10px 0;
             font-size:10px;
@@ -178,7 +178,9 @@ EOT;
 <script src="<?autov('/plugins/plexstreamsplus/js/plex.js')?>"></script>
 <script async>
     $(function() {
-        updateDashboardStreamsNew();
-        setInterval(updateDashboardStreamsNew, 5000);
-    }());
+        plexStreamsPlusStartPolling('dashboard_new', function() {
+            return updateDashboardStreamsNew('dashboard_new');
+        });
+    });
 </script>
+

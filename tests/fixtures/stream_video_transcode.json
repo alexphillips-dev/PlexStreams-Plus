@@ -1,0 +1,36 @@
+{
+  "id": "abc/123?danger=true",
+  "type": "video",
+  "title": "Tower Heist (2011)",
+  "key": "/library/metadata/42",
+  "artUrl": "https://example.invalid/art.jpg",
+  "thumbUrl": "https://example.invalid/thumb.jpg",
+  "user": "chris",
+  "userAvatar": "https://example.invalid/avatar.jpg",
+  "state": "playing",
+  "stateIcon": "play",
+  "product": "Plex for Roku",
+  "player": "Roku TV",
+  "streamDecision": "transcode",
+  "bandwidth": "6.3",
+  "duration": "5300000",
+  "percentPlayed": 47,
+  "currentPositionHours": 0,
+  "currentPositionMinutes": 41,
+  "currentPositionSeconds": 21,
+  "lengthDisplay": "01:28:20",
+  "locationDisplay": "WAN (206.125.201.244 - Fort Frances, CA)",
+  "streamInfo": {
+    "video": {
+      "@attributes": {
+        "decision": "transcode",
+        "displayTitle": "1080p (H.264)"
+      }
+    },
+    "audio": {
+      "@attributes": {
+        "decision": "copy"
+      }
+    }
+  }
+}

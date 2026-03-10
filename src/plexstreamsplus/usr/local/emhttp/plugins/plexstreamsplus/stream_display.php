@@ -1,6 +1,6 @@
 <link type="text/css" rel="stylesheet" href="/plugins/plexstreamsplus/spinner.css">
 <style>
-    .caution {
+    #psplus-streams-root .caution {
         padding-left: 76px;
         margin: 16px -40px;
         padding: 16px 50px;
@@ -11,22 +11,22 @@
         font-size: 14px;
     }
 
-    .caution i {
+    #psplus-streams-root .caution i {
         font-size: 15pt;
     }
 
-    .caution .text {
+    #psplus-streams-root .caution .text {
         display: inline-block;
         vertical-align: 2px;
         padding-left: 7px;
     }
 
-    #streams-container {
+    #psplus-streams-root #streams-container {
         display: block;
         width: 100%;
     }
 
-    #streams-container > ul {
+    #psplus-streams-root #streams-container > ul {
         display: flex;
         flex-wrap: wrap;
         gap: 14px;
@@ -35,20 +35,20 @@
         list-style: none;
     }
 
-    .stream-container {
+    #psplus-streams-root .stream-container {
         flex: 1 1 520px;
         min-width: 420px;
         max-width: 520px;
         margin: 0;
     }
 
-    .stream-card {
+    #psplus-streams-root .stream-card {
         background: #10161d;
         border: 1px solid #28313b;
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
     }
 
-    .stream-media {
+    #psplus-streams-root .stream-media {
         position: relative;
         display: flex;
         height: 250px;
@@ -56,7 +56,7 @@
         background: #0a0f14;
     }
 
-    .stream-backdrop {
+    #psplus-streams-root .stream-backdrop {
         position: absolute;
         inset: 0;
         background-position: center;
@@ -66,13 +66,13 @@
         transform: scale(1.08);
     }
 
-    .stream-overlay {
+    #psplus-streams-root .stream-overlay {
         position: absolute;
         inset: 0;
         background: linear-gradient(90deg, rgba(6, 9, 12, 0.35) 0%, rgba(9, 13, 17, 0.72) 38%, rgba(9, 13, 17, 0.9) 100%);
     }
 
-    .stream-poster {
+    #psplus-streams-root .stream-poster {
         position: relative;
         z-index: 2;
         width: 116px;
@@ -86,7 +86,7 @@
         box-shadow: 0 8px 18px rgba(0, 0, 0, 0.4);
     }
 
-    .stream-details {
+    #psplus-streams-root .stream-details {
         position: relative;
         z-index: 2;
         flex: 1;
@@ -94,7 +94,7 @@
         padding: 16px 14px 35px 0;
     }
 
-    .stream-details .detail-list {
+    #psplus-streams-root .stream-details .detail-list {
         display: flex;
         flex-direction: column;
         flex-wrap: nowrap;
@@ -104,7 +104,7 @@
         padding: 0;
     }
 
-    .stream-details .detail-list li {
+    #psplus-streams-root .stream-details .detail-list li {
         display: flex;
         width: 100%;
         flex: 0 0 auto;
@@ -115,7 +115,7 @@
         line-height: 15px;
     }
 
-    .detail-list .label {
+    #psplus-streams-root .detail-list .label {
         width: 78px;
         min-width: 78px;
         font-size: 10px;
@@ -126,7 +126,7 @@
         text-align: right;
     }
 
-    .detail-list .value {
+    #psplus-streams-root .detail-list .value {
         min-width: 0;
         flex: 1;
         font-size: 12px;
@@ -136,7 +136,7 @@
         white-space: nowrap;
     }
 
-    .player-badge {
+    #psplus-streams-root .player-badge {
         position: absolute;
         z-index: 4;
         top: 10px;
@@ -156,7 +156,7 @@
         box-shadow: 0 5px 14px rgba(0, 0, 0, 0.38);
     }
 
-    .progress-wrap {
+    #psplus-streams-root .progress-wrap {
         position: absolute;
         left: 0;
         right: 0;
@@ -166,7 +166,7 @@
         background: linear-gradient(0deg, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.05));
     }
 
-    .progressBar {
+    #psplus-streams-root .progressBar {
         position: absolute;
         left: 0;
         bottom: 0;
@@ -174,7 +174,7 @@
         background-color: #f2a126;
     }
 
-    .position {
+    #psplus-streams-root .position {
         position: absolute;
         right: 8px;
         bottom: 6px;
@@ -185,20 +185,20 @@
         text-shadow: 0 1px 2px rgba(0, 0, 0, 0.75);
     }
 
-    .stream-footer {
+    #psplus-streams-root .stream-footer {
         border-top: 1px solid #27313d;
         background: #11171f;
         padding: 8px 12px 9px;
     }
 
-    .footer-top {
+    #psplus-streams-root .footer-top {
         display: flex;
         align-items: center;
         gap: 8px;
         min-width: 0;
     }
 
-    .status {
+    #psplus-streams-root .status {
         display: inline-flex;
         justify-content: center;
         align-items: center;
@@ -208,12 +208,12 @@
         font-size: 14px;
     }
 
-    .stream-title-cell {
+    #psplus-streams-root .stream-title-cell {
         min-width: 0;
         flex: 1;
     }
 
-    .stream-title-link {
+    #psplus-streams-root .stream-title-link {
         display: block;
         color: #f8f9fa;
         text-decoration: none;
@@ -226,12 +226,12 @@
         font-family: "Open Sans", sans-serif;
     }
 
-    .stream-title-link:hover {
+    #psplus-streams-root .stream-title-link:hover {
         color: #ffffff;
         text-decoration: none;
     }
 
-    .footer-bottom {
+    #psplus-streams-root .footer-bottom {
         margin-top: 5px;
         display: flex;
         align-items: center;
@@ -240,7 +240,7 @@
         min-width: 0;
     }
 
-    .episode-meta-wrap {
+    #psplus-streams-root .episode-meta-wrap {
         display: inline-flex;
         align-items: center;
         gap: 6px;
@@ -249,25 +249,25 @@
         font-size: 13px;
     }
 
-    .episode-meta-wrap i {
+    #psplus-streams-root .episode-meta-wrap i {
         font-size: 12px;
         color: #c8d2df;
     }
 
-    .episode-meta {
+    #psplus-streams-root .episode-meta {
         text-overflow: ellipsis;
         overflow: hidden;
         white-space: nowrap;
     }
 
-    .session-user {
+    #psplus-streams-root .session-user {
         display: inline-flex;
         align-items: center;
         gap: 8px;
         min-width: 0;
     }
 
-    .session-user-avatar {
+    #psplus-streams-root .session-user-avatar {
         width: 28px;
         height: 28px;
         min-width: 28px;
@@ -278,7 +278,7 @@
         border: 1px solid rgba(255, 255, 255, 0.14);
     }
 
-    .session-user-name {
+    #psplus-streams-root .session-user-name {
         color: #d5dce7;
         font-size: 13px;
         text-overflow: ellipsis;
@@ -286,7 +286,7 @@
         white-space: nowrap;
     }
 
-    #no-streams {
+    #psplus-streams-root #no-streams {
         text-align: center;
         font-style: italic;
     }
@@ -296,24 +296,24 @@
     }
 
     @media (max-width: 1350px) {
-        .stream-container {
+        #psplus-streams-root .stream-container {
             min-width: 380px;
             max-width: 100%;
         }
     }
 
     @media (max-width: 1100px) {
-        .stream-container {
+        #psplus-streams-root .stream-container {
             min-width: 100%;
         }
     }
 
     @media (max-width: 680px) {
-        .stream-media {
+        #psplus-streams-root .stream-media {
             height: 240px;
         }
 
-        .stream-poster {
+        #psplus-streams-root .stream-poster {
             width: 94px;
             min-width: 94px;
             height: 142px;
@@ -321,20 +321,20 @@
             margin-right: 10px;
         }
 
-        .detail-list .label {
+        #psplus-streams-root .detail-list .label {
             width: 64px;
             min-width: 64px;
         }
 
-        .detail-list .value {
+        #psplus-streams-root .detail-list .value {
             font-size: 11px;
         }
 
-        .stream-title-link {
+        #psplus-streams-root .stream-title-link {
             font-size: 14px;
         }
 
-        .session-user-name {
+        #psplus-streams-root .session-user-name {
             max-width: 130px;
         }
     }
@@ -353,6 +353,7 @@
         });
     }
 </script>
+<div id="psplus-streams-root">
 <?php
     $plugin = 'plexstreamsplus';
     $docroot = $docroot ?: $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
@@ -409,15 +410,15 @@
             }
 
             if (preg_match('/Season\s+([0-9]+)\s*-\s*([^\\(]+)/i', $title, $matches)) {
-                return 'S' . $matches[1] . ' · ' . trim($matches[2]);
+                return 'S' . $matches[1] . ' - ' . trim($matches[2]);
             }
 
             if (preg_match('/S([0-9]+)\s*E([0-9]+)/i', $title, $matches)) {
-                return 'S' . $matches[1] . ' · E' . $matches[2];
+                return 'S' . $matches[1] . ' - E' . $matches[2];
             }
 
             if (preg_match('/\((20[0-9]{2}|19[0-9]{2})\)\s*$/', $title, $matches)) {
-                return 'Movie · ' . $matches[1];
+                return 'Movie - ' . $matches[1];
             }
 
             return 'Video Session';
@@ -449,13 +450,9 @@
                 $streamThumb = h($stream['thumbUrl']);
                 $streamUser = h($stream['user']);
                 $streamUserAvatar = h($stream['userAvatar']);
-                $streamAddress = h($stream['address'] ?? '');
-                $streamAlias = h($stream['alias'] ?? '');
-                $serverLabel = ($streamAlias !== '') ? $streamAlias : $streamAddress;
                 $locationDisplayRaw = (string)($stream['locationDisplay'] ?? '');
                 $locationDisplay = h($locationDisplayRaw);
                 $streamBandwidthRaw = (string)($stream['bandwidth'] ?? '');
-                $streamBandwidth = h($streamBandwidthRaw);
 
                 $videoAttrs = $stream['streamInfo']['video']['@attributes'] ?? [];
                 $audioAttrs = $stream['streamInfo']['audio']['@attributes'] ?? [];
@@ -545,13 +542,18 @@
             echo '<p id="no-streams">' . _('There are currently no active streams') . '</p>';
         }
     } else {
-        echo '<div class="caution"><i class="fa fa-exclamation-triangle"></i><div class="text">' . _('Please provide server details under Settings -> Network Services -> PlexStreams Plus or') . ' <a href="/Settings/PlexStreamsPlus">' . _('click here') . '</a></div></div>';
+        echo '<div class="caution"><i class="fa fa-exclamation-triangle"></i><div class="text">' . _('Please provide server details under Settings -> User Utilities -> PlexStreams Plus or') . ' <a href="/Settings/PlexStreamsPlus">' . _('click here') . '</a></div></div>';
     }
 ?>
+</div>
 <script src="<?autov('/plugins/plexstreamsplus/js/plex.js')?>"></script>
 <script>
-    var title = $('title').html();
-    $('title').html(title.split('/')[0] + '/PlexStreams Plus');
-    updateFullStreamInfo();
-    setInterval(updateFullStreamInfo, 5000);
+    var pageTitle = $('title').html();
+    $('title').html(pageTitle.split('/')[0] + '/PlexStreams Plus');
+    plexStreamsPlusStartPolling('streams_page', function() {
+        return updateFullStreamInfo('streams_page');
+    });
 </script>
+
+
+

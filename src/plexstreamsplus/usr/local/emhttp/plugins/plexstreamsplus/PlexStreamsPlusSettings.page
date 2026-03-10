@@ -148,9 +148,21 @@ function clearToken() {
     }
 
     .psplus-token-row {
-        display: grid;
-        grid-template-columns: auto 1fr;
+        display: flex;
+        flex-direction: column;
         gap: 10px;
+    }
+
+    .psplus-token-actions {
+        display: inline-flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .psplus-token-field {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 8px;
         align-items: center;
     }
 
@@ -529,6 +541,18 @@ function clearToken() {
         }
 
         .psplus-token-row {
+            gap: 8px;
+        }
+
+        .psplus-token-actions {
+            width: 100%;
+        }
+
+        .psplus-token-actions .psplus-btn {
+            flex: 1 1 auto;
+        }
+
+        .psplus-token-field {
             grid-template-columns: 1fr;
         }
 
@@ -570,8 +594,14 @@ function clearToken() {
                     <span id="psplus-token-note" class="psplus-meta-note">_(Get a Plex token to discover available servers.)_</span>
                 </div>
                 <div class="psplus-token-row">
-                    <button type="button" id="psplus-get-token-btn" class="psplus-btn psplus-btn-primary" onclick="plexStreamsPlusStartOAuth()">_(Get Plex Token)_</button>
-                    <input type="text" class="psplus-input" id="plex-token" name="TOKEN" value="<?php echo(htmlspecialchars($cfg['TOKEN'], ENT_QUOTES)) ?>" readonly="true" />
+                    <div class="psplus-token-actions">
+                        <button type="button" id="psplus-get-token-btn" class="psplus-btn psplus-btn-primary" onclick="plexStreamsPlusStartOAuth()">_(Get Plex Token)_</button>
+                        <button type="button" id="psplus-verify-token-btn" class="psplus-btn psplus-btn-secondary">_(Verify Token)_</button>
+                    </div>
+                    <div class="psplus-token-field">
+                        <input type="password" class="psplus-input" id="plex-token" name="TOKEN" value="<?php echo(htmlspecialchars($cfg['TOKEN'], ENT_QUOTES)) ?>" readonly="true" />
+                        <button type="button" id="psplus-toggle-token-btn" class="psplus-btn psplus-btn-secondary">_(Show)_</button>
+                    </div>
                 </div>
                 <p>_(Token is stored locally in your Unraid plugin configuration.)_</p>
             </section>

@@ -9,9 +9,9 @@ cd "${ROOT_DIR}"
 
 bash scripts/doctor.sh
 bash scripts/release.sh "$@"
+bash scripts/fixture_tests.sh
 bash scripts/release_guard.sh
 bash scripts/install_smoke.sh
 
 echo "Release prepare checks passed."
 echo "Version: $(psplus::read_plg_version "${ROOT_DIR}/plexstreamsplus.plg")"
-

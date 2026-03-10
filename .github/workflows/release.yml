@@ -47,6 +47,9 @@ jobs:
           TZ: America/New_York
         run: bash scripts/release.sh
 
+      - name: Fixture tests
+        run: bash scripts/fixture_tests.sh
+
       - name: Release guard checks
         run: bash scripts/release_guard.sh
 

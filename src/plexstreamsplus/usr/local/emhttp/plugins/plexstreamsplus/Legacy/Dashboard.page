@@ -55,7 +55,7 @@ Tag="film"
 </table>
 
 <style>
-p.plexstream-title {
+.dash_plexstreamsplus p.plexstream-title {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -64,7 +64,7 @@ p.plexstream-title {
     margin: 0 0 10px 0;
 }
 
-p.plexstream-user {
+.dash_plexstreamsplus p.plexstream-user {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -73,7 +73,7 @@ p.plexstream-user {
     margin: 0 0 10px 0;
 }
 
-p.plexstream-time {
+.dash_plexstreamsplus p.plexstream-time {
     padding: 0 0 0 0;
     margin: 0 0 10px 0;
     font-size:10px;
@@ -95,7 +95,8 @@ $(function() {
     sortTable($('#db-box2'),$.cookie('db-box2'));
     sortTable($('#db-box3'),$.cookie('db-box3'));
 
-    updateDashboardStreams();
-    setInterval(updateDashboardStreams, 5000)
+    plexStreamsPlusStartPolling('dashboard_legacy', function() {
+        return updateDashboardStreams('dashboard_legacy');
+    });
 });
 </script>

@@ -1,4 +1,9 @@
 var plexStreamsPlusServerList = [];
+var plexStreamsPlusPollers = {};
+var plexStreamsPlusPollState = {};
+var plexStreamsPlusSettingsState = {
+    customServersValid: true
+};
 
 function safeText(value) {
     if (value === undefined || value === null) {
@@ -31,9 +36,87 @@ function streamTimeHtml(stream, includeEndTime) {
         plexStreamsPlusEscapeHtml(stream.lengthDisplay) + endTime;
 }
 
+function plexStreamsPlusResetPollState(context) {
+    plexStreamsPlusPollState[context] = {
+        idleStreak: 0,
+        errorStreak: 0,
+        lastCount: 0
+    };
+    return plexStreamsPlusPollState[context];
+}
 
-function updateDashboardStreamsNew() {
-    $.ajax('/plugins/plexstreamsplus/ajax.php').done(function(streams){
+function plexStreamsPlusPollStateFor(context) {
+    if (!plexStreamsPlusPollState[context]) {
+        return plexStreamsPlusResetPollState(context);
+    }
+    return plexStreamsPlusPollState[context];
+}
+
+function plexStreamsPlusMarkPoll(context, streamCount, failed) {
+    var state = plexStreamsPlusPollStateFor(context);
+    if (failed) {
+        state.errorStreak += 1;
+        state.lastCount = 0;
+        return;
+    }
+
+    state.errorStreak = 0;
+    state.lastCount = Number(streamCount || 0);
+    if (state.lastCount > 0) {
+        state.idleStreak = 0;
+    } else {
+        state.idleStreak += 1;
+    }
+}
+
+function plexStreamsPlusNextPollDelay(context) {
+    var state = plexStreamsPlusPollStateFor(context);
+    var minDelay = 5000;
+    var maxDelay = 30000;
+
+    if (state.errorStreak > 0) {
+        return Math.min(maxDelay, minDelay + (state.errorStreak * 5000));
+    }
+    if (state.lastCount > 0) {
+        return minDelay;
+    }
+    return Math.min(maxDelay, minDelay + (state.idleStreak * 5000));
+}
+
+function plexStreamsPlusStopPolling(context) {
+    if (plexStreamsPlusPollers[context]) {
+        clearTimeout(plexStreamsPlusPollers[context]);
+        delete plexStreamsPlusPollers[context];
+    }
+}
+
+function plexStreamsPlusStartPolling(context, updater) {
+    if (typeof updater !== 'function') {
+        return;
+    }
+
+    plexStreamsPlusStopPolling(context);
+    plexStreamsPlusResetPollState(context);
+
+    var run = function() {
+        var request = updater();
+        if (!request || typeof request.always !== 'function') {
+            plexStreamsPlusMarkPoll(context, 0, true);
+            plexStreamsPlusPollers[context] = setTimeout(run, plexStreamsPlusNextPollDelay(context));
+            return;
+        }
+
+        request.always(function() {
+            plexStreamsPlusPollers[context] = setTimeout(run, plexStreamsPlusNextPollDelay(context));
+        });
+    };
+
+    run();
+}
+
+function updateDashboardStreamsNew(pollContext) {
+    var context = safeText(pollContext || 'dashboard_new');
+    return $.ajax('/plugins/plexstreamsplus/ajax.php').done(function(streams){
         $('#plexstreamsplus_count').html(streams.length);
         $('#retrieving_streams').remove();
         var hostStreams = [];
@@ -87,7 +170,9 @@ function updateDashboardStreamsNew() {
             $('#stream_count_container').html('<span id="plexstreamsplus_count">0</span> ' + _('Active Stream(s)') + '</span>');
             $('#plexstreamsplus_streams').html('<div class="no_streams"><span class="w100"><p style="text-align:center;font-style:italic;font-size:13px;">' + _('There are currently no active streams') + '</p></span></div>');
         }
+        plexStreamsPlusMarkPoll(context, streams.length, false);
     }).fail(function(jqXHR) {
+        plexStreamsPlusMarkPoll(context, 0, true);
         if (jqXHR.status == '500') {
             $('#plexstreamsplus_streams').html('<span class="w100"><p style="text-align:center;font-style:italic;font-size:13px;">' + _('Please make sure you have') + ' <a href="/Settings/PlexStreamsPlus">' + _('setup') + '</a> ' + _('the plugin first') + '</p></span>');
         }
@@ -95,8 +180,9 @@ function updateDashboardStreamsNew() {
 }
 
 
-function updateDashboardStreams() {
-    $.ajax('/plugins/plexstreamsplus/ajax.php').done(function(streams){
+function updateDashboardStreams(pollContext) {
+    var context = safeText(pollContext || 'dashboard_legacy');
+    return $.ajax('/plugins/plexstreamsplus/ajax.php').done(function(streams){
         //$('#plexstreamsplus_count').html(streams.length);
         $('#retrieving_streams').remove();
         if (streams.length > 0) {
@@ -149,7 +235,9 @@ function updateDashboardStreams() {
             $('#stream_count_container').html('<span id="plexstreamsplus_count">0</span> ' + _('Active Stream(s)') + '</span>');
             $('#plexstreamsplus_streams').html('<tr class="no_streams"><td colspan="4" align="center" style="padding: 0 0 0 0;"><p style="text-align:center;font-style:italic;">' + _('There are currently no active streams') + '</p></td></tr>');
         }
+        plexStreamsPlusMarkPoll(context, streams.length, false);
     }).fail(function(jqXHR) {
+        plexStreamsPlusMarkPoll(context, 0, true);
         if (jqXHR.status == '500') {
             $('#plexstreamsplus_streams').html('<tr><td colspan="4" align="center"><p style="text-align:center;font-style:italic;">' + _('Please make sure you have') + ' <a href="/Settings/PlexStreamsPlus">' + _('setup') + '</a> ' + _('the plugin first') + '</p></td></tr>');
         }
@@ -277,17 +365,17 @@ function streamEpisodeMeta(stream) {
     var title = safeText(stream.title);
     var seasonMatch = title.match(/Season\s+(\d+)\s*-\s*([^\(]+)/i);
     if (seasonMatch) {
-        return 'S' + seasonMatch[1] + ' · ' + seasonMatch[2].trim();
+        return 'S' + seasonMatch[1] + ' - ' + seasonMatch[2].trim();
     }
 
     var episodeMatch = title.match(/S(\d+)\s*E(\d+)/i);
     if (episodeMatch) {
-        return 'S' + episodeMatch[1] + ' · E' + episodeMatch[2];
+        return 'S' + episodeMatch[1] + ' - E' + episodeMatch[2];
     }
 
     var movieMatch = title.match(/\((20\d{2}|19\d{2})\)\s*$/);
     if (movieMatch) {
-        return 'Movie · ' + movieMatch[1];
+        return 'Movie - ' + movieMatch[1];
     }
 
     return 'Video Session';
@@ -379,6 +467,34 @@ function buildFullStreamCard(stream) {
     '</li>';
 }
 
+function streamStaticSignature(stream) {
+    return JSON.stringify({
+        id: safeText(stream.id),
+        title: safeText(stream.title),
+        key: safeText(stream.key),
+        type: safeText(stream.type),
+        artUrl: safeText(stream.artUrl),
+        thumbUrl: safeText(stream.thumbUrl),
+        user: safeText(stream.user),
+        userAvatar: safeText(stream.userAvatar),
+        product: streamProductName(stream),
+        player: streamPlayerName(stream)
+    });
+}
+
+function refreshStreamCardDynamic($container, stream) {
+    var percentPlayed = stream.percentPlayed || 0;
+    var location = safeText(stream.locationDisplay || '');
+
+    $container.find('.status i').attr('class', 'fa fa-' + safeText(stream.stateIcon)).attr('title', uCWord(stream.state));
+    $container.find('.quality-value').text(streamQualityValue(stream));
+    $container.find('.stream-value').text(decisionLabel(stream.streamDecision));
+    $container.find('.video-value').text(streamVideoValue(stream));
+    $container.find('.audio-value').text(streamAudioValue(stream));
+    $container.find('.location-value').text(location).attr('title', location);
+    $container.find('.progressBar').css('width', percentPlayed + '%').attr('duration', safeText(stream.duration || 0));
+}
+
 function refreshStreamCard($container, stream) {
     var percentPlayed = stream.percentPlayed || 0;
     var location = safeText(stream.locationDisplay || '');
@@ -401,10 +517,12 @@ function refreshStreamCard($container, stream) {
     $container.find('.location-value').text(location).attr('title', location);
 
     $container.find('.progressBar').css('width', percentPlayed + '%').attr('duration', safeText(stream.duration || 0));
+    $container.attr('data-static-signature', streamStaticSignature(stream));
 }
 
-function updateFullStreamInfo() {
-    $.ajax('/plugins/plexstreamsplus/ajax.php').done(function(streams){
+function updateFullStreamInfo(pollContext) {
+    var context = safeText(pollContext || 'streams_page');
+    return $.ajax('/plugins/plexstreamsplus/ajax.php').done(function(streams){
         if (streams.length > 0) {
             var currentDate = new Date();
             var lastUpdate = currentDate.getTime();
@@ -431,10 +549,17 @@ function updateFullStreamInfo() {
                 var $container = $matches.first();
                 var node;
                 if ($container.length > 0) {
-                    refreshStreamCard($container, stream);
+                    var existingSignature = safeText($container.attr('data-static-signature'));
+                    var latestSignature = streamStaticSignature(stream);
+                    if (existingSignature !== latestSignature) {
+                        refreshStreamCard($container, stream);
+                    } else {
+                        refreshStreamCardDynamic($container, stream);
+                    }
                     node = $container[0];
                 } else {
                     $container = $(buildFullStreamCard(stream)).appendTo($streamHolder);
+                    $container.attr('data-static-signature', streamStaticSignature(stream));
                     node = $container[0];
                 }
                 updateDuration(node, stream);
@@ -457,7 +582,9 @@ function updateFullStreamInfo() {
                 $('#streams-container').replaceWith('<div class="no_streams"><p id="no-streams">' + _('There are currently no active streams') + '</p></div>');
             }
         }
+        plexStreamsPlusMarkPoll(context, streams.length, false);
     }).fail(function(jqXHR) {
+        plexStreamsPlusMarkPoll(context, 0, true);
         if (jqXHR.status == '500') {
             var setupMessage = '<div class="no_streams"><p id="no-streams">' + _('Please make sure you have') + ' <a href="/Settings/PlexStreamsPlus">' + _('setup') + '</a> ' + _('the plugin first') + '</p></div>';
             if ($('#streams-container').length > 0) {
@@ -522,7 +649,7 @@ function updateDuration(node, stream) {
 function incrementTimer($hours, $minutes, $seconds) {
     var seconds = parseInt($seconds.html(), 10);
     var minutes = parseInt($minutes.html(), 10);
-    var hours = parseInt($hours.html());
+    var hours = parseInt($hours.html(), 10);
     seconds += 1;
     if (seconds > 59) {
         seconds = 0;
@@ -573,6 +700,7 @@ function plexStreamsPlusSetTokenState(state, noteOverride) {
     var $status = $('#psplus-token-status');
     var $note = $('#psplus-token-note');
     var $button = $('#psplus-get-token-btn');
+    var $verifyButton = $('#psplus-verify-token-btn');
     var normalized = safeText(state).toLowerCase();
     var label = _('Not Connected');
     var note = _('Get a Plex token to discover available servers.');
@@ -599,27 +727,48 @@ function plexStreamsPlusSetTokenState(state, noteOverride) {
     if ($button.length > 0) {
         $button.prop('disabled', normalized === 'loading');
     }
+    if ($verifyButton.length > 0) {
+        $verifyButton.prop('disabled', normalized === 'loading');
+    }
 }
 
-function plexStreamsPlusValidateCustomServers() {
-    var $input = $('#CUSTOM_SERVERS');
-    if ($input.length === 0) {
-        return true;
+function plexStreamsPlusUpdateSaveButtonState() {
+    var $save = $('#psplus-save-btn');
+    if ($save.length > 0) {
+        $save.prop('disabled', !plexStreamsPlusSettingsState.customServersValid);
+    }
+}
+
+function plexStreamsPlusSetTokenMasked(masked) {
+    var $tokenInput = $('#plex-token');
+    var $toggleButton = $('#psplus-toggle-token-btn');
+    if ($tokenInput.length === 0) {
+        return;
     }
 
-    var $feedback = $('#psplus-custom-servers-feedback');
-    var $save = $('#psplus-save-btn');
-    var raw = safeText($input.val()).trim();
+    var shouldMask = masked !== false;
+    $tokenInput.attr('type', shouldMask ? 'password' : 'text');
+    if ($toggleButton.length > 0) {
+        $toggleButton.text(shouldMask ? _('Show') : _('Hide'));
+    }
+}
 
+function plexStreamsPlusToggleTokenMask() {
+    var $tokenInput = $('#plex-token');
+    if ($tokenInput.length === 0) {
+        return;
+    }
+    var isCurrentlyMasked = $tokenInput.attr('type') !== 'text';
+    plexStreamsPlusSetTokenMasked(!isCurrentlyMasked);
+}
+
+function plexStreamsPlusParseCustomServerEntries(rawValue) {
+    var raw = safeText(rawValue).trim();
     if (raw.length === 0) {
-        $input.removeClass('psplus-input-invalid');
-        if ($feedback.length > 0) {
-            $feedback.removeClass('is-error is-success').addClass('is-info').text(_('Optional: add comma-separated host:port endpoints.'));
-        }
-        if ($save.length > 0) {
-            $save.prop('disabled', false);
-        }
-        return true;
+        return {
+            entries: [],
+            invalidEntries: []
+        };
     }
 
     var entries = raw.split(/[,\n]+/).map(function(entry) {
@@ -636,18 +785,41 @@ function plexStreamsPlusValidateCustomServers() {
         }
     });
 
-    if (invalidEntries.length > 0) {
+    return {
+        entries: entries,
+        invalidEntries: invalidEntries
+    };
+}
+
+function plexStreamsPlusValidateCustomServers() {
+    var $input = $('#CUSTOM_SERVERS');
+    if ($input.length === 0) {
+        return true;
+    }
+    var $feedback = $('#psplus-custom-servers-feedback');
+    var result = plexStreamsPlusParseCustomServerEntries($input.val());
+
+    if (result.entries.length === 0) {
+        $input.removeClass('psplus-input-invalid');
+        if ($feedback.length > 0) {
+            $feedback.removeClass('is-error is-success').addClass('is-info').text(_('Optional: add comma-separated host:port endpoints.'));
+        }
+        plexStreamsPlusSettingsState.customServersValid = true;
+        plexStreamsPlusUpdateSaveButtonState();
+        return true;
+    }
+
+    if (result.invalidEntries.length > 0) {
         $input.addClass('psplus-input-invalid');
         if ($feedback.length > 0) {
-            var preview = invalidEntries.slice(0, 2).join(', ');
-            if (invalidEntries.length > 2) {
+            var preview = result.invalidEntries.slice(0, 2).join(', ');
+            if (result.invalidEntries.length > 2) {
                 preview += ', ...';
             }
             $feedback.removeClass('is-info is-success').addClass('is-error').text(_('Invalid endpoint format: ') + preview);
         }
-        if ($save.length > 0) {
-            $save.prop('disabled', true);
-        }
+        plexStreamsPlusSettingsState.customServersValid = false;
+        plexStreamsPlusUpdateSaveButtonState();
         return false;
     }
 
@@ -655,9 +827,8 @@ function plexStreamsPlusValidateCustomServers() {
     if ($feedback.length > 0) {
         $feedback.removeClass('is-info is-error').addClass('is-success').text(_('Custom server endpoints look valid.'));
     }
-    if ($save.length > 0) {
-        $save.prop('disabled', false);
-    }
+    plexStreamsPlusSettingsState.customServersValid = true;
+    plexStreamsPlusUpdateSaveButtonState();
     return true;
 }
 
@@ -670,7 +841,8 @@ function plexStreamsPlusStartOAuth() {
     PlexOAuth(
         function(token) {
             $('#plex-token').val(token);
-            plexStreamsPlusSetTokenState('connected');
+            plexStreamsPlusSetTokenMasked(true);
+            plexStreamsPlusSetTokenState('connected', _('Token received. Use Verify Token to confirm access before saving.'));
             getServers('#hostcontainer', $('#HOST').val());
         },
         function() {
@@ -687,6 +859,46 @@ function plexStreamsPlusStartOAuth() {
     );
 }
 
+function plexStreamsPlusVerifyToken() {
+    var token = safeText($('#plex-token').val()).trim();
+    var useSsl = $('input[name="FORCE_PLEX_HTTPS"]:checked').val();
+    var $verifyButton = $('#psplus-verify-token-btn');
+    if (token.length === 0) {
+        plexStreamsPlusSetTokenState('error', _('No token to verify.'));
+        return;
+    }
+
+    $verifyButton.prop('disabled', true);
+    plexStreamsPlusSetTokenState('loading', _('Verifying token with Plex...'));
+    $.ajax({
+        url: '/plugins/plexstreamsplus/getServers.php?useSsl=' + useSsl,
+        method: 'GET',
+        dataType: 'json',
+        timeout: 15000
+    }).done(function(data) {
+        var serverList = data && data.serverList ? data.serverList : {};
+        var count = Object.keys(serverList).length;
+        if (count > 0) {
+            plexStreamsPlusSetTokenState('connected', _('Token verified. ') + count + ' ' + _('server(s) available.'));
+        } else {
+            plexStreamsPlusSetTokenState('connected', _('Token verified. No servers returned.'));
+        }
+        getServers('#hostcontainer', $('#HOST').val());
+    }).fail(function(jqXHR, textStatus) {
+        if (jqXHR && jqXHR.status === 500) {
+            plexStreamsPlusSetTokenState('error', _('Token verification failed. Please generate a new token.'));
+            return;
+        }
+        if (textStatus === 'timeout') {
+            plexStreamsPlusSetTokenState('error', _('Token verification timed out. Please try again.'));
+            return;
+        }
+        plexStreamsPlusSetTokenState('error', _('Unable to verify token right now.'));
+    }).always(function() {
+        $verifyButton.prop('disabled', false);
+    });
+}
+
 function plexStreamsPlusInitSettingsPage() {
     var $form = $('#plexstreamsplus_settings');
     if ($form.length === 0) {
@@ -701,23 +913,38 @@ function plexStreamsPlusInitSettingsPage() {
         getServers('#hostcontainer', $('#HOST').val());
     });
 
+    $('#psplus-verify-token-btn').on('click', function() {
+        plexStreamsPlusVerifyToken();
+    });
+
+    $('#psplus-toggle-token-btn').on('click', function() {
+        plexStreamsPlusToggleTokenMask();
+    });
+
     $('#CUSTOM_SERVERS').on('input blur', function() {
         plexStreamsPlusValidateCustomServers();
     });
 
     $('#plex-token').on('input change', function() {
         var hasToken = safeText($(this).val()).trim().length > 0;
-        plexStreamsPlusSetTokenState(hasToken ? 'connected' : 'disconnected');
+        plexStreamsPlusSetTokenState(hasToken ? 'connected' : 'disconnected', hasToken ? _('Token updated. Verify before saving.') : undefined);
+        plexStreamsPlusSetTokenMasked(true);
     });
 
     plexStreamsPlusValidateCustomServers();
+    plexStreamsPlusSetTokenMasked(true);
     plexStreamsPlusSetTokenState(safeText($('#plex-token').val()).trim().length > 0 ? 'connected' : 'disconnected');
     plexStreamsPlusSetServerStatus('info', _('Ready to load Plex servers.'));
+    plexStreamsPlusUpdateSaveButtonState();
 }
 
 function getServers(containerSelector, selected) {
     var url = '/plugins/plexstreamsplus/getServers.php?useSsl=' + $('input[name="FORCE_PLEX_HTTPS"]:checked').val();
     var $host = $(containerSelector);
+    var $spinner = $host.closest('.psplus-card').find('.lds-dual-ring');
+    if ($spinner.length === 0) {
+        $spinner = $('.psplus-server-load .lds-dual-ring');
+    }
     var selectedRaw = safeText(selected);
     var selectedList = selectedRaw.split(',').map(function(item) {
         return safeText(item).trim();
@@ -727,7 +954,7 @@ function getServers(containerSelector, selected) {
     var token = safeText($('#plex-token').val()).trim();
 
     $host.hide();
-    $('.lds-dual-ring').show();
+    $spinner.show();
     $host.html('');
     plexStreamsPlusSetServerStatus('loading', _('Checking Plex servers...'));
 
@@ -735,12 +962,12 @@ function getServers(containerSelector, selected) {
         $host.html('<p class="psplus-server-empty">' + _('No Plex token found. Click Get Plex Token to load servers.') + '</p>');
         updateServerList('HOST');
         $host.show();
-        $('.lds-dual-ring').hide();
+        $spinner.hide();
         plexStreamsPlusSetServerStatus('warning', _('No token configured.'));
-        return;
+        return $.Deferred().resolve().promise();
     }
 
-    $.ajax({
+    return $.ajax({
         url: url,
         method: 'GET',
         dataType: 'json',
@@ -796,13 +1023,13 @@ function getServers(containerSelector, selected) {
         }
         updateServerList('HOST');
         $host.show();
-        $('.lds-dual-ring').hide();
+        $spinner.hide();
     }).fail(function(jqXHR, textStatus) {
         var reason = textStatus === 'timeout' ? _('Server discovery request timed out.') : _('Unable to reach Plex discovery right now.');
         $host.html('<p class="psplus-server-empty">' + reason + ' ' + _('Use Refresh to try again.') + '</p>');
         updateServerList('HOST');
         $host.show();
-        $('.lds-dual-ring').hide();
+        $spinner.hide();
         plexStreamsPlusSetServerStatus('error', reason);
     });
 }
@@ -1008,5 +1235,23 @@ function PlexOAuth(success, error, pre) {
             error()
         }
     });
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+        safeText: safeText,
+        decisionLabel: decisionLabel,
+        streamAttr: streamAttr,
+        streamVideoValue: streamVideoValue,
+        streamAudioValue: streamAudioValue,
+        streamEpisodeMeta: streamEpisodeMeta,
+        streamDomId: streamDomId,
+        streamStaticSignature: streamStaticSignature,
+        plexStreamsPlusParseCustomServerEntries: plexStreamsPlusParseCustomServerEntries,
+        plexStreamsPlusResetPollState: plexStreamsPlusResetPollState,
+        plexStreamsPlusMarkPoll: plexStreamsPlusMarkPoll,
+        plexStreamsPlusNextPollDelay: plexStreamsPlusNextPollDelay,
+        buildFullStreamCard: buildFullStreamCard
+    };
 }
 
