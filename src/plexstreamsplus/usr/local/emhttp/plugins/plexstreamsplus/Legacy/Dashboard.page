@@ -1,5 +1,5 @@
 Menu="Dashboard"
-Icon="film"
+Icon="PlexStreams-icon.png"
 Tag="film"
 ---
 <?php

@@ -1,7 +1,7 @@
 Menu="NetworkServices"
 Title="PlexStreams Plus"
 Tag="film"
-Icon="film"
+Icon="PlexStreams-icon.png"
 Type="xmenu"
 Tabs="false"
 ---

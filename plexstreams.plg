@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
   <!ENTITY name       "plexstreams">
   <!ENTITY author     "alexphillips-dev">
-  <!ENTITY version    "2026.03.09.9">
+  <!ENTITY version    "2026.03.09.11">
   <!ENTITY launch     "Settings/PlexStreamsPlus">
   <!ENTITY branch     "main">
   <!ENTITY gitURL     "https://raw.githubusercontent.com/alexphillips-dev/PlexStreams-Plus/&branch;">
@@ -12,7 +12,7 @@
   <!ENTITY emhttp     "/usr/local/emhttp/plugins/plexstreamsplus">
   <!ENTITY plgPATH    "/boot/config/plugins/&name;">
   <!ENTITY plgNAME    "&name;-&version;-x86_64-1">
-  <!ENTITY md5        "41493d82dae551f14bbab1a40bea4d34">
+  <!ENTITY md5        "f0c3b6706fa251b1f96e22e4e26c6d01">
 ]>
 
 <PLUGIN  name="&name;"
@@ -22,10 +22,13 @@
          support="https://github.com/alexphillips-dev/PlexStreams-Plus"
          launch="&launch;"
          IconFA="film"
-         icon="film">
+         icon="PlexStreams-icon.png">
 
     <CHANGES>
     ##&name;
+###2026.03.09.11
+- Move plugin icon asset into packaged plugin paths and use it for plugin and settings icons.
+
 ###2026.03.09.9
 - Prevent dashboard JS symbol collision with FolderView Plus by namespacing Plex HTML-escape helper.
 

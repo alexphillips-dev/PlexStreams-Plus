@@ -1,6 +1,7 @@
 Menu="PlexStreamsPlus"
 Title="PlexStreams Plus Settings"
 Tag="film"
+Icon="PlexStreams-icon.png"
 ---
 <link type="text/css" rel="stylesheet" href="/plugins/plexstreamsplus/spinner.css">
 <?php

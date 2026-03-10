@@ -1,5 +1,5 @@
 Menu="Dashboard"
-Icon="film"
+Icon="PlexStreams-icon.png"
 Tag="film"
 Cond="parse_ini_file('/boot/config/plugins/plexstreamsplus/plexstreamsplus.cfg')['DISPLAY_WIDGET'] == '1' && version_compare(parse_ini_file('/etc/unraid-version')['version'],'6.12.0-beta5', '<=')"
 ---

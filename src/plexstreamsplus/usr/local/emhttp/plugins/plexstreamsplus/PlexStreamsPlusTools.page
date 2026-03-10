@@ -1,7 +1,7 @@
 Menu="SystemInformation"
 Name="PlexStreams Plus"
 Tag="film"
-Icon="film"
+Icon="PlexStreams-icon.png"
 Type="xmenu"
 Tabs="true"
 Title="PlexStreams Plus"
