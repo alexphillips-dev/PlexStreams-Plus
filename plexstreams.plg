@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
   <!ENTITY name       "plexstreams">
   <!ENTITY author     "alexphillips-dev">
-  <!ENTITY version    "2026.03.09.9.1">
+  <!ENTITY version    "2026.03.09.12">
   <!ENTITY launch     "Settings/PlexStreamsPlus">
   <!ENTITY branch     "main">
   <!ENTITY gitURL     "https://raw.githubusercontent.com/alexphillips-dev/PlexStreams-Plus/&branch;">
@@ -12,7 +12,7 @@
   <!ENTITY emhttp     "/usr/local/emhttp/plugins/plexstreamsplus">
   <!ENTITY plgPATH    "/boot/config/plugins/&name;">
   <!ENTITY plgNAME    "&name;-&version;-x86_64-1">
-  <!ENTITY md5        "f55cea5eff70b4a571da3412143883a1">
+  <!ENTITY md5        "f3b8ce3bc2ae3c09b9a13c018719617f">
 ]>
 
 <PLUGIN  name="&name;"
@@ -26,6 +26,9 @@
 
     <CHANGES>
     ##&name;
+###2026.03.09.12
+- Align release versioning/update flow with FolderView Plus (zero-padded numeric revisions and archive-driven incrementing).
+
 ###2026.03.09.9.1
 - Fix Unraid update detection by switching to single-digit safe revision sequence and republishing icon update.
 

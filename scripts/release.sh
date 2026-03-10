@@ -58,74 +58,101 @@ if [[ ! "${release_date}" =~ ^[0-9]{4}\.[0-9]{2}\.[0-9]{2}$ ]]; then
 fi
 
 current_version="$(sed -n -E 's/.*<!ENTITY version[[:space:]]+"([^"]+)".*/\1/p' "${PLUS_MANIFEST}" | head -n1)"
-if [[ ! "${current_version}" =~ ^[0-9]{4}\.[0-9]{2}\.[0-9]{2}\.[0-9]+(\.[0-9]+)*$ ]]; then
+if [[ ! "${current_version}" =~ ^[0-9]{4}\.[0-9]{2}\.[0-9]{2}(\.[0-9]+(\.[0-9]+)*)?$ ]]; then
   echo "Could not parse current manifest version from ${PLUS_MANIFEST}." >&2
   exit 1
 fi
 
-next_safe_revision() {
-  local revision="$1"
-  local -a parts
-  IFS='.' read -r -a parts <<< "${revision}"
-
-  local first=$((10#${parts[0]}))
-  if (( first > 9 )); then
-    echo "9.1"
-    return
-  fi
-
-  if (( ${#parts[@]} == 1 )); then
-    if (( first < 9 )); then
-      echo "$((first + 1))"
-    else
-      echo "9.1"
-    fi
-    return
-  fi
-
-  local last_index=$(( ${#parts[@]} - 1 ))
-  local last=$((10#${parts[last_index]}))
-  if (( last < 9 )); then
-    parts[last_index]="$((last + 1))"
-  else
-    parts+=("1")
-  fi
-
-  local next="${parts[0]}"
-  local i
-  for ((i=1; i<${#parts[@]}; i++)); do
-    next="${next}.${parts[i]}"
-  done
-  echo "${next}"
+is_stable_version() {
+  local input="${1:-}"
+  [[ "${input}" =~ ^[0-9]{4}\.[0-9]{2}\.[0-9]{2}(\.[0-9]+)?$ ]]
 }
 
-date_regex="${release_date//./\\.}"
-current_revision=""
-if [[ "${current_version}" =~ ^${date_regex}\.([0-9]+(\.[0-9]+)*)$ ]]; then
-  current_revision="${BASH_REMATCH[1]}"
-fi
+normalize_stable_version_for_unraid() {
+  local input="${1:-}"
+  if [[ "${input}" =~ ^([0-9]{4}\.[0-9]{2}\.[0-9]{2})$ ]]; then
+    echo "${BASH_REMATCH[1]}.01"
+    return
+  fi
+  if [[ "${input}" =~ ^([0-9]{4}\.[0-9]{2}\.[0-9]{2})\.([0-9]+)$ ]]; then
+    local base="${BASH_REMATCH[1]}"
+    local patch=$((10#${BASH_REMATCH[2]}))
+    printf '%s.%02d\n' "${base}" "${patch}"
+    return
+  fi
+  echo "${input}"
+}
+
+next_patch_version() {
+  local input="${1:-}"
+  if [[ "${input}" =~ ^([0-9]{4}\.[0-9]{2}\.[0-9]{2})\.([0-9]+)$ ]]; then
+    local base="${BASH_REMATCH[1]}"
+    local patch=$((10#${BASH_REMATCH[2]} + 1))
+    printf '%s.%02d\n' "${base}" "${patch}"
+    return
+  fi
+  echo "${input}"
+}
+
+highest_archive_version_for_date() {
+  local target_date="${1:-}"
+  local archive
+  local versions=()
+
+  shopt -s nullglob
+  for archive in "${ARCHIVE_DIR}/${PLUS_NAME}-${target_date}."*"${ARCH_SUFFIX}"; do
+    local name="${archive##*/}"
+    local version_part="${name#${PLUS_NAME}-}"
+    version_part="${version_part%${ARCH_SUFFIX}}"
+    if is_stable_version "${version_part}"; then
+      versions+=("$(normalize_stable_version_for_unraid "${version_part}")")
+    fi
+  done
+  shopt -u nullglob
+
+  if [[ ${#versions[@]} -eq 0 ]]; then
+    echo ""
+    return
+  fi
+
+  printf '%s\n' "${versions[@]}" | sort -V | tail -n1
+}
 
 version=""
 if [[ -n "${release_revision}" ]]; then
-  if [[ ! "${release_revision}" =~ ^[1-9](\.[1-9])*$ ]]; then
-    echo "Invalid revision '${release_revision}'. Use dot-separated digits 1-9 (examples: 1, 9.1, 9.2)." >&2
+  if [[ ! "${release_revision}" =~ ^[1-9][0-9]*$ ]]; then
+    echo "Invalid revision '${release_revision}'. Revision must be a positive integer." >&2
     exit 1
   fi
-  version="${release_date}.${release_revision}"
+  version="$(printf '%s.%02d' "${release_date}" "$((10#${release_revision}))")"
   if [[ -f "${ARCHIVE_DIR}/${PLUS_NAME}-${version}${ARCH_SUFFIX}" ]]; then
     echo "Archive already exists for ${version}. Pick a new revision." >&2
     exit 1
   fi
 else
-  next_revision="1"
-  if [[ -n "${current_revision}" ]]; then
-    next_revision="$(next_safe_revision "${current_revision}")"
+  highest_version="$(highest_archive_version_for_date "${release_date}")"
+
+  if is_stable_version "${current_version}"; then
+    normalized_current="$(normalize_stable_version_for_unraid "${current_version}")"
+    if [[ "${normalized_current}" =~ ^${release_date//./\\.}\.[0-9]+$ ]]; then
+      if [[ -z "${highest_version}" ]]; then
+        highest_version="${normalized_current}"
+      else
+        max_version="$(printf '%s\n%s\n' "${highest_version}" "${normalized_current}" | sort -V | tail -n1)"
+        highest_version="${max_version}"
+      fi
+    fi
   fi
 
-  while [[ -f "${ARCHIVE_DIR}/${PLUS_NAME}-${release_date}.${next_revision}${ARCH_SUFFIX}" ]]; do
-    next_revision="$(next_safe_revision "${next_revision}")"
+  if [[ -z "${highest_version}" ]]; then
+    version="${release_date}.01"
+  else
+    version="$(next_patch_version "${highest_version}")"
+  fi
+
+  while [[ -f "${ARCHIVE_DIR}/${PLUS_NAME}-${version}${ARCH_SUFFIX}" ]]; do
+    version="$(next_patch_version "${version}")"
   done
-  version="${release_date}.${next_revision}"
 fi
 
 plus_archive="${ARCHIVE_DIR}/${PLUS_NAME}-${version}${ARCH_SUFFIX}"
