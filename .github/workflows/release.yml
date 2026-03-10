@@ -1,0 +1,56 @@
+name: Release Plugin
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_date:
+        description: Override date in YYYY.MM.DD (default is America/New_York current date)
+        required: false
+        type: string
+      revision:
+        description: Override numeric revision (default is auto increment)
+        required: false
+        type: string
+      changelog:
+        description: Changelog bullet inserted at the top of both manifests
+        required: false
+        default: Automated release pipeline update.
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git author
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Build release artifacts and update manifests
+        id: release
+        env:
+          RELEASE_DATE: ${{ inputs.release_date }}
+          RELEASE_REVISION: ${{ inputs.revision }}
+          RELEASE_CHANGELOG: ${{ inputs.changelog }}
+          TZ: America/New_York
+        run: bash scripts/release.sh
+
+      - name: Commit and push
+        run: |
+          if git diff --quiet; then
+            echo "No release changes were generated."
+            exit 0
+          fi
+
+          git add archive plexstreams.plg plexstreamsplus.plg src/plexstreamsplus/usr/local/emhttp/plugins/plexstreamsplus/includes/common.php
+          git commit -m "release: ${{ steps.release.outputs.version }}"
+          git push
