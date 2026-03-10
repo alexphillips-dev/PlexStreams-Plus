@@ -91,14 +91,14 @@
         z-index: 2;
         flex: 1;
         min-width: 0;
-        padding: 12px 14px 35px 0;
+        padding: 16px 14px 35px 0;
     }
 
     .stream-details .detail-list {
         display: flex;
         flex-direction: column;
         flex-wrap: nowrap;
-        gap: 2px;
+        gap: 3px;
         list-style: none;
         margin: 0;
         padding: 0;
@@ -110,8 +110,9 @@
         flex: 0 0 auto;
         align-items: baseline;
         gap: 6px;
+        padding: 1px 0;
         margin-bottom: 0;
-        line-height: 14px;
+        line-height: 15px;
     }
 
     .detail-list .label {
