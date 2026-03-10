@@ -59,6 +59,9 @@ if ($cfg['DISPLAY_WIDGET'] === '0' && file_exists($pluginPath . 'PlexStreamsPlus
 <script>
 function clearToken() {
     document.getElementById('plex-token').value = '';
+    if (typeof plexStreamsPlusSetTokenState === 'function') {
+        plexStreamsPlusSetTokenState('disconnected');
+    }
     document.getElementById('plexstreamsplus_settings').submit();
 }
 </script>
@@ -168,6 +171,11 @@ function clearToken() {
         background: #1a2f45;
     }
 
+    .psplus-btn:disabled {
+        opacity: 0.55;
+        cursor: default;
+    }
+
     .psplus-btn-primary {
         border-color: #376a9b;
         background: linear-gradient(135deg, #245f97, #1f4a7c);
@@ -187,6 +195,16 @@ function clearToken() {
         background: #3e232c;
     }
 
+    .psplus-btn-secondary {
+        border-color: #3f546a;
+        background: #1a2938;
+        color: #d8e6f5;
+    }
+
+    .psplus-btn-secondary:hover {
+        background: #213447;
+    }
+
     .psplus-input {
         width: 100%;
         min-height: 37px;
@@ -203,11 +221,63 @@ function clearToken() {
         box-shadow: 0 0 0 1px rgba(81, 139, 194, 0.35);
     }
 
+    .psplus-input-invalid {
+        border-color: #8b4756;
+        box-shadow: 0 0 0 1px rgba(139, 71, 86, 0.45);
+    }
+
     .psplus-card-head {
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 8px;
+    }
+
+    .psplus-token-meta {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .psplus-state-pill {
+        border: 1px solid #3d546b;
+        background: rgba(16, 30, 45, 0.74);
+        color: #d2e4f8;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        font-weight: 700;
+        padding: 4px 8px;
+    }
+
+    .psplus-state-pill.is-connected {
+        border-color: #2f6a4c;
+        background: rgba(21, 55, 39, 0.75);
+        color: #d4ffe8;
+    }
+
+    .psplus-state-pill.is-loading {
+        border-color: #536a85;
+        color: #d8e7f7;
+    }
+
+    .psplus-state-pill.is-error {
+        border-color: #7f4c58;
+        background: rgba(58, 31, 38, 0.8);
+        color: #ffd4dc;
+    }
+
+    .psplus-meta-note {
+        font-size: 11px;
+        color: #8fa4ba;
+    }
+
+    .psplus-server-head-actions {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
     }
 
     .psplus-selection-chip {
@@ -225,6 +295,33 @@ function clearToken() {
     .psplus-selection-chip strong {
         color: #ffffff;
         margin-left: 4px;
+    }
+
+    .psplus-server-status {
+        border: 1px solid #30455a;
+        background: rgba(15, 26, 39, 0.78);
+        color: #bad0e7;
+        font-size: 11px;
+        padding: 6px 8px;
+        line-height: 1.2;
+    }
+
+    .psplus-server-status.is-success {
+        border-color: #2f644a;
+        color: #c9f0de;
+        background: rgba(21, 49, 37, 0.7);
+    }
+
+    .psplus-server-status.is-warning {
+        border-color: #6e6037;
+        color: #f4e3b2;
+        background: rgba(52, 44, 20, 0.7);
+    }
+
+    .psplus-server-status.is-error {
+        border-color: #784856;
+        color: #ffd6de;
+        background: rgba(56, 27, 35, 0.7);
     }
 
     .psplus-server-load {
@@ -337,6 +434,20 @@ function clearToken() {
         font-style: italic;
     }
 
+    .psplus-input-feedback {
+        font-size: 11px;
+        color: #90a6be;
+        min-height: 15px;
+    }
+
+    .psplus-input-feedback.is-success {
+        color: #c7efd8;
+    }
+
+    .psplus-input-feedback.is-error {
+        color: #ffc8d3;
+    }
+
     .psplus-setting-stack {
         display: flex;
         flex-direction: column;
@@ -421,6 +532,11 @@ function clearToken() {
             grid-template-columns: 1fr;
         }
 
+        .psplus-server-head-actions {
+            width: 100%;
+            justify-content: space-between;
+        }
+
         .psplus-actions {
             justify-content: stretch;
             flex-direction: column;
@@ -440,7 +556,7 @@ function clearToken() {
         <div class="psplus-version-pill">_(Version)_ <?php echo(htmlspecialchars(PLUGIN_VERSION, ENT_QUOTES)); ?></div>
     </div>
 
-    <form markdown="1" name="plexstreamsplus_settings" id="plexstreamsplus_settings" method="POST" action="/update.php" target="progressFrame" class="psplus-settings-form">
+    <form name="plexstreamsplus_settings" id="plexstreamsplus_settings" method="POST" action="/update.php" target="progressFrame" class="psplus-settings-form">
         <input type="hidden" name="#file" value="plexstreamsplus/plexstreamsplus.cfg" />
         <input type="hidden" id="COMMAND" name="#command" value="" />
         <input type="hidden" id="HOST" name="HOST" value="<?php echo(htmlspecialchars($cfg['HOST'], ENT_QUOTES)); ?>" />
@@ -449,8 +565,12 @@ function clearToken() {
             <section class="psplus-card">
                 <h2>_(Authentication)_</h2>
                 <p>_(Authorize this plugin with Plex to load your available servers.)_</p>
+                <div class="psplus-token-meta">
+                    <span id="psplus-token-status" class="psplus-state-pill is-disconnected">_(Not Connected)_</span>
+                    <span id="psplus-token-note" class="psplus-meta-note">_(Get a Plex token to discover available servers.)_</span>
+                </div>
                 <div class="psplus-token-row">
-                    <button type="button" class="psplus-btn psplus-btn-primary" onclick="PlexOAuth(function(token){document.getElementById('plex-token').value = token;});">_(Get Plex Token)_</button>
+                    <button type="button" id="psplus-get-token-btn" class="psplus-btn psplus-btn-primary" onclick="plexStreamsPlusStartOAuth()">_(Get Plex Token)_</button>
                     <input type="text" class="psplus-input" id="plex-token" name="TOKEN" value="<?php echo(htmlspecialchars($cfg['TOKEN'], ENT_QUOTES)) ?>" readonly="true" />
                 </div>
                 <p>_(Token is stored locally in your Unraid plugin configuration.)_</p>
@@ -459,9 +579,13 @@ function clearToken() {
             <section class="psplus-card">
                 <div class="psplus-card-head">
                     <h2>_(Servers)_</h2>
-                    <div class="psplus-selection-chip">_(Selected)_ <strong id="psplus-selected-count">0</strong></div>
+                    <div class="psplus-server-head-actions">
+                        <button type="button" class="psplus-btn psplus-btn-secondary" id="psplus-refresh-servers">_(Refresh)_</button>
+                        <div class="psplus-selection-chip">_(Selected)_ <strong id="psplus-selected-count">0</strong></div>
+                    </div>
                 </div>
                 <p>_(Select which Plex servers should be monitored.)_</p>
+                <div class="psplus-server-status is-info" id="psplus-server-status">_(Ready to load Plex servers.)_</div>
                 <div class="psplus-server-load"><div class="lds-dual-ring"></div></div>
                 <div id="hostcontainer" class="psplus-server-list"></div>
             </section>
@@ -470,6 +594,7 @@ function clearToken() {
                 <h2>_(Custom Servers)_</h2>
                 <p>_(Add manual Plex endpoints if discovery does not return all servers.)_</p>
                 <input type="text" class="psplus-input" name="CUSTOM_SERVERS" id="CUSTOM_SERVERS" placeholder="Example: 192.168.1.2:32400" value="<?php echo(htmlspecialchars($cfg['CUSTOM_SERVERS'], ENT_QUOTES)); ?>" />
+                <p id="psplus-custom-servers-feedback" class="psplus-input-feedback is-info">_(Optional: add comma-separated host:port endpoints.)_</p>
             </section>
 
             <section class="psplus-card">
@@ -507,9 +632,9 @@ function clearToken() {
                             <div class="psplus-setting-help">_(Prefer HTTPS when discovering and querying Plex servers.)_</div>
                         </div>
                         <div class="psplus-segment">
-                            <input type="radio" name="FORCE_PLEX_HTTPS" id="FORCE_PLEX_HTTPS_ON" value="1" onchange="getServers('#hostcontainer','<?php echo(htmlspecialchars($cfg['HOST'], ENT_QUOTES)) ?>')" <?php echo($cfg['FORCE_PLEX_HTTPS'] === "1" ? "checked" : ""); ?> />
+                            <input type="radio" name="FORCE_PLEX_HTTPS" id="FORCE_PLEX_HTTPS_ON" value="1" onchange="getServers('#hostcontainer', document.getElementById('HOST').value)" <?php echo($cfg['FORCE_PLEX_HTTPS'] === "1" ? "checked" : ""); ?> />
                             <label for="FORCE_PLEX_HTTPS_ON">_(On)_</label>
-                            <input type="radio" name="FORCE_PLEX_HTTPS" id="FORCE_PLEX_HTTPS_OFF" value="0" onchange="getServers('#hostcontainer','<?php echo(htmlspecialchars($cfg['HOST'], ENT_QUOTES)) ?>')" <?php echo($cfg['FORCE_PLEX_HTTPS'] === "0" ? "checked" : ""); ?> />
+                            <input type="radio" name="FORCE_PLEX_HTTPS" id="FORCE_PLEX_HTTPS_OFF" value="0" onchange="getServers('#hostcontainer', document.getElementById('HOST').value)" <?php echo($cfg['FORCE_PLEX_HTTPS'] === "0" ? "checked" : ""); ?> />
                             <label for="FORCE_PLEX_HTTPS_OFF">_(Off)_</label>
                         </div>
                     </div>
@@ -519,7 +644,7 @@ function clearToken() {
 
         <div class="psplus-actions">
             <button type="button" class="psplus-btn psplus-btn-danger" onclick="clearToken()">_(Remove Token)_</button>
-            <button type="submit" class="psplus-btn psplus-btn-primary">_(Save Changes)_</button>
+            <button type="submit" id="psplus-save-btn" class="psplus-btn psplus-btn-primary">_(Save Changes)_</button>
         </div>
     </form>
 </div>
@@ -529,6 +654,9 @@ function clearToken() {
 </script>
 <script src="<?autov('/plugins/plexstreamsplus/js/plex.js')?>"></script>
 <script>
-  getServers('#hostcontainer', '<?php echo(htmlspecialchars($cfg['HOST'], ENT_QUOTES)) ?>');
+$(function() {
+    plexStreamsPlusInitSettingsPage();
+    getServers('#hostcontainer', $('#HOST').val());
+});
 </script>
 <?endif;?>

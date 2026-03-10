@@ -549,21 +549,215 @@ function updateServerList(dest) {
     }
 }
 
+function plexStreamsPlusSetServerStatus(status, message) {
+    var $status = $('#psplus-server-status');
+    if ($status.length === 0) {
+        return;
+    }
+
+    var classMap = ['is-info', 'is-success', 'is-warning', 'is-error', 'is-loading'];
+    $status.removeClass(classMap.join(' '));
+
+    var normalized = safeText(status).toLowerCase();
+    if (classMap.indexOf('is-' + normalized) === -1) {
+        normalized = 'info';
+    }
+
+    $status.addClass('is-' + normalized);
+    if (message !== undefined) {
+        $status.text(safeText(message));
+    }
+}
+
+function plexStreamsPlusSetTokenState(state, noteOverride) {
+    var $status = $('#psplus-token-status');
+    var $note = $('#psplus-token-note');
+    var $button = $('#psplus-get-token-btn');
+    var normalized = safeText(state).toLowerCase();
+    var label = _('Not Connected');
+    var note = _('Get a Plex token to discover available servers.');
+
+    if (normalized === 'connected') {
+        label = _('Connected');
+        note = _('Token is stored locally and ready to use.');
+    } else if (normalized === 'loading') {
+        label = _('Authorizing');
+        note = _('Complete Plex sign-in in the pop-up window.');
+    } else if (normalized === 'error') {
+        label = _('Token Error');
+        note = _('Plex authorization failed. Try again.');
+    } else {
+        normalized = 'disconnected';
+    }
+
+    if ($status.length > 0) {
+        $status.removeClass('is-connected is-disconnected is-loading is-error').addClass('is-' + normalized).text(label);
+    }
+    if ($note.length > 0) {
+        $note.text(noteOverride !== undefined ? safeText(noteOverride) : note);
+    }
+    if ($button.length > 0) {
+        $button.prop('disabled', normalized === 'loading');
+    }
+}
+
+function plexStreamsPlusValidateCustomServers() {
+    var $input = $('#CUSTOM_SERVERS');
+    if ($input.length === 0) {
+        return true;
+    }
+
+    var $feedback = $('#psplus-custom-servers-feedback');
+    var $save = $('#psplus-save-btn');
+    var raw = safeText($input.val()).trim();
+
+    if (raw.length === 0) {
+        $input.removeClass('psplus-input-invalid');
+        if ($feedback.length > 0) {
+            $feedback.removeClass('is-error is-success').addClass('is-info').text(_('Optional: add comma-separated host:port endpoints.'));
+        }
+        if ($save.length > 0) {
+            $save.prop('disabled', false);
+        }
+        return true;
+    }
+
+    var entries = raw.split(/[,\n]+/).map(function(entry) {
+        return safeText(entry).trim();
+    }).filter(function(entry) {
+        return entry.length > 0;
+    });
+
+    var endpointPattern = /^(https?:\/\/)?(([A-Za-z0-9._-]+)|(\[[0-9a-fA-F:]+\])|(\d{1,3}(?:\.\d{1,3}){3}))(?::\d{1,5})?$/;
+    var invalidEntries = [];
+    entries.forEach(function(entry) {
+        if (!endpointPattern.test(entry)) {
+            invalidEntries.push(entry);
+        }
+    });
+
+    if (invalidEntries.length > 0) {
+        $input.addClass('psplus-input-invalid');
+        if ($feedback.length > 0) {
+            var preview = invalidEntries.slice(0, 2).join(', ');
+            if (invalidEntries.length > 2) {
+                preview += ', ...';
+            }
+            $feedback.removeClass('is-info is-success').addClass('is-error').text(_('Invalid endpoint format: ') + preview);
+        }
+        if ($save.length > 0) {
+            $save.prop('disabled', true);
+        }
+        return false;
+    }
+
+    $input.removeClass('psplus-input-invalid');
+    if ($feedback.length > 0) {
+        $feedback.removeClass('is-info is-error').addClass('is-success').text(_('Custom server endpoints look valid.'));
+    }
+    if ($save.length > 0) {
+        $save.prop('disabled', false);
+    }
+    return true;
+}
+
+function plexStreamsPlusStartOAuth() {
+    if (typeof PlexOAuth !== 'function') {
+        return;
+    }
+
+    plexStreamsPlusSetTokenState('loading');
+    PlexOAuth(
+        function(token) {
+            $('#plex-token').val(token);
+            plexStreamsPlusSetTokenState('connected');
+            getServers('#hostcontainer', $('#HOST').val());
+        },
+        function() {
+            var existingToken = safeText($('#plex-token').val()).trim();
+            if (existingToken.length > 0) {
+                plexStreamsPlusSetTokenState('connected', _('Authorization cancelled. Existing token kept.'));
+            } else {
+                plexStreamsPlusSetTokenState('error');
+            }
+        },
+        function() {
+            plexStreamsPlusSetTokenState('loading');
+        }
+    );
+}
+
+function plexStreamsPlusInitSettingsPage() {
+    var $form = $('#plexstreamsplus_settings');
+    if ($form.length === 0) {
+        return;
+    }
+    if ($form.data('psplusUxInit')) {
+        return;
+    }
+    $form.data('psplusUxInit', true);
+
+    $('#psplus-refresh-servers').on('click', function() {
+        getServers('#hostcontainer', $('#HOST').val());
+    });
+
+    $('#CUSTOM_SERVERS').on('input blur', function() {
+        plexStreamsPlusValidateCustomServers();
+    });
+
+    $('#plex-token').on('input change', function() {
+        var hasToken = safeText($(this).val()).trim().length > 0;
+        plexStreamsPlusSetTokenState(hasToken ? 'connected' : 'disconnected');
+    });
+
+    plexStreamsPlusValidateCustomServers();
+    plexStreamsPlusSetTokenState(safeText($('#plex-token').val()).trim().length > 0 ? 'connected' : 'disconnected');
+    plexStreamsPlusSetServerStatus('info', _('Ready to load Plex servers.'));
+}
+
 function getServers(containerSelector, selected) {
     var url = '/plugins/plexstreamsplus/getServers.php?useSsl=' + $('input[name="FORCE_PLEX_HTTPS"]:checked').val();
     var $host = $(containerSelector);
+    var selectedRaw = safeText(selected);
+    var selectedList = selectedRaw.split(',').map(function(item) {
+        return safeText(item).trim();
+    }).filter(function(item) {
+        return item.length > 0;
+    });
+    var token = safeText($('#plex-token').val()).trim();
+
     $host.hide();
     $('.lds-dual-ring').show();
-    selected = selected.split(',');
     $host.html('');
-    $.get(url).done(function(data) {
-        plexStreamsPlusServerList = data.serverList;
+    plexStreamsPlusSetServerStatus('loading', _('Checking Plex servers...'));
+
+    if (token.length === 0) {
+        $host.html('<p class="psplus-server-empty">' + _('No Plex token found. Click Get Plex Token to load servers.') + '</p>');
+        updateServerList('HOST');
+        $host.show();
+        $('.lds-dual-ring').hide();
+        plexStreamsPlusSetServerStatus('warning', _('No token configured.'));
+        return;
+    }
+
+    $.ajax({
+        url: url,
+        method: 'GET',
+        dataType: 'json',
+        timeout: 15000
+    }).done(function(data) {
+        plexStreamsPlusServerList = data && data.serverList ? data.serverList : {};
+        var endpointCount = 0;
+        var serverCount = 0;
+
         if (Object.keys(plexStreamsPlusServerList).length > 0) {
             for (var id in plexStreamsPlusServerList) {
                 if (plexStreamsPlusServerList.hasOwnProperty(id)) {
+                    serverCount += 1;
                     var server = plexStreamsPlusServerList[id];
                     plexStreamsPlusServerList[id].Connections.forEach(function(connection, connectionIndex) {
                         if (connection !== null) {
+                            endpointCount += 1;
                             var shortHost = connection.uri;
                             shortHost = shortHost.replace(connection.protocol  + '://', '');
                             if (connection.port) {
@@ -581,7 +775,7 @@ function getServers(containerSelector, selected) {
                             $host.append('<input type="hidden" name="ALIAS-' + aliasKey + '" value="' + safeServerName + '"/>');
                             $host.append(
                                 '<div class="psplus-server-item">' +
-                                    '<input type="checkbox" onchange="updateServerList(\'HOST\')" name="hostbox" id="' + checkboxId + '" data-id="' + plexStreamsPlusEscapeHtml(id) + '"' + (selected.indexOf(connection.uri) > -1 ? ' checked="checked"' : '' ) + ' value="' + safeUri + '" data-address="' + safeAddress + '" data-name="' + safeServerName + '"/>' +
+                                    '<input type="checkbox" onchange="updateServerList(\'HOST\')" name="hostbox" id="' + checkboxId + '" data-id="' + plexStreamsPlusEscapeHtml(id) + '"' + (selectedList.indexOf(connection.uri) > -1 ? ' checked="checked"' : '' ) + ' value="' + safeUri + '" data-address="' + safeAddress + '" data-name="' + safeServerName + '"/>' +
                                     '<label class="psplus-server-label" for="' + checkboxId + '">' +
                                         '<span class="psplus-server-main">' +
                                             '<span class="psplus-server-name">' + safeServerName + '</span>' +
@@ -595,12 +789,21 @@ function getServers(containerSelector, selected) {
                     });
                 }
             }
+            plexStreamsPlusSetServerStatus('success', _('Found') + ' ' + endpointCount + ' ' + _('endpoint(s) across') + ' ' + serverCount + ' ' + _('server(s).'));
         } else {
             $host.html('<p class="psplus-server-empty">' + _('No servers found. Add one under Custom Servers.') + '</p>');
+            plexStreamsPlusSetServerStatus('warning', _('No servers returned by Plex discovery.'));
         }
         updateServerList('HOST');
         $host.show();
         $('.lds-dual-ring').hide();
+    }).fail(function(jqXHR, textStatus) {
+        var reason = textStatus === 'timeout' ? _('Server discovery request timed out.') : _('Unable to reach Plex discovery right now.');
+        $host.html('<p class="psplus-server-empty">' + reason + ' ' + _('Use Refresh to try again.') + '</p>');
+        updateServerList('HOST');
+        $host.show();
+        $('.lds-dual-ring').hide();
+        plexStreamsPlusSetServerStatus('error', reason);
     });
 }
 
