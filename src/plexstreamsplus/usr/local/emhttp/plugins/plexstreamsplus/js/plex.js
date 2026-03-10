@@ -401,7 +401,6 @@ function refreshStreamCard($container, stream) {
     $container.find('.location-value').text(location).attr('title', location);
 
     $container.find('.progressBar').css('width', percentPlayed + '%').attr('duration', safeText(stream.duration || 0));
-    $container.find('.position').html(streamPositionHtml(stream));
 }
 
 function updateFullStreamInfo() {
@@ -474,6 +473,11 @@ function updateDuration(node, stream) {
     var $container = $(node);
 
     if (!stream.duration) {
+        if (node.timer) {
+            clearInterval(node.timer);
+            node.timer = undefined;
+        }
+        $container.find('.position').html(streamPositionHtml(stream));
         if (stream.endTime) {
             $container.find('.endTime').text(stream.endTime);
         }
@@ -483,6 +487,13 @@ function updateDuration(node, stream) {
     var $hours = $container.find('.currentPositionHours');
     var $minutes = $container.find('.currentPositionMinutes');
     var $seconds = $container.find('.currentPositionSeconds');
+
+    if (!$hours.length || !$minutes.length || !$seconds.length) {
+        $container.find('.position').html(streamPositionHtml(stream));
+        $hours = $container.find('.currentPositionHours');
+        $minutes = $container.find('.currentPositionMinutes');
+        $seconds = $container.find('.currentPositionSeconds');
+    }
 
     if (node.prevState && node.prevState !== stream.state) {
         $hours.html(stream.currentPositionHours.toString().padStart(2, 0));
