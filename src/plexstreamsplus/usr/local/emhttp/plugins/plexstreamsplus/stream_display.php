@@ -1,4 +1,4 @@
-<link type="text/css" rel="stylesheet" href="/plugins/plexstreams/spinner.css">
+<link type="text/css" rel="stylesheet" href="/plugins/plexstreamsplus/spinner.css">
 <style>
     .caution {
         padding-left: 76px;
@@ -199,11 +199,11 @@
     }
 </script>
 <?php
-    $plugin = 'plexstreams';
+    $plugin = 'plexstreamsplus';
     $docroot = $docroot ?: $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
     $translations = file_exists("$docroot/webGui/include/Translations.php");
-    include('/usr/local/emhttp/plugins/plexstreams/includes/config.php');
-    include('/usr/local/emhttp/plugins/plexstreams/includes/common.php');
+    include('/usr/local/emhttp/plugins/plexstreamsplus/includes/config.php');
+    include('/usr/local/emhttp/plugins/plexstreamsplus/includes/common.php');
 
     if (!function_exists('h')) {
         function h($value) {
@@ -213,7 +213,7 @@
 
     if ($translations) {
         // add translations
-        $_SERVER['REQUEST_URI'] = 'plexstreams';
+        $_SERVER['REQUEST_URI'] = 'plexstreamsplus';
         require_once "$docroot/webGui/include/Translations.php";
     } else {
         // legacy support (without javascript)
@@ -252,7 +252,7 @@
                 $streamStateIcon = h($stream['stateIcon']);
                 $streamLengthDisplay = h($stream['lengthDisplay'] ?? '');
                 $streamDecision = h(ucwords($stream['streamDecision'] ?? ''));
-                $movieDetailUrl = '/plugins/plexstreams/movieDetails.php?details=' . urlencode($stream['key']) . '&host=' . urlencode($stream['@host']);
+                $movieDetailUrl = '/plugins/plexstreamsplus/movieDetails.php?details=' . urlencode($stream['key']) . '&host=' . urlencode($stream['@host']);
 
                 echo('
                     <li class="stream-container" id="' . $streamId . '">
@@ -298,13 +298,13 @@
             echo('<p style="text-align:center;font-style:italic;" id="no-streams">' . _('There are currently no active streams') . '</p>');
         }
     } else {
-        echo('<div class="caution"><i class="fa fa-exclamation-triangle"></i><div class="text">' . _('Please provide server details under Settings -> Network Services -> Plex Streams or') . ' <a href="/Settings/PlexStreams">' . _('click here') .'</a></div></div>');
+        echo('<div class="caution"><i class="fa fa-exclamation-triangle"></i><div class="text">' . _('Please provide server details under Settings -> Network Services -> PlexStreams Plus or') . ' <a href="/Settings/PlexStreamsPlus">' . _('click here') .'</a></div></div>');
     }
 ?>
-<script src="<?autov('/plugins/plexstreams/js/plex.js')?>"></script>
+<script src="<?autov('/plugins/plexstreamsplus/js/plex.js')?>"></script>
 <script>
     var title = $('title').html();
-    $('title').html(title.split('/')[0] + '/Plex Streams');
+    $('title').html(title.split('/')[0] + '/PlexStreams Plus');
     updateFullStreamInfo();
     setInterval(updateFullStreamInfo, 5000);
 </script>

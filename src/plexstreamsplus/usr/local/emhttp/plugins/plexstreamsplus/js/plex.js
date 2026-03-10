@@ -33,8 +33,8 @@ function streamTimeHtml(stream, includeEndTime) {
 
 
 function updateDashboardStreamsNew() {
-    $.ajax('/plugins/plexstreams/ajax.php').done(function(streams){
-        $('#plexstreams_count').html(streams.length);
+    $.ajax('/plugins/plexstreamsplus/ajax.php').done(function(streams){
+        $('#plexstreamsplus_count').html(streams.length);
         $('#retrieving_streams').remove();
         var hostStreams = [];
         if (streams.length > 0) {
@@ -56,7 +56,7 @@ function updateDashboardStreamsNew() {
                         '<span class="w18" style="text-align:center;"><i class="fa fa-' + escapeHtml(stream.stateIcon) + '" title="' + escapeHtml(stream.state) + '"></i></span>' +
                         '<span class="w18" style="text-align:center;"><p class="plexstream-user" title="' + escapeHtml(stream.user) + '">' + escapeHtml(stream.user) + '</p></span>' +
                         '<span class="w18" style="text-align:right;"><p class="plexstream-time">' + streamTimeHtml(stream, true) + '</p></span>' +
-                    '</div>').appendTo('#plexstreams_streams');
+                    '</div>').appendTo('#plexstreamsplus_streams');
                     var node = $container[0];
                 } else {
                     var node = $container[0];
@@ -73,7 +73,7 @@ function updateDashboardStreamsNew() {
                     $('#stream_count_container').append('<div><strong>' + escapeHtml(host) + ':</strong> ' + hostStreams[host] + ' ' +  _('Active Stream(s)') + '</div>');
                 }
             }
-            $('#plexstreams_streams [updatedat]').each(function() {
+            $('#plexstreamsplus_streams [updatedat]').each(function() {
                 if ($(this).is('[updatedat]')) {
                     if ($(this).attr('updatedat') !== lastUpdate.toString()) {
                         if (this.timer) {
@@ -84,20 +84,20 @@ function updateDashboardStreamsNew() {
                 }
             });
         } else {
-            $('#stream_count_container').html('<span id="plexstreams_count">0</span> ' + _('Active Stream(s)') + '</span>');
-            $('#plexstreams_streams').html('<div class="no_streams"><span class="w100"><p style="text-align:center;font-style:italic;font-size:13px;">' + _('There are currently no active streams') + '</p></span></div>');
+            $('#stream_count_container').html('<span id="plexstreamsplus_count">0</span> ' + _('Active Stream(s)') + '</span>');
+            $('#plexstreamsplus_streams').html('<div class="no_streams"><span class="w100"><p style="text-align:center;font-style:italic;font-size:13px;">' + _('There are currently no active streams') + '</p></span></div>');
         }
     }).fail(function(jqXHR) {
         if (jqXHR.status == '500') {
-            $('#plexstreams_streams').html('<span class="w100"><p style="text-align:center;font-style:italic;font-size:13px;">' + _('Please make sure you have') + ' <a href="/Settings/PlexStreams">' + _('setup') + '</a> ' + _('the plugin first') + '</p></span>');
+            $('#plexstreamsplus_streams').html('<span class="w100"><p style="text-align:center;font-style:italic;font-size:13px;">' + _('Please make sure you have') + ' <a href="/Settings/PlexStreamsPlus">' + _('setup') + '</a> ' + _('the plugin first') + '</p></span>');
         }
     });
 }
 
 
 function updateDashboardStreams() {
-    $.ajax('/plugins/plexstreams/ajax.php').done(function(streams){
-        //$('#plexstreams_count').html(streams.length);
+    $.ajax('/plugins/plexstreamsplus/ajax.php').done(function(streams){
+        //$('#plexstreamsplus_count').html(streams.length);
         $('#retrieving_streams').remove();
         if (streams.length > 0) {
             $('.no_streams').remove();
@@ -118,7 +118,7 @@ function updateDashboardStreams() {
                         '<td align="center" style="padding: 0px;text-align:center;"><i class="fa fa-' + escapeHtml(stream.stateIcon) + '" title="' + escapeHtml(stream.state) + '"></i></td>' +
                         '<td align="center" style="padding: 0px;"><p class="plexstream-user" title="' + escapeHtml(stream.user) + '">' + escapeHtml(stream.user) + '</td>' +
                         '<td align="center" style="padding: 0px;text-align:right;"><p class="plexstream-time">' + streamTimeHtml(stream, false) + '</p></td>' +
-                    '</tr>').appendTo('#plexstreams_streams');
+                    '</tr>').appendTo('#plexstreamsplus_streams');
                     var node = $container[0];
                 } else {
                     var node = $container[0];
@@ -135,7 +135,7 @@ function updateDashboardStreams() {
                     $('#stream_count_container').append('<div><strong>' + escapeHtml(host) + ':</strong> ' + hostStreams[host] + ' ' +  _('Active Stream(s)') + '</div>');
                 }
             }
-            $('#plexstreams_streams tr[updatedat]').each(function() {
+            $('#plexstreamsplus_streams tr[updatedat]').each(function() {
                 if ($(this).is('[updatedat]')) {
                     if ($(this).attr('updatedat') !== lastUpdate.toString()) {
                         if (this.timer) {
@@ -146,12 +146,12 @@ function updateDashboardStreams() {
                 }
             });
         } else {
-            $('#stream_count_container').html('<span id="plexstreams_count">0</span> ' + _('Active Stream(s)') + '</span>');
-            $('#plexstreams_streams').html('<tr class="no_streams"><td colspan="4" align="center" style="padding: 0 0 0 0;"><p style="text-align:center;font-style:italic;">' + _('There are currently no active streams') + '</p></td></tr>');
+            $('#stream_count_container').html('<span id="plexstreamsplus_count">0</span> ' + _('Active Stream(s)') + '</span>');
+            $('#plexstreamsplus_streams').html('<tr class="no_streams"><td colspan="4" align="center" style="padding: 0 0 0 0;"><p style="text-align:center;font-style:italic;">' + _('There are currently no active streams') + '</p></td></tr>');
         }
     }).fail(function(jqXHR) {
         if (jqXHR.status == '500') {
-            $('#plexstreams_streams').html('<tr><td colspan="4" align="center"><p style="text-align:center;font-style:italic;">' + _('Please make sure you have') + ' <a href="/Settings/PlexStreams">' + _('setup') + '</a> ' + _('the plugin first') + '</p></td></tr>');
+            $('#plexstreamsplus_streams').html('<tr><td colspan="4" align="center"><p style="text-align:center;font-style:italic;">' + _('Please make sure you have') + ' <a href="/Settings/PlexStreamsPlus">' + _('setup') + '</a> ' + _('the plugin first') + '</p></td></tr>');
         }
     });
 }
@@ -161,7 +161,7 @@ function uCWord(str) {
 }
 
 function updateFullStreamInfo() {
-    $.ajax('/plugins/plexstreams/ajax.php').done(function(streams){
+    $.ajax('/plugins/plexstreamsplus/ajax.php').done(function(streams){
         if (streams.length > 0) {
             var currentDate = new Date();
             var lastUpdate = currentDate.getTime();
@@ -193,7 +193,7 @@ function updateFullStreamInfo() {
                     }
                 } else {
                     var serverName = escapeHtml(streamServerName(stream));
-                    var detailUrl = '/plugins/plexstreams/movieDetails.php?details=' + encodeURIComponent(stream.key) + '&host=' + encodeURIComponent(stream['@host']);
+                    var detailUrl = '/plugins/plexstreamsplus/movieDetails.php?details=' + encodeURIComponent(stream.key) + '&host=' + encodeURIComponent(stream['@host']);
                     $container = $('<li class="stream-container" id="' + escapeHtml(stream.id) + '"><div class="stream-subcontainer"><div class="stream" style="background-image:url(' + escapeHtml(stream.artUrl)  + ');"><div class="blur"><div class="details"><ul class="detail-list"><li><div class="label">' + _('Server') + '</div><div class="value">' + serverName + '</div></li><li><div class="label">' + _('Length') + '</div><div class="value">' + escapeHtml(stream.lengthDisplay || stream.duration) + '</div></li><li><div class="label">' + _('Stream') + '</div><div class="stream value">' + escapeHtml(uCWord(stream.streamDecision)) + '</div></li><li><div class="label">' + _('Location') + '</div><div class="value" title="' + escapeHtml(stream.locationDisplay) + '" style="pointer:default;">' + escapeHtml(stream.locationDisplay) + '</div></li><li><div class="label">' + _('Bandwidth') + '</div><div class="bandwidth value">' + escapeHtml(stream.bandwidth) + '</div></li><li><div class="label">' + _('Audio') + '</div><div class="audio value">' + escapeHtml(uCWord(audioDecision)) + '</div></li><li>' +  (videoDecision !== '' ? '<div class="label">' + _('Video') + '</div><div class="video value">' + escapeHtml(uCWord(videoDecision)) + '</div></li>' : '') + '</ul></div><div class="poster" style="background-image:url(' + escapeHtml(stream.thumbUrl) + ');"></div><div class="userIcon" title="' + escapeHtml(stream.user) + '" style="background-image:url(' + escapeHtml(stream.userAvatar) + ')"></div></div></div><div class="bottom-box"><div class="progressBar" duration="' + escapeHtml(stream.duration) + '" style="width:' + escapeHtml(stream.percentPlayed) + '%;"><div class="position"><span class="currentPositionHours">' + stream.currentPositionHours.toString().padStart(2, 0) + '</span>:<span class="currentPositionMinutes">' + stream.currentPositionMinutes.toString().padStart(2, 0) + '</span>:<span class="currentPositionSeconds">' + stream.currentPositionSeconds.toString().padStart(2, 0) + '</span>  / ' + escapeHtml(stream.lengthDisplay) + '</div></div><div class="title"><a href="#" onclick="openBox(\'' + detailUrl + '\',\'Details\',600,900); return false;">' + escapeHtml(stream.title) +'</a><div class="status"><i class="fa fa-' + escapeHtml(stream.stateIcon) + '" title="' + escapeHtml(stream.state) + '"></i></div></div></div></div></li>').appendTo($streamHolder);
                     node = $container[0];
                 }
@@ -219,7 +219,7 @@ function updateFullStreamInfo() {
         }
     }).fail(function(jqXHR) {
         if (jqXHR.status == '500') {
-            $('#plexstreams_streams').html('<tr><td colspan="4" align="center"><p style="text-align:center;font-style:italic">' + _('Please make sure you have') + ' <a href="/Settings/PlexStreams">' + _('setup') + '</a> ' + _('the plugin first') + '</p></td></tr>');
+            $('#plexstreamsplus_streams').html('<tr><td colspan="4" align="center"><p style="text-align:center;font-style:italic">' + _('Please make sure you have') + ' <a href="/Settings/PlexStreamsPlus">' + _('setup') + '</a> ' + _('the plugin first') + '</p></td></tr>');
         }
     });
 }
@@ -289,7 +289,7 @@ function updateServerList(dest) {
 }
 
 function getServers(containerSelector, selected) {
-    var url = '/plugins/plexstreams/getServers.php?useSsl=' + $('input[name="FORCE_PLEX_HTTPS"]:checked').val();
+    var url = '/plugins/plexstreamsplus/getServers.php?useSsl=' + $('input[name="FORCE_PLEX_HTTPS"]:checked').val();
     var $host = $(containerSelector);
     $host.hide();
     $('.lds-dual-ring').show();
@@ -422,14 +422,14 @@ function uuidv4() {
 function getPlexHeaders() {
     return {
         'Accept': 'application/json',
-        'X-Plex-Product': 'Unraid Plex Streams Plugin',
+        'X-Plex-Product': 'Unraid PlexStreams Plus Plugin',
         'X-Plex-Version': PLUGIN_VERSION,
-        'X-Plex-Client-Identifier': getLocalStorage('UnraidPlexStreams_ClientID', uuidv4(), false),
+        'X-Plex-Client-Identifier': getLocalStorage('UnraidPlexStreamsPlus_ClientID', uuidv4(), false),
         'X-Plex-Platform': 'unraid',
         'X-Plex-Platform-Version': OS_VERSION,
         'X-Plex-Model': 'Plex OAuth',
         'X-Plex-Device': OS_VERSION,
-        'X-Plex-Device-Name': 'Unraid Plex Streams Plugin',
+        'X-Plex-Device-Name': 'Unraid PlexStreams Plus Plugin',
         'X-Plex-Device-Screen-Resolution': window.screen.width + 'x' + window.screen.height,
         'X-Plex-Language': 'en'
     };

@@ -1,7 +1,0 @@
-Menu="Plex_Streams:1"
-Title="Streams"
-Tag="film"
----
-<?php
-include('/usr/local/emhttp/plugins/plexstreams/stream_display.php');
-?>

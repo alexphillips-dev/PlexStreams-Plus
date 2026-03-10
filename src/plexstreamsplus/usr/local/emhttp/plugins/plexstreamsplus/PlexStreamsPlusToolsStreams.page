@@ -1,0 +1,7 @@
+Menu="PlexStreamsPlusTools:2"
+Title="Streams"
+Markdown="false"
+---
+<?php
+include('/usr/local/emhttp/plugins/plexstreamsplus/stream_display.php');
+?>

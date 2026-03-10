@@ -2,7 +2,7 @@
     if (isset($GLOBALS['unRaidSettings'])) {
         define('OS_VERSION', 'Unraid ' . $GLOBALS['unRaidSettings']['version']);
     }
-    define('PLUGIN_VERSION', '2023.11.27');
+    define('PLUGIN_VERSION', '2026.03.09.10');
 
     function normalizeHostUrl($host) {
         $host = trim((string)$host);
@@ -447,8 +447,8 @@
                                 'titleString' => $title,
                                 'key' => $video['@attributes']['key'],
                                 'duration' => $duration,
-                                'artUrl' => '/plugins/plexstreams/getImage.php?img=' . urlencode($artThumb) . '&host=' . urlencode($streams['@host']),
-                                'thumbUrl' => '/plugins/plexstreams/getImage.php?img=' .  urlencode($video['@attributes']['grandparentThumb'] ?? $video['@attributes']['thumb']) . '&host=' . urlencode($streams['@host']),
+                                'artUrl' => '/plugins/plexstreamsplus/getImage.php?img=' . urlencode($artThumb) . '&host=' . urlencode($streams['@host']),
+                                'thumbUrl' => '/plugins/plexstreamsplus/getImage.php?img=' .  urlencode($video['@attributes']['grandparentThumb'] ?? $video['@attributes']['thumb']) . '&host=' . urlencode($streams['@host']),
                                 'user' => $video['User']['@attributes']['title'],
                                 'userAvatar' => $video['User']['@attributes']['thumb'],
                                 'state' => $video['Player']['@attributes']['state'],
@@ -594,8 +594,8 @@
                                         'titleString' => $titleString,
                                         'key' => $audio['@attributes']['key'],
                                         'duration' => $duration,
-                                        'artUrl' => '/plugins/plexstreams/getImage.php?img=' . urlencode($audio['@attributes']['art']) . '&host=' . urlencode($streams['@host']),
-                                        'thumbUrl' => '/plugins/plexstreams/getImage.php?img=' .  urlencode($audio['@attributes']['grandparentThumb'] ?? $audio['@attributes']['thumb']) . '&host=' . urlencode($streams['@host']),
+                                        'artUrl' => '/plugins/plexstreamsplus/getImage.php?img=' . urlencode($audio['@attributes']['art']) . '&host=' . urlencode($streams['@host']),
+                                        'thumbUrl' => '/plugins/plexstreamsplus/getImage.php?img=' .  urlencode($audio['@attributes']['grandparentThumb'] ?? $audio['@attributes']['thumb']) . '&host=' . urlencode($streams['@host']),
                                         'user' => $audio['User']['@attributes']['title'],
                                         'userAvatar' => $audio['User']['@attributes']['thumb'],
                                         'state' => $audio['Player']['@attributes']['state'],

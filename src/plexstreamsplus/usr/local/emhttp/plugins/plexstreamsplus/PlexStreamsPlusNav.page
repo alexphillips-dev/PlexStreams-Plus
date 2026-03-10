@@ -1,0 +1,17 @@
+Menu="Tasks:89"
+Name="PlexStreams Plus"
+Tag="film"
+Icon="film"
+Code="f008"
+Type="xmenu"
+Tabs="false"
+Cond="parse_ini_file('/boot/config/plugins/plexstreamsplus/plexstreamsplus.cfg')['DISPLAY_NAV'] === '1'"
+---
+<script>
+    (function() {
+        window.theme = '<?php echo($display['theme']); ?>';
+        if (theme === 'azure') {
+            $('a[href="/PlexStreamsPlusNav"]').parent().hover(function(){$(this).css('width','180px');},function(){$(this).css('width','40px')});
+        }
+    }());
+</script>

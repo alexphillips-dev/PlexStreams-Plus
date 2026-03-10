@@ -1,10 +1,10 @@
 Menu="Dashboard"
 Icon="film"
 Tag="film"
-Cond="parse_ini_file('/boot/config/plugins/plexstreams/plexstreams.cfg')['DISPLAY_WIDGET'] == '1' && version_compare(parse_ini_file('/etc/unraid-version')['version'],'6.12.0-beta5', '<=')"
+Cond="parse_ini_file('/boot/config/plugins/plexstreamsplus/plexstreamsplus.cfg')['DISPLAY_WIDGET'] == '1' && version_compare(parse_ini_file('/etc/unraid-version')['version'],'6.12.0-beta5', '<=')"
 ---
 <?php
-    $plugin = "plexstreams";
+    $plugin = "plexstreamsplus";
     $translations = file_exists("$docroot/webGui/include/Translations.php");
     require_once "$docroot/plugins/$plugin/includes/Legacy.php";
 ?>
@@ -19,8 +19,8 @@ Cond="parse_ini_file('/boot/config/plugins/plexstreams/plexstreams.cfg')['DISPLA
 ?>
 
 <style type="text/css">
-        .dash_plexstreams_toggle{display:none}
-        .dash_plexstreams_toggle tbody td {
+        .dash_plexstreamsplus_toggle{display:none}
+        .dash_plexstreamsplus_toggle tbody td {
             padding-top: 0px;
             padding-bottom: 0px;
         }
@@ -38,14 +38,14 @@ Cond="parse_ini_file('/boot/config/plugins/plexstreams/plexstreams.cfg')['DISPLA
                 <td></td>
                 <td class="next" colspan="<?php echo $dashboard_widget_colspan ?>" style="white-space: no-wrap;">
                     <i style="font-size:32px;vertical-align:top;" class="fa fa-film icon"></i>
-                        <div class="section" style="line-height:2rem;">_(Plex Streams)_<br><span id="stream_count_container"><span id="plexstreams_count">0</span> _(Active Stream(s))_</span><br><br></div>
-                        <i class="fa fa-fw chevron mt0" id="dash_plexstreams" onclick="toggleChevron('dash_plexstreams',0)"></i>
-                        <a href="/Settings/PlexStreams" title="_(Plex Streams Setup page)_"><i class="fa fa-fw fa-cog chevron mt0"></i></a>
-                        <a href="/Tools/PlexStreamsTools" title="_(View Streams)_"><i class="fa fa-fw fa-film chevron mt0"></i></a>
+                        <div class="section" style="line-height:2rem;">_(PlexStreams Plus)_<br><span id="stream_count_container"><span id="plexstreamsplus_count">0</span> _(Active Stream(s))_</span><br><br></div>
+                        <i class="fa fa-fw chevron mt0" id="dash_plexstreamsplus" onclick="toggleChevron('dash_plexstreamsplus',0)"></i>
+                        <a href="/Settings/PlexStreamsPlus" title="_(PlexStreams Plus Setup page)_"><i class="fa fa-fw fa-cog chevron mt0"></i></a>
+                        <a href="/Tools/PlexStreamsPlusTools" title="_(View Streams)_"><i class="fa fa-fw fa-film chevron mt0"></i></a>
                 </td>
                 <td></td>
             </tr>
-            <tr class="dash_plexstreams">
+            <tr class="dash_plexstreamsplus">
                 <td></td>
                 <td colspan="<?php echo $dashboard_widget_colspan ?>" class="top">
                         <table>
@@ -57,7 +57,7 @@ Cond="parse_ini_file('/boot/config/plugins/plexstreams/plexstreams.cfg')['DISPLA
                                     <th align="right">_(Time)_</th>
                                 </tr>
                             </thead>
-                            <tbody style="display: table-row-group;" id="plexstreams_streams">
+                            <tbody style="display: table-row-group;" id="plexstreamsplus_streams">
                                 <tr id="retrieving_streams">
                                     <td colspan="4"><p align="center" style="font-style:italic;">_(Retrieving Stream Data...)_</p></td>
                                 </tr>
@@ -96,7 +96,7 @@ p.plexstream-time {
     text-align: right;
 }
 </style>
-<script src="<?autov('/plugins/plexstreams/js/plex.js')?>"></script>
+<script src="<?autov('/plugins/plexstreamsplus/js/plex.js')?>"></script>
 <script async>
 $(function() {
     // append data from the table into the correct one
@@ -104,7 +104,7 @@ $(function() {
 
     //setTimeout(function() {
         // reload toggle to get the correct state
-        toggleView('dash_plexstreams', true);
+        toggleView('dash_plexstreamsplus', true);
 
         // reload sorting to get the stored data (cookie)
         var currentSortOrder1 = $.cookie('db-box1');

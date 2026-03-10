@@ -1,9 +1,9 @@
-Menu="PlexStreams"
-Title="Plex Stream Settings"
+Menu="PlexStreamsPlus"
+Title="PlexStreams Plus Settings"
 Tag="film"
 ---
 <?php
-    $plugin = "plexstreams";
+    $plugin = "plexstreamsplus";
     $translations = file_exists("$docroot/webGui/include/Translations.php");
     require_once "$docroot/plugins/$plugin/includes/Legacy.php";
 ?>
@@ -11,10 +11,10 @@ Tag="film"
 <?eval('?>'.parse_file("$docroot/plugins/$plugin/Legacy/Settings.page"))?>
 <?else:?>
 ---
-<link type="text/css" rel="stylesheet" href="/plugins/plexstreams/spinner.css">
+<link type="text/css" rel="stylesheet" href="/plugins/plexstreamsplus/spinner.css">
 <?php
-include('/usr/local/emhttp/plugins/plexstreams/includes/config.php');
-include('/usr/local/emhttp/plugins/plexstreams/includes/common.php');
+include('/usr/local/emhttp/plugins/plexstreamsplus/includes/config.php');
+include('/usr/local/emhttp/plugins/plexstreamsplus/includes/common.php');
 
 if (!isset($cfg['DISPLAY_WIDGET'])) {
     $cfg['DISPLAY_WIDGET'] = "1";
@@ -40,29 +40,29 @@ if (!isset($cfg['TOKEN'])) {
     $cfg['TOKEN'] = "";
 }
 
-$pluginPath = '/usr/local/emhttp/plugins/plexstreams/';
+$pluginPath = '/usr/local/emhttp/plugins/plexstreamsplus/';
 
-if ($cfg['DISPLAY_NAV'] === '0' && file_exists($pluginPath . 'Plex_Streams.page')) {
-    rename($pluginPath .'Plex_Streams.page', $pluginPath .'Plex_Streams.page.off');
-} else if ($cfg['DISPLAY_NAV'] === '1' && file_exists($pluginPath . 'Plex_Streams.page.off')) {
-    rename($pluginPath .'Plex_Streams.page.off', $pluginPath .'Plex_Streams.page');
+if ($cfg['DISPLAY_NAV'] === '0' && file_exists($pluginPath . 'PlexStreamsPlusNav.page')) {
+    rename($pluginPath .'PlexStreamsPlusNav.page', $pluginPath .'PlexStreamsPlusNav.page.off');
+} else if ($cfg['DISPLAY_NAV'] === '1' && file_exists($pluginPath . 'PlexStreamsPlusNav.page.off')) {
+    rename($pluginPath .'PlexStreamsPlusNav.page.off', $pluginPath .'PlexStreamsPlusNav.page');
 }
 
-if ($cfg['DISPLAY_WIDGET'] === '0' && file_exists($pluginPath . 'PlexStreams_dashboard.page')) {
-    //rename($pluginPath .'PlexStreams_dashboard.page', $pluginPath .'PlexStreams_dashboard.page.off');
-} else if ($cfg['DISPLAY_WIDGET'] === '1' && file_exists($pluginPath . 'PlexStreams_dashboard.page.off')) {
-    //rename($pluginPath .'PlexStreams_dashboard.page.off', $pluginPath .'PlexStreams_dashboard.page');
+if ($cfg['DISPLAY_WIDGET'] === '0' && file_exists($pluginPath . 'PlexStreamsPlus_dashboard.page')) {
+    //rename($pluginPath .'PlexStreamsPlus_dashboard.page', $pluginPath .'PlexStreamsPlus_dashboard.page.off');
+} else if ($cfg['DISPLAY_WIDGET'] === '1' && file_exists($pluginPath . 'PlexStreamsPlus_dashboard.page.off')) {
+    //rename($pluginPath .'PlexStreamsPlus_dashboard.page.off', $pluginPath .'PlexStreamsPlus_dashboard.page');
 }
 ?>
 
 <script>
 function clearToken() {
     document.getElementById('plex-token').value = '';
-    document.getElementById('plexstreams_settings').submit();
+    document.getElementById('plexstreamsplus_settings').submit();
 }
 </script>
-<form markdown="1" name="plexstreams_settings" id="plexstreams_settings" method="POST" action="/update.php" target="progressFrame">
-<input type="hidden" name="#file" value="plexstreams/plexstreams.cfg" />
+<form markdown="1" name="plexstreamsplus_settings" id="plexstreamsplus_settings" method="POST" action="/update.php" target="progressFrame">
+<input type="hidden" name="#file" value="plexstreamsplus/plexstreamsplus.cfg" />
 <input type="hidden" id="COMMAND" name="#command" value="" />
 <input type="hidden" id="HOST" name="HOST" value="<?php echo(htmlspecialchars($cfg['HOST'], ENT_QUOTES)); ?>" />
 <input type="button" value="_(Get Plex Token)_" style="margin-right:0px;" onclick="PlexOAuth(function(token){document.getElementById('plex-token').value = token;});"/>
@@ -99,7 +99,7 @@ function clearToken() {
     var OS_VERSION = '<?php echo($GLOBALS['unRaidSettings']['version']); ?>';
     var PLUGIN_VERSION = '<?php echo(PLUGIN_VERSION); ?>';
 </script>
-<script src="<?autov('/plugins/plexstreams/js/plex.js')?>"></script>
+<script src="<?autov('/plugins/plexstreamsplus/js/plex.js')?>"></script>
 <script>
   getServers('#hostcontainer', '<?php echo(htmlspecialchars($cfg['HOST'], ENT_QUOTES)) ?>');
 </script>

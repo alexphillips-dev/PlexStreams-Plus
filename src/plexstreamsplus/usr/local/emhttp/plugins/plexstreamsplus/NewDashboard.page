@@ -1,7 +1,7 @@
 Menu="Dashboard:0"
 Icon="film"
 Tag="film"
-Cond="parse_ini_file('/boot/config/plugins/plexstreams/plexstreams.cfg')['DISPLAY_WIDGET'] == '1' && version_compare(parse_ini_file('/etc/unraid-version')['version'],'6.12.0-beta5', '>')"
+Cond="parse_ini_file('/boot/config/plugins/plexstreamsplus/plexstreamsplus.cfg')['DISPLAY_WIDGET'] == '1' && version_compare(parse_ini_file('/etc/unraid-version')['version'],'6.12.0-beta5', '>')"
 ---
 <style>
 p.plexstream-title {
@@ -52,7 +52,7 @@ p.plexstream-time {
         <span class="w44">
         <span class="w72">
     */
-    $plugin = "plexstreams";
+    $plugin = "plexstreamsplus";
     $translations = file_exists("$docroot/webGui/include/Translations.php");
     $dashboard_widget_pos = 1;
     $dashboard_widget_colspan = 3;
@@ -60,8 +60,8 @@ p.plexstream-time {
 ?>
 
 <style type="text/css">
-        .dash_plexstreams_toggle{display:none}
-        .dash_plexstreams_toggle tbody td {
+        .dash_plexstreamsplus_toggle{display:none}
+        .dash_plexstreamsplus_toggle tbody td {
             padding-top: 0px;
             padding-bottom: 0px;
         }
@@ -94,13 +94,13 @@ p.plexstream-time {
 <?php
 $mytiles[$plugin]['column1'] =
 <<<EOT
-<tbody class="sortable" title="_(Plex Streams)_">
+<tbody class="sortable" title="_(PlexStreams Plus)_">
     <tr>
         <td>
             <i style="font-size:32px;vertical-align:top;" class="fa fa-film icon"></i>
-            <div class="section" style="line-height:2rem;">_(Plex Streams)_<br><span id="stream_count_container"><span id="plexstreams_count">0</span> _(Active Stream(s))_</span></div>
-            <a href="/Settings/PlexStreams" title="_(Plex Streams Setup page)_"><i class="fa fa-fw fa-cog control"></i></a>
-            <a href="/Tools/PlexStreamsTools" title="_(View Streams)_"><i class="fa fa-fw fa-film control"></i></a>
+            <div class="section" style="line-height:2rem;">_(PlexStreams Plus)_<br><span id="stream_count_container"><span id="plexstreamsplus_count">0</span> _(Active Stream(s))_</span></div>
+            <a href="/Settings/PlexStreamsPlus" title="_(PlexStreams Plus Setup page)_"><i class="fa fa-fw fa-cog control"></i></a>
+            <a href="/Tools/PlexStreamsPlusTools" title="_(View Streams)_"><i class="fa fa-fw fa-film control"></i></a>
         </td>
     </tr>
     <tr>
@@ -113,7 +113,7 @@ $mytiles[$plugin]['column1'] =
     </tr>
     <tr>
         <td>
-            <div id="plexstreams_streams">
+            <div id="plexstreamsplus_streams">
                 <div id="retrieving_streams">
                     <p align="center" style="font-style:italic;text-align:center;">_(Retrieving Stream Data...)_</p>
                 </div>
@@ -123,7 +123,7 @@ $mytiles[$plugin]['column1'] =
 </tbody>
 EOT;
 ?>
-<script src="<?autov('/plugins/plexstreams/js/plex.js')?>"></script>
+<script src="<?autov('/plugins/plexstreamsplus/js/plex.js')?>"></script>
 <script async>
     $(function() {
         updateDashboardStreamsNew();

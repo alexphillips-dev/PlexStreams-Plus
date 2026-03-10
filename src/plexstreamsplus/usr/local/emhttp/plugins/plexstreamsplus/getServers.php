@@ -1,6 +1,6 @@
 <?php
-    include('/usr/local/emhttp/plugins/plexstreams/includes/config.php');
-    include('/usr/local/emhttp/plugins/plexstreams/includes/common.php');
+    include('/usr/local/emhttp/plugins/plexstreamsplus/includes/config.php');
+    include('/usr/local/emhttp/plugins/plexstreamsplus/includes/common.php');
 
     header('Content-type: application/json');
 

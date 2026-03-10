@@ -1,8 +1,8 @@
 Menu="SystemInformation"
-Name="Plex Streams"
+Name="PlexStreams Plus"
 Tag="film"
 Icon="film"
 Type="xmenu"
 Tabs="true"
-Title="Plex Streams"
+Title="PlexStreams Plus"
 ---

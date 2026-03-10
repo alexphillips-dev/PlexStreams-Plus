@@ -1,31 +1,36 @@
 <?xml version='1.0' standalone='yes'?>
 
 <!DOCTYPE PLUGIN [
-  <!ENTITY name       "plexstreams">
-  <!ENTITY author     "Donald Organ">
-  <!ENTITY version    "2023.11.27">
-  <!ENTITY launch     "Settings/PlexStreams">
-  <!ENTITY branch     "master">
-  <!ENTITY gitURL     "https://raw.githubusercontent.com/dorgan/Unraid-&name;/&branch;">
+  <!ENTITY name       "plexstreamsplus">
+  <!ENTITY author     "alexphillips-dev">
+  <!ENTITY version    "2026.03.09.10">
+  <!ENTITY launch     "Settings/PlexStreamsPlus">
+  <!ENTITY branch     "main">
+  <!ENTITY gitURL     "https://raw.githubusercontent.com/alexphillips-dev/PlexStreams-Plus/&branch;">
   <!ENTITY vnstatURL  "&gitURL;/deps/">
   <!ENTITY pluginURL  "&gitURL;/&name;.plg">
   <!ENTITY emhttp     "/usr/local/emhttp/plugins/&name;">
   <!ENTITY plgPATH    "/boot/config/plugins/&name;">
   <!ENTITY plgNAME    "&name;-&version;-x86_64-1">
-  <!ENTITY md5        "cfae9b112f22dd0d9354bf0beb258b5d">
+  <!ENTITY md5        "fdb6d1968421dfb24eb3af01c43f1a03">
 ]>
 
 <PLUGIN  name="&name;"
          author="&author;"
          version="&version;"
          pluginURL="&pluginURL;"
-         support="https://forums.unraid.net/topic/92459-plugin-plex-streams/"
+         support="https://github.com/alexphillips-dev/PlexStreams-Plus"
          launch="&launch;"
          IconFA="film"
          icon="film">
 
     <CHANGES>
     ##&name;
+###2026.03.09.10
+- Rebrand to PlexStreams Plus
+- Update author and GitHub repository metadata
+- Internal rename to plexstreamsplus paths/pages
+
 ###2023.11.27
 - Correcting bug for settings page
 
@@ -300,18 +305,18 @@
     <!-- POST-INSTALL SCRIPT -->
     <FILE Run="/bin/bash">
         <INLINE>
-            WIDGET_OFF_FILE=/usr/local/emhttp/plugins/plexstreams/PlexStreams_dashboard.page.off
-            WIDGET_SETTING=`php -r 'exit(parse_ini_file("/boot/config/plugins/plexstreams/plexstreams.cfg", false)["DISPLAY_WIDGET"]);'`
+            WIDGET_OFF_FILE=/usr/local/emhttp/plugins/plexstreamsplus/PlexStreamsPlus_dashboard.page.off
+            WIDGET_SETTING=`php -r 'exit(parse_ini_file("/boot/config/plugins/plexstreamsplus/plexstreamsplus.cfg", false)["DISPLAY_WIDGET"]);'`
             if [[ -f "$WIDGET_OFF_FILE" || "$WIDGET_SETTING" == "0" ]]; then
-                rm -f /usr/local/emhttp/plugins/plexstreams/PlexStreams_dashboard.page.off
-                mv -f /usr/local/emhttp/plugins/plexstreams/PlexStreams_dashboard.page /usr/local/emhttp/plugins/plexstreams/PlexStreams_dashboard.page.off
+                rm -f /usr/local/emhttp/plugins/plexstreamsplus/PlexStreamsPlus_dashboard.page.off
+                mv -f /usr/local/emhttp/plugins/plexstreamsplus/PlexStreamsPlus_dashboard.page /usr/local/emhttp/plugins/plexstreamsplus/PlexStreamsPlus_dashboard.page.off
             fi
             
-            NAV_OFF=/usr/local/emhttp/plugins/plexstreams/Plex_Streams.page.off
-            NAV_SETTING=`php -r 'exit(parse_ini_file("/boot/config/plugins/plexstreams/plexstreams.cfg", false)["DISPLAY_NAV"]);'`
+            NAV_OFF=/usr/local/emhttp/plugins/plexstreamsplus/PlexStreamsPlusNav.page.off
+            NAV_SETTING=`php -r 'exit(parse_ini_file("/boot/config/plugins/plexstreamsplus/plexstreamsplus.cfg", false)["DISPLAY_NAV"]);'`
             if [[ -f "$NAV_OFF" || "$NAV_SETTING" == "0" ]]; then
-                rm -f /usr/local/emhttp/plugins/plexstreams/Plex_Streams.page.off
-                mv -f /usr/local/emhttp/plugins/plexstreams/Plex_Streams.page /usr/local/emhttp/plugins/plexstreams/Plex_Streams.page.off
+                rm -f /usr/local/emhttp/plugins/plexstreamsplus/PlexStreamsPlusNav.page.off
+                mv -f /usr/local/emhttp/plugins/plexstreamsplus/PlexStreamsPlusNav.page /usr/local/emhttp/plugins/plexstreamsplus/PlexStreamsPlusNav.page.off
             fi
 
             echo ""
