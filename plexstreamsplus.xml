@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Containers>
 <Plugin>True</Plugin>
-<PluginURL>https://psplus:$(cut -d. -f1 /proc/uptime)@raw.githubusercontent.com/alexphillips-dev/PlexStreams-Plus/main/plexstreamsplus.plg</PluginURL>
+<PluginURL>https://raw.githubusercontent.com/alexphillips-dev/PlexStreams-Plus/main/plexstreamsplus.plg</PluginURL>
 <PluginAuthor>alexphillips-dev</PluginAuthor>
 <Beta>False</Beta>
 <Category>Tools:System</Category>

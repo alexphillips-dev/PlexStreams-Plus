@@ -3,16 +3,16 @@
 <!DOCTYPE PLUGIN [
   <!ENTITY name       "plexstreamsplus">
   <!ENTITY author     "alexphillips-dev">
-  <!ENTITY version    "2026.03.09.28">
+  <!ENTITY version    "2026.03.09.29">
   <!ENTITY launch     "Settings/PlexStreamsPlus">
   <!ENTITY branch     "main">
   <!ENTITY gitURL     "https://raw.githubusercontent.com/alexphillips-dev/PlexStreams-Plus/&branch;">
   <!ENTITY vnstatURL  "&gitURL;/deps/">
-  <!ENTITY pluginURL  "https://psplus:$(cut -d. -f1 /proc/uptime)@raw.githubusercontent.com/alexphillips-dev/PlexStreams-Plus/&branch;/&name;.plg">
+  <!ENTITY pluginURL  "&gitURL;/&name;.plg">
   <!ENTITY emhttp     "/usr/local/emhttp/plugins/&name;">
   <!ENTITY plgPATH    "/boot/config/plugins/&name;">
   <!ENTITY plgNAME    "&name;-&version;-x86_64-1">
-  <!ENTITY md5        "887616d133ccaa5344753e9d0599adf1">
+  <!ENTITY md5        "5ac443bae9dd4dc75d350e8a3da51c6c">
 ]>
 
 <PLUGIN  name="&name;"
@@ -26,6 +26,9 @@
 
     <CHANGES>
     ##&name;
+###2026.03.09.29
+- Fix update checks by restoring direct raw.githubusercontent.com plugin URLs (remove unsupported auth-style cache busting).
+
 ###2026.03.09.28
 - Audit cleanup + performance/safety/dev-quality pass: adaptive polling, diff-based stream card updates, scoped styles, token mask/verify controls, fixture tests, and stronger release guard metadata checks.
 

@@ -93,6 +93,7 @@ fi
 
 EXPECTED_PROJECT_URL="https://github.com/alexphillips-dev/PlexStreams-Plus"
 EXPECTED_SUPPORT_URL="${EXPECTED_PROJECT_URL}/issues"
+EXPECTED_RAW_BASE_URL="https://raw.githubusercontent.com/alexphillips-dev/PlexStreams-Plus/main"
 EXPECTED_PLUGIN_NAME="PlexStreams Plus"
 EXPECTED_CATEGORY="Tools:System"
 EXPECTED_CA_TYPE="AddOn"
@@ -118,12 +119,18 @@ assert_ca_metadata() {
   [[ "${plugin_name}" == "${EXPECTED_PLUGIN_NAME}" ]] || psplus::fail "CA metadata mismatch in ${xml_file}: <Name>${plugin_name}</Name>"
   [[ "${plugin_author}" == "${AUTHOR_PLUS}" ]] || psplus::fail "CA metadata mismatch in ${xml_file}: <PluginAuthor>${plugin_author}</PluginAuthor>"
   [[ "${support_url}" == "${EXPECTED_SUPPORT_URL}" ]] || psplus::fail "CA metadata mismatch in ${xml_file}: <Support>${support_url}</Support>"
+  local expected_plugin_url="${EXPECTED_RAW_BASE_URL}/${manifest_name}"
   [[ "${project_url}" == "${EXPECTED_PROJECT_URL}" ]] || psplus::fail "CA metadata mismatch in ${xml_file}: <Project>${project_url}</Project>"
-  [[ "${plugin_url}" == *"/${manifest_name}" ]] || psplus::fail "CA metadata mismatch in ${xml_file}: <PluginURL>${plugin_url}</PluginURL>"
+  [[ "${plugin_url}" == "${expected_plugin_url}" ]] || psplus::fail "CA metadata mismatch in ${xml_file}: <PluginURL>${plugin_url}</PluginURL>"
+  [[ "${plugin_url}" != *'$('* ]] || psplus::fail "CA metadata mismatch in ${xml_file}: PluginURL contains unsupported shell expansion syntax."
 }
 
 assert_ca_metadata "${PLUS_CA_XML}" "plexstreamsplus.plg"
 assert_ca_metadata "${LEGACY_CA_XML}" "plexstreams.plg"
+
+if grep -q 'psplus:\$([^)]*)@' "${PLUS_PLG}" "${LEGACY_PLG}" "${PLUS_CA_XML}" "${LEGACY_CA_XML}"; then
+  psplus::fail "Found unsupported cache-busting auth syntax in plugin URLs. Use direct raw.githubusercontent.com URLs."
+fi
 
 PLUGIN_VERSION_IN_COMMON="$(sed -n -E "s/.*define\('PLUGIN_VERSION', '([^']+)'\).*/\1/p" "${COMMON_FILE}" | head -n 1 || true)"
 if [[ "${PLUGIN_VERSION_IN_COMMON}" != "${VERSION_PLUS}" ]]; then
