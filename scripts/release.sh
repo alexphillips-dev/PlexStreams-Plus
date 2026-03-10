@@ -58,15 +58,57 @@ if [[ ! "${release_date}" =~ ^[0-9]{4}\.[0-9]{2}\.[0-9]{2}$ ]]; then
 fi
 
 current_version="$(sed -n -E 's/.*<!ENTITY version[[:space:]]+"([^"]+)".*/\1/p' "${PLUS_MANIFEST}" | head -n1)"
-if [[ ! "${current_version}" =~ ^[0-9]{4}\.[0-9]{2}\.[0-9]{2}\.[0-9]+$ ]]; then
+if [[ ! "${current_version}" =~ ^[0-9]{4}\.[0-9]{2}\.[0-9]{2}\.[0-9]+(\.[0-9]+)*$ ]]; then
   echo "Could not parse current manifest version from ${PLUS_MANIFEST}." >&2
   exit 1
 fi
 
+next_safe_revision() {
+  local revision="$1"
+  local -a parts
+  IFS='.' read -r -a parts <<< "${revision}"
+
+  local first=$((10#${parts[0]}))
+  if (( first > 9 )); then
+    echo "9.1"
+    return
+  fi
+
+  if (( ${#parts[@]} == 1 )); then
+    if (( first < 9 )); then
+      echo "$((first + 1))"
+    else
+      echo "9.1"
+    fi
+    return
+  fi
+
+  local last_index=$(( ${#parts[@]} - 1 ))
+  local last=$((10#${parts[last_index]}))
+  if (( last < 9 )); then
+    parts[last_index]="$((last + 1))"
+  else
+    parts+=("1")
+  fi
+
+  local next="${parts[0]}"
+  local i
+  for ((i=1; i<${#parts[@]}; i++)); do
+    next="${next}.${parts[i]}"
+  done
+  echo "${next}"
+}
+
+date_regex="${release_date//./\\.}"
+current_revision=""
+if [[ "${current_version}" =~ ^${date_regex}\.([0-9]+(\.[0-9]+)*)$ ]]; then
+  current_revision="${BASH_REMATCH[1]}"
+fi
+
 version=""
 if [[ -n "${release_revision}" ]]; then
-  if [[ ! "${release_revision}" =~ ^[1-9][0-9]*$ ]]; then
-    echo "Invalid revision '${release_revision}'. Revision must be a positive integer." >&2
+  if [[ ! "${release_revision}" =~ ^[1-9](\.[1-9])*$ ]]; then
+    echo "Invalid revision '${release_revision}'. Use dot-separated digits 1-9 (examples: 1, 9.1, 9.2)." >&2
     exit 1
   fi
   version="${release_date}.${release_revision}"
@@ -75,19 +117,13 @@ if [[ -n "${release_revision}" ]]; then
     exit 1
   fi
 else
-  next_revision=1
-  date_regex="${release_date//./\\.}"
-  if [[ "${current_version}" =~ ^${date_regex}\.([0-9]+)$ ]]; then
-    next_revision="${BASH_REMATCH[1]}"
-  fi
-
-  version="${release_date}.${next_revision}"
-  if [[ "${current_version}" == "${version}" && -f "${ARCHIVE_DIR}/${PLUS_NAME}-${version}${ARCH_SUFFIX}" ]]; then
-    next_revision=$((next_revision + 1))
+  next_revision="1"
+  if [[ -n "${current_revision}" ]]; then
+    next_revision="$(next_safe_revision "${current_revision}")"
   fi
 
   while [[ -f "${ARCHIVE_DIR}/${PLUS_NAME}-${release_date}.${next_revision}${ARCH_SUFFIX}" ]]; do
-    next_revision=$((next_revision + 1))
+    next_revision="$(next_safe_revision "${next_revision}")"
   done
   version="${release_date}.${next_revision}"
 fi
