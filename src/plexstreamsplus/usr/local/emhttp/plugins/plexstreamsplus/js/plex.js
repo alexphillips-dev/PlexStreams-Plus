@@ -7,7 +7,7 @@ function safeText(value) {
     return String(value);
 }
 
-function escapeHtml(value) {
+function plexStreamsPlusEscapeHtml(value) {
     return safeText(value)
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
@@ -24,11 +24,11 @@ function streamTimeHtml(stream, includeEndTime) {
     if (stream.currentPositionHours === null || stream.currentPositionHours === undefined) {
         return 'N/A';
     }
-    var endTime = includeEndTime ? ' (<span class="endTime">' + escapeHtml(stream.endTime) + '</span>)' : '';
+    var endTime = includeEndTime ? ' (<span class="endTime">' + plexStreamsPlusEscapeHtml(stream.endTime) + '</span>)' : '';
     return '<span class="currentPositionHours">' + stream.currentPositionHours.toString().padStart(2, 0) + '</span>:' +
         '<span class="currentPositionMinutes">' + stream.currentPositionMinutes.toString().padStart(2, 0) + '</span>:' +
         '<span class="currentPositionSeconds">' + stream.currentPositionSeconds.toString().padStart(2, 0) + '</span> / ' +
-        escapeHtml(stream.lengthDisplay) + endTime;
+        plexStreamsPlusEscapeHtml(stream.lengthDisplay) + endTime;
 }
 
 
@@ -51,10 +51,10 @@ function updateDashboardStreamsNew() {
                     hostStreams[hostName] = hostStreams[hostName] + 1;
                 }
                 if ($container.length === 0) {
-                    $container = $('<div id="' + escapeHtml(stream.id) + '">' +
-                        '<span class="w36"><p class="plexstream-title" title="' + escapeHtml(stream.titleString) + '">' + escapeHtml(stream.title) +  '</p></span>' +
-                        '<span class="w18" style="text-align:center;"><i class="fa fa-' + escapeHtml(stream.stateIcon) + '" title="' + escapeHtml(stream.state) + '"></i></span>' +
-                        '<span class="w18" style="text-align:center;"><p class="plexstream-user" title="' + escapeHtml(stream.user) + '">' + escapeHtml(stream.user) + '</p></span>' +
+                    $container = $('<div id="' + plexStreamsPlusEscapeHtml(stream.id) + '">' +
+                        '<span class="w36"><p class="plexstream-title" title="' + plexStreamsPlusEscapeHtml(stream.titleString) + '">' + plexStreamsPlusEscapeHtml(stream.title) +  '</p></span>' +
+                        '<span class="w18" style="text-align:center;"><i class="fa fa-' + plexStreamsPlusEscapeHtml(stream.stateIcon) + '" title="' + plexStreamsPlusEscapeHtml(stream.state) + '"></i></span>' +
+                        '<span class="w18" style="text-align:center;"><p class="plexstream-user" title="' + plexStreamsPlusEscapeHtml(stream.user) + '">' + plexStreamsPlusEscapeHtml(stream.user) + '</p></span>' +
                         '<span class="w18" style="text-align:right;"><p class="plexstream-time">' + streamTimeHtml(stream, true) + '</p></span>' +
                     '</div>').appendTo('#plexstreamsplus_streams');
                     var node = $container[0];
@@ -70,7 +70,7 @@ function updateDashboardStreamsNew() {
             $('#stream_count_container').html('');
             for (var host in hostStreams) {
                 if(hostStreams.hasOwnProperty(host)) {
-                    $('#stream_count_container').append('<div><strong>' + escapeHtml(host) + ':</strong> ' + hostStreams[host] + ' ' +  _('Active Stream(s)') + '</div>');
+                    $('#stream_count_container').append('<div><strong>' + plexStreamsPlusEscapeHtml(host) + ':</strong> ' + hostStreams[host] + ' ' +  _('Active Stream(s)') + '</div>');
                 }
             }
             $('#plexstreamsplus_streams [updatedat]').each(function() {
@@ -113,10 +113,10 @@ function updateDashboardStreams() {
                     hostStreams[hostName] = hostStreams[hostName] + 1;
                 }
                 if ($container.length === 0) {
-                    $container = $('<tr style="display:table-row;" id="' + escapeHtml(stream.id) + '">' +
-                        '<td width="40%" style="padding: 0px;"><p class="plexstream-title" title="' + escapeHtml(stream.titleString) + '">' + escapeHtml(stream.title) +  '</p></td>' +
-                        '<td align="center" style="padding: 0px;text-align:center;"><i class="fa fa-' + escapeHtml(stream.stateIcon) + '" title="' + escapeHtml(stream.state) + '"></i></td>' +
-                        '<td align="center" style="padding: 0px;"><p class="plexstream-user" title="' + escapeHtml(stream.user) + '">' + escapeHtml(stream.user) + '</td>' +
+                    $container = $('<tr style="display:table-row;" id="' + plexStreamsPlusEscapeHtml(stream.id) + '">' +
+                        '<td width="40%" style="padding: 0px;"><p class="plexstream-title" title="' + plexStreamsPlusEscapeHtml(stream.titleString) + '">' + plexStreamsPlusEscapeHtml(stream.title) +  '</p></td>' +
+                        '<td align="center" style="padding: 0px;text-align:center;"><i class="fa fa-' + plexStreamsPlusEscapeHtml(stream.stateIcon) + '" title="' + plexStreamsPlusEscapeHtml(stream.state) + '"></i></td>' +
+                        '<td align="center" style="padding: 0px;"><p class="plexstream-user" title="' + plexStreamsPlusEscapeHtml(stream.user) + '">' + plexStreamsPlusEscapeHtml(stream.user) + '</td>' +
                         '<td align="center" style="padding: 0px;text-align:right;"><p class="plexstream-time">' + streamTimeHtml(stream, false) + '</p></td>' +
                     '</tr>').appendTo('#plexstreamsplus_streams');
                     var node = $container[0];
@@ -132,7 +132,7 @@ function updateDashboardStreams() {
             $('#stream_count_container').html('');
             for (var host in hostStreams) {
                 if(hostStreams.hasOwnProperty(host)) {
-                    $('#stream_count_container').append('<div><strong>' + escapeHtml(host) + ':</strong> ' + hostStreams[host] + ' ' +  _('Active Stream(s)') + '</div>');
+                    $('#stream_count_container').append('<div><strong>' + plexStreamsPlusEscapeHtml(host) + ':</strong> ' + hostStreams[host] + ' ' +  _('Active Stream(s)') + '</div>');
                 }
             }
             $('#plexstreamsplus_streams tr[updatedat]').each(function() {
@@ -192,9 +192,9 @@ function updateFullStreamInfo() {
                         $details.find('.video.value').text(uCWord(videoDecision));
                     }
                 } else {
-                    var serverName = escapeHtml(streamServerName(stream));
+                    var serverName = plexStreamsPlusEscapeHtml(streamServerName(stream));
                     var detailUrl = '/plugins/plexstreamsplus/movieDetails.php?details=' + encodeURIComponent(stream.key) + '&host=' + encodeURIComponent(stream['@host']);
-                    $container = $('<li class="stream-container" id="' + escapeHtml(stream.id) + '"><div class="stream-subcontainer"><div class="stream" style="background-image:url(' + escapeHtml(stream.artUrl)  + ');"><div class="blur"><div class="details"><ul class="detail-list"><li><div class="label">' + _('Server') + '</div><div class="value">' + serverName + '</div></li><li><div class="label">' + _('Length') + '</div><div class="value">' + escapeHtml(stream.lengthDisplay || stream.duration) + '</div></li><li><div class="label">' + _('Stream') + '</div><div class="stream value">' + escapeHtml(uCWord(stream.streamDecision)) + '</div></li><li><div class="label">' + _('Location') + '</div><div class="value" title="' + escapeHtml(stream.locationDisplay) + '" style="pointer:default;">' + escapeHtml(stream.locationDisplay) + '</div></li><li><div class="label">' + _('Bandwidth') + '</div><div class="bandwidth value">' + escapeHtml(stream.bandwidth) + '</div></li><li><div class="label">' + _('Audio') + '</div><div class="audio value">' + escapeHtml(uCWord(audioDecision)) + '</div></li><li>' +  (videoDecision !== '' ? '<div class="label">' + _('Video') + '</div><div class="video value">' + escapeHtml(uCWord(videoDecision)) + '</div></li>' : '') + '</ul></div><div class="poster" style="background-image:url(' + escapeHtml(stream.thumbUrl) + ');"></div><div class="userIcon" title="' + escapeHtml(stream.user) + '" style="background-image:url(' + escapeHtml(stream.userAvatar) + ')"></div></div></div><div class="bottom-box"><div class="progressBar" duration="' + escapeHtml(stream.duration) + '" style="width:' + escapeHtml(stream.percentPlayed) + '%;"><div class="position"><span class="currentPositionHours">' + stream.currentPositionHours.toString().padStart(2, 0) + '</span>:<span class="currentPositionMinutes">' + stream.currentPositionMinutes.toString().padStart(2, 0) + '</span>:<span class="currentPositionSeconds">' + stream.currentPositionSeconds.toString().padStart(2, 0) + '</span>  / ' + escapeHtml(stream.lengthDisplay) + '</div></div><div class="title"><a href="#" onclick="openBox(\'' + detailUrl + '\',\'Details\',600,900); return false;">' + escapeHtml(stream.title) +'</a><div class="status"><i class="fa fa-' + escapeHtml(stream.stateIcon) + '" title="' + escapeHtml(stream.state) + '"></i></div></div></div></div></li>').appendTo($streamHolder);
+                    $container = $('<li class="stream-container" id="' + plexStreamsPlusEscapeHtml(stream.id) + '"><div class="stream-subcontainer"><div class="stream" style="background-image:url(' + plexStreamsPlusEscapeHtml(stream.artUrl)  + ');"><div class="blur"><div class="details"><ul class="detail-list"><li><div class="label">' + _('Server') + '</div><div class="value">' + serverName + '</div></li><li><div class="label">' + _('Length') + '</div><div class="value">' + plexStreamsPlusEscapeHtml(stream.lengthDisplay || stream.duration) + '</div></li><li><div class="label">' + _('Stream') + '</div><div class="stream value">' + plexStreamsPlusEscapeHtml(uCWord(stream.streamDecision)) + '</div></li><li><div class="label">' + _('Location') + '</div><div class="value" title="' + plexStreamsPlusEscapeHtml(stream.locationDisplay) + '" style="pointer:default;">' + plexStreamsPlusEscapeHtml(stream.locationDisplay) + '</div></li><li><div class="label">' + _('Bandwidth') + '</div><div class="bandwidth value">' + plexStreamsPlusEscapeHtml(stream.bandwidth) + '</div></li><li><div class="label">' + _('Audio') + '</div><div class="audio value">' + plexStreamsPlusEscapeHtml(uCWord(audioDecision)) + '</div></li><li>' +  (videoDecision !== '' ? '<div class="label">' + _('Video') + '</div><div class="video value">' + plexStreamsPlusEscapeHtml(uCWord(videoDecision)) + '</div></li>' : '') + '</ul></div><div class="poster" style="background-image:url(' + plexStreamsPlusEscapeHtml(stream.thumbUrl) + ');"></div><div class="userIcon" title="' + plexStreamsPlusEscapeHtml(stream.user) + '" style="background-image:url(' + plexStreamsPlusEscapeHtml(stream.userAvatar) + ')"></div></div></div><div class="bottom-box"><div class="progressBar" duration="' + plexStreamsPlusEscapeHtml(stream.duration) + '" style="width:' + plexStreamsPlusEscapeHtml(stream.percentPlayed) + '%;"><div class="position"><span class="currentPositionHours">' + stream.currentPositionHours.toString().padStart(2, 0) + '</span>:<span class="currentPositionMinutes">' + stream.currentPositionMinutes.toString().padStart(2, 0) + '</span>:<span class="currentPositionSeconds">' + stream.currentPositionSeconds.toString().padStart(2, 0) + '</span>  / ' + plexStreamsPlusEscapeHtml(stream.lengthDisplay) + '</div></div><div class="title"><a href="#" onclick="openBox(\'' + detailUrl + '\',\'Details\',600,900); return false;">' + plexStreamsPlusEscapeHtml(stream.title) +'</a><div class="status"><i class="fa fa-' + plexStreamsPlusEscapeHtml(stream.stateIcon) + '" title="' + plexStreamsPlusEscapeHtml(stream.state) + '"></i></div></div></div></div></li>').appendTo($streamHolder);
                     node = $container[0];
                 }
                 updateDuration(node, stream);
@@ -309,12 +309,12 @@ function getServers(containerSelector, selected) {
                                 shortHost = shortHost.replace(':' + connection.port, '');
                             }
                             var aliasKey = shortHost.replace(/[^A-Za-z0-9_-]/g, '_');
-                            var safeServerName = escapeHtml(server.Name);
-                            var safeUri = escapeHtml(connection.uri);
-                            var safeAddress = escapeHtml(connection.address);
-                            var safePort = escapeHtml(connection.port);
+                            var safeServerName = plexStreamsPlusEscapeHtml(server.Name);
+                            var safeUri = plexStreamsPlusEscapeHtml(connection.uri);
+                            var safeAddress = plexStreamsPlusEscapeHtml(connection.address);
+                            var safePort = plexStreamsPlusEscapeHtml(connection.port);
                             $host.append('<input type="hidden" name="ALIAS-' + aliasKey + '" value="' + safeServerName + '"/>');
-                            $host.append('<input type="checkbox" onchange="updateServerList(\'HOST\')" name="hostbox" id="' + safeUri + '" data-id="' + escapeHtml(id) + '"' + (selected.indexOf(connection.uri) > -1 ? ' checked="checked"' : '' ) + ' value="' + safeUri + '" data-address="' + safeAddress + '" data-name="' + safeServerName + '"/> <label for="' + safeUri + '"> ' + safeServerName + ' (' +  safeAddress + ':' + safePort + ')' + (connection.local === '0' ? ' - Remote' : '') + '</label><br/>');
+                            $host.append('<input type="checkbox" onchange="updateServerList(\'HOST\')" name="hostbox" id="' + safeUri + '" data-id="' + plexStreamsPlusEscapeHtml(id) + '"' + (selected.indexOf(connection.uri) > -1 ? ' checked="checked"' : '' ) + ' value="' + safeUri + '" data-address="' + safeAddress + '" data-name="' + safeServerName + '"/> <label for="' + safeUri + '"> ' + safeServerName + ' (' +  safeAddress + ':' + safePort + ')' + (connection.local === '0' ? ' - Remote' : '') + '</label><br/>');
                         }
                     });
                 }
@@ -529,3 +529,4 @@ function PlexOAuth(success, error, pre) {
         }
     });
 }
+
