@@ -25,7 +25,7 @@ Cond="parse_ini_file('/boot/config/plugins/plexstreamsplus/plexstreamsplus.cfg')
             padding-bottom: 0px;
         }
 </style>
-<table cellspacing="0" cellpadding="0" id="db-box<?php echo $dashboard_widget_pos ?>" class="plex_streams_container dashboard box<?php echo $dashboard_widget_pos ?>" style="display:none">
+<table cellspacing="0" cellpadding="0" id="db-box<?php echo $dashboard_widget_pos ?>" class="plex_streams_container psplus-dashboard-widget dashboard box<?php echo $dashboard_widget_pos ?>" style="display:none" data-psplus-context="dashboard_legacy">
         <thead sort="10">
             <tr class="hidden">
                 <td></td>
@@ -36,9 +36,18 @@ Cond="parse_ini_file('/boot/config/plugins/plexstreamsplus/plexstreamsplus.cfg')
         <tbody id="plex_streams_dash_box" class="sortable" sort="10">
             <tr>
                 <td></td>
-                <td class="next" colspan="<?php echo $dashboard_widget_colspan ?>" style="white-space: no-wrap;">
+                <td class="next" colspan="<?php echo $dashboard_widget_colspan ?>" style="white-space: no-wrap; position: relative; padding-right: 66px;">
                     <i style="font-size:32px;vertical-align:top;" class="fa fa-film icon"></i>
-                        <div class="section" style="line-height:2rem;">_(PlexStreams Plus)_<br><span id="stream_count_container"><span id="plexstreamsplus_count">0</span> _(Active Stream(s))_</span><br><br></div>
+                        <div class="section" style="line-height:1.5rem;">_(PlexStreams Plus)_<br><span class="psplus-widget-count-line"><span id="plexstreamsplus_count">0</span> _(Active Stream(s))_</span></div>
+                        <div id="stream_count_container" class="psplus-host-breakdown"></div>
+                        <div class="psplus-widget-summary">
+                            <span class="psplus-summary-chip"><span class="psplus-chip-label">_(Streams)_</span><span class="psplus-chip-value" data-chip="streams">0</span></span>
+                            <span class="psplus-summary-chip"><span class="psplus-chip-label">_(Direct)_</span><span class="psplus-chip-value" data-chip="direct">0</span></span>
+                            <span class="psplus-summary-chip"><span class="psplus-chip-label">_(Transcode)_</span><span class="psplus-chip-value" data-chip="transcode">0</span></span>
+                            <span class="psplus-summary-chip"><span class="psplus-chip-label">LAN Mbps</span><span class="psplus-chip-value" data-chip="lan">0.0</span></span>
+                            <span class="psplus-summary-chip"><span class="psplus-chip-label">WAN Mbps</span><span class="psplus-chip-value" data-chip="wan">0.0</span></span>
+                        </div>
+                        <div class="psplus-refresh-state is-pending"><i class="fa fa-fw fa-clock-o"></i><span class="psplus-refresh-text">_(Waiting for first update...)_</span></div>
                         <i class="fa fa-fw chevron mt0" id="dash_plexstreamsplus" onclick="toggleChevron('dash_plexstreamsplus',0)"></i>
                         <a href="/Settings/PlexStreamsPlus" title="_(PlexStreams Plus Setup page)_"><i class="fa fa-fw fa-cog chevron mt0"></i></a>
                         <a href="/Tools/PlexStreamsPlusTools" title="_(View Streams)_"><i class="fa fa-fw fa-film chevron mt0"></i></a>
@@ -89,11 +98,96 @@ Cond="parse_ini_file('/boot/config/plugins/plexstreamsplus/plexstreamsplus.cfg')
 }
 
 .plex_streams_container p.plexstream-time {
-    padding: 0 0 0 0;
-    margin: 0 0 10px 0;
-    font-size:10px;
-    width: 125px;
+    padding: 0;
+    margin: 0;
+    font-size: 11px;
+    width: 226px;
+    min-width: 226px;
     text-align: right;
+    font-family: "Roboto Mono", "Consolas", "Menlo", monospace;
+    font-variant-numeric: tabular-nums;
+}
+
+.plex_streams_container .psplus-widget-count-line {
+    display: inline-block;
+}
+
+.plex_streams_container .psplus-host-breakdown {
+    margin: 3px 0 4px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 8px;
+}
+
+.plex_streams_container .psplus-host-chip {
+    font-size: 11px;
+    line-height: 1.2;
+    color: #b8c2cc;
+    white-space: nowrap;
+}
+
+.plex_streams_container .psplus-widget-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 5px;
+    margin: 2px 0 4px;
+}
+
+.plex_streams_container .psplus-summary-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(25, 36, 50, 0.72);
+    border: 1px solid rgba(90, 118, 151, 0.35);
+    border-radius: 999px;
+    padding: 1px 7px;
+    font-size: 10px;
+    line-height: 1.45;
+    white-space: nowrap;
+}
+
+.plex_streams_container .psplus-chip-label {
+    color: #9ab0c5;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 700;
+}
+
+.plex_streams_container .psplus-chip-value {
+    color: #f0f4f8;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.plex_streams_container .psplus-refresh-state {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    line-height: 1.35;
+    color: #9fb0bf;
+    white-space: nowrap;
+}
+
+.plex_streams_container .psplus-refresh-state.is-ok {
+    color: #8fd1aa;
+}
+
+.plex_streams_container .psplus-refresh-state.is-stale {
+    color: #e5bb72;
+}
+
+.plex_streams_container .psplus-refresh-state.is-error {
+    color: #f09292;
+}
+
+.plex_streams_container .psplus-dashboard-row {
+    cursor: pointer;
+}
+
+.plex_streams_container .psplus-dashboard-row:focus {
+    outline: 1px solid rgba(143, 209, 170, 0.8);
+    outline-offset: -1px;
 }
 </style>
 <script src="<?autov('/plugins/plexstreamsplus/js/plex.js')?>"></script>

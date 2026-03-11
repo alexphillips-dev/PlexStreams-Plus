@@ -48,6 +48,21 @@
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
     }
 
+    #psplus-streams-root .stream-container.psplus-focus-target .stream-card {
+        border-color: #f2a126;
+        box-shadow: 0 0 0 1px rgba(242, 161, 38, 0.8), 0 10px 24px rgba(0, 0, 0, 0.5);
+        animation: psplus-focus-pulse 2.4s ease-out 1;
+    }
+
+    @keyframes psplus-focus-pulse {
+        0% {
+            box-shadow: 0 0 0 0 rgba(242, 161, 38, 0.8), 0 10px 24px rgba(0, 0, 0, 0.5);
+        }
+        100% {
+            box-shadow: 0 0 0 12px rgba(242, 161, 38, 0), 0 10px 24px rgba(0, 0, 0, 0.5);
+        }
+    }
+
     #psplus-streams-root .stream-media {
         position: relative;
         display: flex;
@@ -402,6 +417,17 @@
         }
     }
 
+    if (!function_exists('streamSessionKey')) {
+        function streamSessionKey($stream) {
+            $host = trim((string)($stream['@host'] ?? ''));
+            $id = trim((string)($stream['id'] ?? ''));
+            if ($host !== '' && $id !== '') {
+                return $host . '::' . $id;
+            }
+            return $id !== '' ? $id : $host;
+        }
+    }
+
     if (!function_exists('episodeMetaLabel')) {
         function episodeMetaLabel($title, $type) {
             $title = trim((string)$title);
@@ -444,8 +470,10 @@
 
             foreach ($mergedStreams as $stream) {
                 $streamIdRaw = (string)($stream['id'] ?? '');
-                $streamId = h(streamDomId($streamIdRaw));
-                $streamDataId = h($streamIdRaw);
+                $streamSessionKeyRaw = streamSessionKey($stream);
+                $streamId = h(streamDomId($streamSessionKeyRaw));
+                $streamDataId = h($streamSessionKeyRaw);
+                $streamLegacyDataId = h($streamIdRaw);
                 $streamArt = h($stream['artUrl']);
                 $streamThumb = h($stream['thumbUrl']);
                 $streamUser = h($stream['user']);
@@ -497,7 +525,7 @@
                     : '<span class="stream-title-link">' . $streamTitle . '</span>';
 
                 echo '
-                    <li class="stream-container" id="' . $streamId . '" data-stream-id="' . $streamDataId . '" data-stream-type="' . $streamType . '">
+                    <li class="stream-container" id="' . $streamId . '" data-stream-id="' . $streamDataId . '" data-stream-legacy-id="' . $streamLegacyDataId . '" data-stream-type="' . $streamType . '">
                         <article class="stream-card">
                             <div class="stream-media">
                                 <div class="stream-backdrop" style="background-image:url(\'' . $streamArt . '\');"></div>

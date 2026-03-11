@@ -3,171 +3,242 @@ Icon="PlexStreams-icon.png"
 Tag="film"
 Cond="parse_ini_file('/boot/config/plugins/plexstreamsplus/plexstreamsplus.cfg')['DISPLAY_WIDGET'] == '1' && version_compare(parse_ini_file('/etc/unraid-version')['version'],'6.12.0-beta5', '>')"
 ---
-<style>
-#plexstreamsplus_streams p.plexstream-title {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    width: 200px;
-    padding: 0 0 0 0;
-    margin: 0 0 10px 0;
-}
-
-#plexstreamsplus_streams p.plexstream-user {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    width: 104px;
-    padding: 0 0 0 0;
-    margin: 0 0 10px 0;
-}
-
-#plexstreamsplus_streams p.plexstream-time {
-    padding: 0 0 0 0;
-    margin: 0 0 10px 0;
-    font-size:10px;
-    width: 100%;
-    white-space: nowrap;
-    overflow: visible;
-    text-overflow: clip;
-    text-align: right;
-}
-
-td.plexstreamsplus-widget-header {
-    position: relative;
-    padding-right: 64px;
-}
-
-.plexstreamsplus-widget-header .section {
-    line-height: 1.55rem !important;
-}
-
-.plexstreamsplus-widget-actions {
-    position: absolute;
-    top: 2px;
-    right: 0;
-    display: inline-flex;
-    align-items: flex-start;
-    gap: 2px;
-}
-
-.plexstreamsplus-time-col {
-    overflow: visible !important;
-}
-</style>
 <?PHP
-    /*
-        Create a .page file based on this example file and store the file in your plugin directory
-        Make sure this file has a unique name not used by the GUI or other plugins
-
-        This is an example configuration which is used to add custom tiles to the dashboard
-        Placement of one or more custom tiles is done under column1, column2 or column3
-        A column can have as many new custom tiles as needed, each custom tile is a <tbody> element
-        Each tile must have these two properties set:
-
-        "_(description)_"    - this is the (translated) description shown in the Content Manager window
-        "_(Tile tile)_"      - this is the (translated) title of the tile shown in bold on the screen
-
-        The content of the tile can be any text as required by your plugin, this content is placed inside the <td> element
-        A number of predefined spans are available to make fields of certain widths and maybe used to follow the GUI alignment
-        These are:
-        <span class="w18">
-        <span class="w26">
-        <span class="w36">
-        <span class="w44">
-        <span class="w72">
-    */
     $plugin = "plexstreamsplus";
     $translations = file_exists("$docroot/webGui/include/Translations.php");
     $dashboard_widget_pos = 1;
     $dashboard_widget_colspan = 3;
-    $streamCount = 0;
 ?>
 
 <style type="text/css">
-        .dash_plexstreamsplus_toggle{display:none}
-        .dash_plexstreamsplus_toggle tbody td {
-            padding-top: 0px;
-            padding-bottom: 0px;
-        }
-        #plexstreamsplus_streams p.plexstream-title {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            width: 200px;
-            padding: 0 0 0 0;
-            margin: 0 0 10px 0;
-        }
+    .psplus-dashboard-widget {
+        position: relative;
+    }
 
-        #plexstreamsplus_streams p.plexstream-user {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            width: 104px;
-            padding: 0 0 0 0;
-            margin: 0 0 10px 0;
-        }
+    .psplus-dashboard-widget .dash_plexstreamsplus_toggle {
+        display: none;
+    }
 
-        #plexstreamsplus_streams p.plexstream-time {
-            padding: 0 0 0 0;
-            margin: 0 0 10px 0;
-            font-size:10px;
-            width: 100%;
-            white-space: nowrap;
-            overflow: visible;
-            text-overflow: clip;
-            text-align: right;
-        }
+    .psplus-dashboard-widget td {
+        padding-top: 0;
+        padding-bottom: 0;
+    }
 
-        td.plexstreamsplus-widget-header {
-            position: relative;
-            padding-right: 64px;
-        }
+    .psplus-dashboard-widget .plexstreamsplus-widget-header {
+        position: relative;
+        padding-right: 66px;
+    }
 
-        .plexstreamsplus-widget-header .section {
-            line-height: 1.55rem !important;
-        }
+    .psplus-dashboard-widget .section {
+        line-height: 1.5rem !important;
+        margin-right: 10px;
+    }
 
-        .plexstreamsplus-widget-actions {
-            position: absolute;
-            top: 2px;
-            right: 0;
-            display: inline-flex;
-            align-items: flex-start;
-            gap: 2px;
-        }
+    .psplus-dashboard-widget .psplus-widget-count-line {
+        display: inline-block;
+    }
 
-        .plexstreamsplus-time-col {
-            overflow: visible !important;
-        }
+    .psplus-dashboard-widget .plexstreamsplus-widget-actions {
+        position: absolute;
+        top: 0;
+        right: 0;
+        display: inline-flex;
+        align-items: flex-start;
+        gap: 2px;
+    }
+
+    .psplus-dashboard-widget .psplus-host-breakdown {
+        margin: 3px 0 4px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px 8px;
+    }
+
+    .psplus-dashboard-widget .psplus-host-chip {
+        font-size: 11px;
+        line-height: 1.2;
+        color: #b8c2cc;
+        white-space: nowrap;
+    }
+
+    .psplus-dashboard-widget .psplus-widget-summary {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px 5px;
+        margin: 2px 0 4px;
+    }
+
+    .psplus-dashboard-widget .psplus-summary-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: rgba(25, 36, 50, 0.72);
+        border: 1px solid rgba(90, 118, 151, 0.35);
+        border-radius: 999px;
+        padding: 1px 7px;
+        font-size: 10px;
+        line-height: 1.45;
+        white-space: nowrap;
+    }
+
+    .psplus-dashboard-widget .psplus-chip-label {
+        color: #9ab0c5;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        font-weight: 700;
+    }
+
+    .psplus-dashboard-widget .psplus-chip-value {
+        color: #f0f4f8;
+        font-weight: 700;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .psplus-dashboard-widget .psplus-refresh-state {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 11px;
+        line-height: 1.35;
+        color: #9fb0bf;
+        white-space: nowrap;
+    }
+
+    .psplus-dashboard-widget .psplus-refresh-state.is-ok {
+        color: #8fd1aa;
+    }
+
+    .psplus-dashboard-widget .psplus-refresh-state.is-stale {
+        color: #e5bb72;
+    }
+
+    .psplus-dashboard-widget .psplus-refresh-state.is-error {
+        color: #f09292;
+    }
+
+    .psplus-dashboard-widget .psplus-refresh-state.is-pending {
+        color: #9fb0bf;
+    }
+
+    .psplus-dashboard-widget .psplus-dashboard-grid-head {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        margin: 2px 0 3px;
+    }
+
+    .psplus-dashboard-widget .psplus-dashboard-streams > .psplus-dashboard-row {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        border-top: 1px solid rgba(255, 255, 255, 0.04);
+        min-height: 22px;
+        cursor: pointer;
+    }
+
+    .psplus-dashboard-widget .psplus-dashboard-streams > .psplus-dashboard-row:first-child {
+        border-top: 0;
+    }
+
+    .psplus-dashboard-widget .psplus-dashboard-row:hover {
+        background: rgba(44, 62, 84, 0.28);
+    }
+
+    .psplus-dashboard-widget .psplus-dashboard-row:focus {
+        outline: 1px solid rgba(143, 209, 170, 0.8);
+        outline-offset: -1px;
+    }
+
+    .psplus-dashboard-widget .plexstream-title,
+    .psplus-dashboard-widget .plexstream-user,
+    .psplus-dashboard-widget .plexstream-time {
+        margin: 0;
+        padding: 0;
+    }
+
+    .psplus-dashboard-widget .plexstream-title {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .psplus-dashboard-widget .plexstream-user {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .psplus-dashboard-widget .plexstream-time {
+        width: 100%;
+        min-width: 216px;
+        white-space: nowrap;
+        text-align: right;
+        font-size: 11px;
+        font-family: "Roboto Mono", "Consolas", "Menlo", monospace;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .psplus-dashboard-widget .psplus-col-name {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .psplus-dashboard-widget .psplus-col-status {
+        flex: 0 0 72px;
+        text-align: center;
+    }
+
+    .psplus-dashboard-widget .psplus-col-user {
+        flex: 0 0 150px;
+        min-width: 0;
+    }
+
+    .psplus-dashboard-widget .psplus-col-time,
+    .psplus-dashboard-widget .plexstreamsplus-time-col {
+        flex: 0 0 226px;
+        min-width: 226px;
+        max-width: 226px;
+        text-align: right;
+    }
 </style>
 <?php
 $mytiles[$plugin]['column1'] =
 <<<EOT
-<tbody class="sortable" title="_(PlexStreams Plus)_">
+<tbody class="sortable psplus-dashboard-widget" title="_(PlexStreams Plus)_" data-psplus-context="dashboard_new">
     <tr>
         <td class="plexstreamsplus-widget-header">
             <i style="font-size:32px;vertical-align:top;" class="fa fa-film icon"></i>
-            <div class="section" style="line-height:2rem;">_(PlexStreams Plus)_<br><span id="stream_count_container"><span id="plexstreamsplus_count">0</span> _(Active Stream(s))_</span></div>
+            <div class="section">_(PlexStreams Plus)_<br><span class="psplus-widget-count-line"><span id="plexstreamsplus_count">0</span> _(Active Stream(s))_</span></div>
             <span class="plexstreamsplus-widget-actions">
                 <a href="/Settings/PlexStreamsPlus" title="_(PlexStreams Plus Setup page)_"><i class="fa fa-fw fa-cog control"></i></a>
                 <a href="/Tools/PlexStreamsPlusTools" title="_(View Streams)_"><i class="fa fa-fw fa-film control"></i></a>
             </span>
-        </td>
-    </tr>
-    <tr>
-        <td>            
-            <span class="w36">_(Name)_</span>
-            <span class="w18" align="center">_(Status)_</span>
-            <span class="w18">_(User)_</span>
-            <span class="w26 plexstreamsplus-time-col" align="right">_(Time)_</span>
+            <div id="stream_count_container" class="psplus-host-breakdown"></div>
+            <div class="psplus-widget-summary">
+                <span class="psplus-summary-chip"><span class="psplus-chip-label">_(Streams)_</span><span class="psplus-chip-value" data-chip="streams">0</span></span>
+                <span class="psplus-summary-chip"><span class="psplus-chip-label">_(Direct)_</span><span class="psplus-chip-value" data-chip="direct">0</span></span>
+                <span class="psplus-summary-chip"><span class="psplus-chip-label">_(Transcode)_</span><span class="psplus-chip-value" data-chip="transcode">0</span></span>
+                <span class="psplus-summary-chip"><span class="psplus-chip-label">LAN Mbps</span><span class="psplus-chip-value" data-chip="lan">0.0</span></span>
+                <span class="psplus-summary-chip"><span class="psplus-chip-label">WAN Mbps</span><span class="psplus-chip-value" data-chip="wan">0.0</span></span>
+            </div>
+            <div class="psplus-refresh-state is-pending"><i class="fa fa-fw fa-clock-o"></i><span class="psplus-refresh-text">_(Waiting for first update...)_</span></div>
         </td>
     </tr>
     <tr>
         <td>
-            <div id="plexstreamsplus_streams">
+            <div class="psplus-dashboard-grid-head">
+                <span class="psplus-col-name">_(Name)_</span>
+                <span class="psplus-col-status">_(Status)_</span>
+                <span class="psplus-col-user">_(User)_</span>
+                <span class="psplus-col-time">_(Time)_</span>
+            </div>
+            <div id="plexstreamsplus_streams" class="psplus-dashboard-streams">
                 <div id="retrieving_streams">
-                    <p align="center" style="font-style:italic;text-align:center;">_(Retrieving Stream Data...)_</p>
+                    <span class="w100"><p align="center" style="font-style:italic;text-align:center;">_(Retrieving Stream Data...)_</p></span>
                 </div>
             </div>
         </td>
@@ -183,4 +254,3 @@ EOT;
         });
     });
 </script>
-
