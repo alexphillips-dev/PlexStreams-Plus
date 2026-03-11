@@ -66,7 +66,7 @@
     #psplus-streams-root .stream-media {
         position: relative;
         display: flex;
-        height: 250px;
+        height: 224px;
         overflow: hidden;
         background: #0a0f14;
     }
@@ -90,10 +90,10 @@
     #psplus-streams-root .stream-poster {
         position: relative;
         z-index: 2;
-        width: 116px;
-        min-width: 116px;
-        height: 174px;
-        margin: 16px 12px 0 16px;
+        width: 112px;
+        min-width: 112px;
+        height: 168px;
+        margin: 12px 12px 0 14px;
         background-position: center;
         background-repeat: no-repeat;
         background-size: cover;
@@ -106,7 +106,7 @@
         z-index: 2;
         flex: 1;
         min-width: 0;
-        padding: 16px 14px 35px 0;
+        padding: 12px 14px 30px 0;
     }
 
     #psplus-streams-root .stream-details .detail-list {
@@ -176,7 +176,7 @@
         left: 0;
         right: 0;
         bottom: 0;
-        height: 24px;
+        height: 20px;
         z-index: 4;
         background: linear-gradient(0deg, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.05));
     }
@@ -185,15 +185,15 @@
         position: absolute;
         left: 0;
         bottom: 0;
-        height: 4px;
+        height: 3px;
         background-color: #f2a126;
     }
 
     #psplus-streams-root .position {
         position: absolute;
         right: 8px;
-        bottom: 6px;
-        font-size: 11px;
+        bottom: 4px;
+        font-size: 10px;
         font-weight: 600;
         color: #f3f7fb;
         text-align: right;
@@ -203,7 +203,7 @@
     #psplus-streams-root .stream-footer {
         border-top: 1px solid #27313d;
         background: #11171f;
-        padding: 8px 12px 9px;
+        padding: 7px 12px 8px;
     }
 
     #psplus-streams-root .footer-top {
@@ -325,13 +325,14 @@
 
     @media (max-width: 680px) {
         #psplus-streams-root .stream-media {
-            height: 240px;
+            height: 212px;
         }
 
         #psplus-streams-root .stream-poster {
             width: 94px;
             min-width: 94px;
             height: 142px;
+            margin-top: 10px;
             margin-left: 12px;
             margin-right: 10px;
         }
