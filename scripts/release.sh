@@ -59,27 +59,34 @@ if [[ ! "${release_date}" =~ ^[0-9]{4}\.[0-9]{2}\.[0-9]{2}$ ]]; then
   exit 1
 fi
 
+today_ny="$(TZ=America/New_York date +%Y.%m.%d)"
+if [[ "${release_date}" != "${today_ny}" && "${ALLOW_RELEASE_DATE_OVERRIDE:-0}" != "1" ]]; then
+  echo "Release date '${release_date}' does not match today's date '${today_ny}' (America/New_York)." >&2
+  echo "Set ALLOW_RELEASE_DATE_OVERRIDE=1 to intentionally publish a non-today date." >&2
+  exit 1
+fi
+
 current_version="$(sed -n -E 's/.*<!ENTITY version[[:space:]]+"([^"]+)".*/\1/p' "${PLUS_MANIFEST}" | head -n1)"
-if [[ ! "${current_version}" =~ ^[0-9]{4}\.[0-9]{2}\.[0-9]{2}(\.[0-9]+(\.[0-9]+)*)?$ ]]; then
+if [[ ! "${current_version}" =~ ^[0-9]{4}\.[0-9]{2}\.[0-9]{2}(\.[1-9][0-9]*)?$ ]]; then
   echo "Could not parse current manifest version from ${PLUS_MANIFEST}." >&2
   exit 1
 fi
 
 is_stable_version() {
   local input="${1:-}"
-  [[ "${input}" =~ ^[0-9]{4}\.[0-9]{2}\.[0-9]{2}(\.[0-9]+)?$ ]]
+  [[ "${input}" =~ ^[0-9]{4}\.[0-9]{2}\.[0-9]{2}(\.[1-9][0-9]*)?$ ]]
 }
 
 normalize_stable_version_for_unraid() {
   local input="${1:-}"
   if [[ "${input}" =~ ^([0-9]{4}\.[0-9]{2}\.[0-9]{2})$ ]]; then
-    echo "${BASH_REMATCH[1]}.01"
+    echo "${BASH_REMATCH[1]}.1"
     return
   fi
-  if [[ "${input}" =~ ^([0-9]{4}\.[0-9]{2}\.[0-9]{2})\.([0-9]+)$ ]]; then
+  if [[ "${input}" =~ ^([0-9]{4}\.[0-9]{2}\.[0-9]{2})\.([1-9][0-9]*)$ ]]; then
     local base="${BASH_REMATCH[1]}"
     local patch=$((10#${BASH_REMATCH[2]}))
-    printf '%s.%02d\n' "${base}" "${patch}"
+    printf '%s.%d\n' "${base}" "${patch}"
     return
   fi
   echo "${input}"
@@ -87,10 +94,10 @@ normalize_stable_version_for_unraid() {
 
 next_patch_version() {
   local input="${1:-}"
-  if [[ "${input}" =~ ^([0-9]{4}\.[0-9]{2}\.[0-9]{2})\.([0-9]+)$ ]]; then
+  if [[ "${input}" =~ ^([0-9]{4}\.[0-9]{2}\.[0-9]{2})\.([1-9][0-9]*)$ ]]; then
     local base="${BASH_REMATCH[1]}"
     local patch=$((10#${BASH_REMATCH[2]} + 1))
-    printf '%s.%02d\n' "${base}" "${patch}"
+    printf '%s.%d\n' "${base}" "${patch}"
     return
   fi
   echo "${input}"
@@ -126,7 +133,7 @@ if [[ -n "${release_revision}" ]]; then
     echo "Invalid revision '${release_revision}'. Revision must be a positive integer." >&2
     exit 1
   fi
-  version="$(printf '%s.%02d' "${release_date}" "$((10#${release_revision}))")"
+  version="$(printf '%s.%d' "${release_date}" "$((10#${release_revision}))")"
   if [[ -f "${ARCHIVE_DIR}/${PLUS_NAME}-${version}${ARCH_SUFFIX}" ]]; then
     echo "Archive already exists for ${version}. Pick a new revision." >&2
     exit 1
@@ -147,7 +154,7 @@ else
   fi
 
   if [[ -z "${highest_version}" ]]; then
-    version="${release_date}.01"
+    version="${release_date}.1"
   else
     version="$(next_patch_version "${highest_version}")"
   fi

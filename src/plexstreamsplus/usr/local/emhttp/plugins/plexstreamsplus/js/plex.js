@@ -488,10 +488,10 @@ function updateDashboardStreamsNew(pollContext) {
                 var $container = $matches.first();
                 if ($container.length === 0) {
                     $container = $('<div class="psplus-dashboard-row" role="link" tabindex="0" data-stream-key="' + safeKey + '" id="' + plexStreamsPlusEscapeHtml(domId) + '">' +
-                        '<span class="w36 psplus-col-name"><p class="plexstream-title" title="' + plexStreamsPlusEscapeHtml(stream.titleString) + '">' + plexStreamsPlusEscapeHtml(stream.title) + '</p></span>' +
-                        '<span class="w18 psplus-col-status" style="text-align:center;"><i class="fa fa-' + plexStreamsPlusEscapeHtml(stream.stateIcon) + '" title="' + plexStreamsPlusEscapeHtml(stream.state) + '"></i></span>' +
-                        '<span class="w18 psplus-col-user"><p class="plexstream-user" title="' + plexStreamsPlusEscapeHtml(stream.user) + '">' + plexStreamsPlusEscapeHtml(stream.user) + '</p></span>' +
-                        '<span class="w26 plexstreamsplus-time-col psplus-col-time"><p class="plexstream-time">' + streamTimeHtml(stream, true) + '</p></span>' +
+                        '<span class="psplus-col-name"><p class="plexstream-title" title="' + plexStreamsPlusEscapeHtml(stream.titleString) + '">' + plexStreamsPlusEscapeHtml(stream.title) + '</p></span>' +
+                        '<span class="psplus-col-status" style="text-align:center;"><i class="fa fa-' + plexStreamsPlusEscapeHtml(stream.stateIcon) + '" title="' + plexStreamsPlusEscapeHtml(stream.state) + '"></i></span>' +
+                        '<span class="psplus-col-user"><p class="plexstream-user" title="' + plexStreamsPlusEscapeHtml(stream.user) + '">' + plexStreamsPlusEscapeHtml(stream.user) + '</p></span>' +
+                        '<span class="plexstreamsplus-time-col psplus-col-time"><p class="plexstream-time">' + streamTimeHtml(stream, true) + '</p></span>' +
                     '</div>').appendTo($streamsHolder);
                 }
 

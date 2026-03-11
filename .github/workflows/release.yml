@@ -8,7 +8,7 @@ on:
         required: false
         type: string
       revision:
-        description: Override numeric revision (example: 1 becomes .01; default is auto increment)
+        description: Override numeric revision (example: 1 becomes .1; default is auto increment)
         required: false
         type: string
       changelog:
@@ -16,6 +16,11 @@ on:
         required: false
         default: Automated release pipeline update.
         type: string
+      allow_date_override:
+        description: Allow publishing with a non-today release_date
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: write
@@ -44,6 +49,7 @@ jobs:
           RELEASE_DATE: ${{ inputs.release_date }}
           RELEASE_REVISION: ${{ inputs.revision }}
           RELEASE_CHANGELOG: ${{ inputs.changelog }}
+          ALLOW_RELEASE_DATE_OVERRIDE: ${{ inputs.allow_date_override && '1' || '0' }}
           TZ: America/New_York
         run: bash scripts/release.sh
 

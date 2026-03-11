@@ -120,17 +120,20 @@ Cond="parse_ini_file('/boot/config/plugins/plexstreamsplus/plexstreamsplus.cfg')
         color: #9fb0bf;
     }
 
-    .psplus-dashboard-widget .psplus-dashboard-grid-head {
-        display: flex;
+    .psplus-dashboard-widget .psplus-dashboard-grid-head,
+    .psplus-dashboard-widget .psplus-dashboard-streams > .psplus-dashboard-row {
+        display: grid;
+        grid-template-columns: minmax(0, 2.2fr) 64px minmax(0, 1.2fr) minmax(0, 1.6fr);
+        column-gap: 8px;
         align-items: center;
         width: 100%;
+    }
+
+    .psplus-dashboard-widget .psplus-dashboard-grid-head {
         margin: 2px 0 3px;
     }
 
     .psplus-dashboard-widget .psplus-dashboard-streams > .psplus-dashboard-row {
-        display: flex;
-        align-items: center;
-        width: 100%;
         border-top: 1px solid rgba(255, 255, 255, 0.04);
         min-height: 22px;
         cursor: pointer;
@@ -174,8 +177,11 @@ Cond="parse_ini_file('/boot/config/plugins/plexstreamsplus/plexstreamsplus.cfg')
 
     .psplus-dashboard-widget .plexstream-time {
         width: 100%;
-        min-width: 216px;
+        min-width: 0;
+        max-width: 100%;
         white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
         text-align: right;
         font-size: 11px;
         font-family: "Roboto Mono", "Consolas", "Menlo", monospace;
@@ -183,25 +189,25 @@ Cond="parse_ini_file('/boot/config/plugins/plexstreamsplus/plexstreamsplus.cfg')
     }
 
     .psplus-dashboard-widget .psplus-col-name {
-        flex: 1 1 auto;
+        width: auto !important;
         min-width: 0;
     }
 
     .psplus-dashboard-widget .psplus-col-status {
-        flex: 0 0 72px;
+        width: auto !important;
         text-align: center;
     }
 
     .psplus-dashboard-widget .psplus-col-user {
-        flex: 0 0 150px;
+        width: auto !important;
         min-width: 0;
     }
 
     .psplus-dashboard-widget .psplus-col-time,
     .psplus-dashboard-widget .plexstreamsplus-time-col {
-        flex: 0 0 226px;
-        min-width: 226px;
-        max-width: 226px;
+        width: auto !important;
+        min-width: 0;
+        max-width: 100%;
         text-align: right;
     }
 </style>

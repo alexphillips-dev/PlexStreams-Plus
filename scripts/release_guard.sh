@@ -71,12 +71,12 @@ if [[ "${AUTHOR_PLUS}" != "${AUTHOR_LEGACY}" ]]; then
   psplus::fail "Manifest author mismatch: plus=${AUTHOR_PLUS}, legacy=${AUTHOR_LEGACY}"
 fi
 
-if [[ ! "${VERSION_PLUS}" =~ ^[0-9]{4}\.[0-9]{2}\.[0-9]{2}\.[0-9]{2,}$ ]]; then
+if [[ ! "${VERSION_PLUS}" =~ ^[0-9]{4}\.[0-9]{2}\.[0-9]{2}\.[1-9][0-9]*$ ]]; then
   psplus::fail "Version has unexpected format: ${VERSION_PLUS}"
 fi
 
 VERSION_DATE="${VERSION_PLUS%.*}"
-TODAY_DATE="$(date +%Y.%m.%d)"
+TODAY_DATE="$(TZ=America/New_York date +%Y.%m.%d)"
 if [[ "${VERSION_DATE}" > "${TODAY_DATE}" ]]; then
   psplus::fail "Version date (${VERSION_DATE}) is in the future (today: ${TODAY_DATE})."
 fi

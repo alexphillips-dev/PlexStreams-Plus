@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
   <!ENTITY name       "plexstreamsplus">
   <!ENTITY author     "alexphillips-dev">
-  <!ENTITY version    "2026.03.09.30">
+  <!ENTITY version    "2026.03.11.1">
   <!ENTITY launch     "Settings/PlexStreamsPlus">
   <!ENTITY branch     "main">
   <!ENTITY gitURL     "https://raw.githubusercontent.com/alexphillips-dev/PlexStreams-Plus/&branch;">
@@ -12,7 +12,7 @@
   <!ENTITY emhttp     "/usr/local/emhttp/plugins/&name;">
   <!ENTITY plgPATH    "/boot/config/plugins/&name;">
   <!ENTITY plgNAME    "&name;-&version;-x86_64-1">
-  <!ENTITY md5        "da62e05c6b88340a23b4b80a90d5688a">
+  <!ENTITY md5        "34a9949a68cdfe4a666b740af28d19eb">
 ]>
 
 <PLUGIN  name="&name;"
@@ -26,6 +26,9 @@
 
     <CHANGES>
     ##&name;
+###2026.03.11.1
+- Fix release versioning logic to use today's date with .1 reset and improve dashboard widget dynamic sizing across columns.
+
 ###2026.03.09.30
 - Dashboard widget upgrade: stale/last-updated status, reliable live timers, summary chips, clickable rows to focused Streams view, and scoped CSS isolation.
 
