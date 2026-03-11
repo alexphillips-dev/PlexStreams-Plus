@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
   <!ENTITY name       "plexstreamsplus">
   <!ENTITY author     "alexphillips-dev">
-  <!ENTITY version    "2026.03.11.5">
+  <!ENTITY version    "2026.03.11.6">
   <!ENTITY launch     "Settings/PlexStreamsPlus">
   <!ENTITY branch     "main">
   <!ENTITY gitURL     "https://raw.githubusercontent.com/alexphillips-dev/PlexStreams-Plus/&branch;">
@@ -12,7 +12,7 @@
   <!ENTITY emhttp     "/usr/local/emhttp/plugins/&name;">
   <!ENTITY plgPATH    "/boot/config/plugins/&name;">
   <!ENTITY plgNAME    "&name;-&version;-x86_64-1">
-  <!ENTITY md5        "587a93dcd75fbded76e79cfb411d36c0">
+  <!ENTITY md5        "d4b29e340d076a33850b9b3c8a242e89">
 ]>
 
 <PLUGIN  name="&name;"
@@ -26,6 +26,9 @@
 
     <CHANGES>
     ##&name;
+###2026.03.11.6
+- Fix Unraid update detection by using stable raw PluginURL endpoints and publishing a fresh revision.
+
 ###2026.03.11.5
 - Further compact stream cards by reducing media/padding dimensions to remove extra space below posters.
 
