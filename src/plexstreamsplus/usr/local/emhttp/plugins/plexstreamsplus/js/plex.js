@@ -39,10 +39,51 @@ function streamSessionKey(stream) {
     return id || host || '';
 }
 
-function streamTimeHtml(stream, includeEndTime) {
+function plexStreamsPlusParseClockToSeconds(clockValue) {
+    var raw = safeText(clockValue).trim();
+    if (!raw) {
+        return 0;
+    }
+
+    var parts = raw.split(':');
+    if (parts.length === 3) {
+        return plexStreamsPlusToSeconds(parts[0], parts[1], parts[2]);
+    }
+    if (parts.length === 2) {
+        return (Number(parts[0]) || 0) * 60 + (Number(parts[1]) || 0);
+    }
+    return Number(parts[0]) || 0;
+}
+
+function plexStreamsPlusShouldShowHours(durationSeconds, currentSeconds) {
+    return (Number(durationSeconds) || 0) >= 3600 || (Number(currentSeconds) || 0) >= 3600;
+}
+
+function plexStreamsPlusFormatClockLabel(totalSeconds, showHours) {
+    var bounded = Math.max(0, Math.floor(Number(totalSeconds) || 0));
+    var hours = Math.floor(bounded / 3600);
+    var minutes = Math.floor((bounded % 3600) / 60);
+    var seconds = Math.floor(bounded % 60);
+    if (showHours || hours > 0) {
+        return String(hours) + ':' + String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
+    }
+    return String(Math.floor(bounded / 60)) + ':' + String(seconds).padStart(2, '0');
+}
+
+function streamTimeHtml(stream, includeEndTime, smartFormat) {
     if (stream.currentPositionHours === null || stream.currentPositionHours === undefined) {
         return 'N/A';
     }
+
+    var currentSeconds = plexStreamsPlusToSeconds(stream.currentPositionHours, stream.currentPositionMinutes, stream.currentPositionSeconds);
+    var durationSeconds = plexStreamsPlusParseClockToSeconds(stream.lengthDisplay);
+    if (smartFormat) {
+        var showHours = plexStreamsPlusShouldShowHours(durationSeconds, currentSeconds);
+        var currentLabel = plexStreamsPlusFormatClockLabel(currentSeconds, showHours);
+        var durationLabel = plexStreamsPlusFormatClockLabel(durationSeconds, showHours);
+        return '<span class="currentPositionText">' + currentLabel + '</span> / <span class="lengthText">' + durationLabel + '</span>';
+    }
+
     var endTime = includeEndTime ? ' (<span class="endTime">' + plexStreamsPlusEscapeHtml(stream.endTime) + '</span>)' : '';
     return '<span class="currentPositionHours">' + stream.currentPositionHours.toString().padStart(2, 0) + '</span>:' +
         '<span class="currentPositionMinutes">' + stream.currentPositionMinutes.toString().padStart(2, 0) + '</span>:' +
@@ -220,6 +261,22 @@ function plexStreamsPlusRenderLiveTime(nodeOrContainer, nowMs) {
     var liveSeconds = state.positionSeconds + Math.max(0, elapsed);
     if (state.durationSeconds > 0) {
         liveSeconds = Math.min(state.durationSeconds, liveSeconds);
+    }
+
+    var smartMode = safeText($node.attr('data-smart-time')) === '1';
+    if (smartMode) {
+        var smartShowHours = plexStreamsPlusShouldShowHours(state.durationSeconds, liveSeconds);
+        var liveLabel = plexStreamsPlusFormatClockLabel(liveSeconds, smartShowHours);
+        var durationLabel = plexStreamsPlusFormatClockLabel(state.durationSeconds, smartShowHours);
+        var $currentText = $node.find('.currentPositionText');
+        var $lengthText = $node.find('.lengthText');
+        if ($currentText.length > 0 && $lengthText.length > 0) {
+            $currentText.text(liveLabel);
+            $lengthText.text(durationLabel);
+        } else {
+            $node.find('.plexstream-time, .position').first().html('<span class="currentPositionText">' + liveLabel + '</span> / <span class="lengthText">' + durationLabel + '</span>');
+        }
+        return;
     }
 
     var hms = plexStreamsPlusFormatSeconds(liveSeconds);
@@ -501,22 +558,23 @@ function updateDashboardStreamsNew(pollContext) {
 
                 var $container = $matches.first();
                 if ($container.length === 0) {
-                    $container = $('<div class="psplus-dashboard-row" role="link" tabindex="0" data-stream-key="' + safeKey + '" id="' + plexStreamsPlusEscapeHtml(domId) + '">' +
+                    $container = $('<div class="psplus-dashboard-row" role="link" tabindex="0" data-smart-time="1" data-stream-key="' + safeKey + '" id="' + plexStreamsPlusEscapeHtml(domId) + '">' +
                         '<span class="psplus-col-name"><p class="plexstream-title" title="' + plexStreamsPlusEscapeHtml(stream.titleString) + '">' + plexStreamsPlusEscapeHtml(stream.title) + '</p></span>' +
                         '<span class="psplus-col-status" style="text-align:center;"><i class="fa fa-' + plexStreamsPlusEscapeHtml(stream.stateIcon) + '" title="' + plexStreamsPlusEscapeHtml(stream.state) + '"></i></span>' +
                         '<span class="psplus-col-user"><p class="plexstream-user" title="' + plexStreamsPlusEscapeHtml(stream.user) + '">' + plexStreamsPlusEscapeHtml(stream.user) + '</p></span>' +
-                        '<span class="plexstreamsplus-time-col psplus-col-time"><p class="plexstream-time">' + streamTimeHtml(stream, true) + '</p></span>' +
+                        '<span class="plexstreamsplus-time-col psplus-col-time"><p class="plexstream-time">' + streamTimeHtml(stream, false, true) + '</p></span>' +
                     '</div>').appendTo($streamsHolder);
                 }
 
                 var node = $container[0];
                 $container.attr('id', domId);
                 $container.attr('data-stream-key', streamKey);
+                $container.attr('data-smart-time', '1');
                 $container.attr('updatedat', lastUpdate);
                 $container.find('.plexstream-title').text(stream.title).attr('title', stream.titleString);
                 $container.find('.psplus-col-status i').attr('class', 'fa fa-' + stream.stateIcon).attr('title', uCWord(stream.state));
                 $container.find('.plexstream-user').text(stream.user).attr('title', stream.user);
-                $container.find('.plexstream-time').html(streamTimeHtml(stream, true));
+                $container.find('.plexstream-time').html(streamTimeHtml(stream, false, true));
                 updateDuration(node, stream);
                 node.prevState = stream.state;
             });
@@ -586,22 +644,23 @@ function updateDashboardStreams(pollContext) {
 
                 var $container = $matches.first();
                 if ($container.length === 0) {
-                    $container = $('<tr class="psplus-dashboard-row" role="link" tabindex="0" data-stream-key="' + safeKey + '" style="display:table-row;" id="' + plexStreamsPlusEscapeHtml(domId) + '">' +
+                    $container = $('<tr class="psplus-dashboard-row" role="link" tabindex="0" data-smart-time="1" data-stream-key="' + safeKey + '" style="display:table-row;" id="' + plexStreamsPlusEscapeHtml(domId) + '">' +
                         '<td width="40%" style="padding: 0px;"><p class="plexstream-title" title="' + plexStreamsPlusEscapeHtml(stream.titleString) + '">' + plexStreamsPlusEscapeHtml(stream.title) + '</p></td>' +
                         '<td align="center" style="padding: 0px;text-align:center;"><i class="fa fa-' + plexStreamsPlusEscapeHtml(stream.stateIcon) + '" title="' + plexStreamsPlusEscapeHtml(stream.state) + '"></i></td>' +
                         '<td align="center" style="padding: 0px;"><p class="plexstream-user" title="' + plexStreamsPlusEscapeHtml(stream.user) + '">' + plexStreamsPlusEscapeHtml(stream.user) + '</p></td>' +
-                        '<td align="center" style="padding: 0px;text-align:right;"><p class="plexstream-time">' + streamTimeHtml(stream, false) + '</p></td>' +
+                        '<td align="center" style="padding: 0px;text-align:right;"><p class="plexstream-time">' + streamTimeHtml(stream, false, true) + '</p></td>' +
                     '</tr>').appendTo($streamsHolder);
                 }
 
                 var node = $container[0];
                 $container.attr('id', domId);
                 $container.attr('data-stream-key', streamKey);
+                $container.attr('data-smart-time', '1');
                 $container.attr('updatedat', lastUpdate);
                 $container.find('.plexstream-title').text(stream.title).attr('title', stream.titleString);
                 $container.find('td:eq(1) i').attr('class', 'fa fa-' + stream.stateIcon).attr('title', uCWord(stream.state));
                 $container.find('.plexstream-user').text(stream.user).attr('title', stream.user);
-                $container.find('.plexstream-time').html(streamTimeHtml(stream, false));
+                $container.find('.plexstream-time').html(streamTimeHtml(stream, false, true));
                 node.prevState = stream.state;
                 updateDuration(node, stream);
             });

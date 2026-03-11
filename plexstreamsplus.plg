@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
   <!ENTITY name       "plexstreamsplus">
   <!ENTITY author     "alexphillips-dev">
-  <!ENTITY version    "2026.03.11.3">
+  <!ENTITY version    "2026.03.11.4">
   <!ENTITY launch     "Settings/PlexStreamsPlus">
   <!ENTITY branch     "main">
   <!ENTITY gitURL     "https://raw.githubusercontent.com/alexphillips-dev/PlexStreams-Plus/&branch;">
@@ -12,7 +12,7 @@
   <!ENTITY emhttp     "/usr/local/emhttp/plugins/&name;">
   <!ENTITY plgPATH    "/boot/config/plugins/&name;">
   <!ENTITY plgNAME    "&name;-&version;-x86_64-1">
-  <!ENTITY md5        "b6e17bad527a2c990f77a7663da2ef10">
+  <!ENTITY md5        "717858acfdcec1019fea009869cd77d0">
 ]>
 
 <PLUGIN  name="&name;"
@@ -26,6 +26,9 @@
 
     <CHANGES>
     ##&name;
+###2026.03.11.4
+- Dashboard widget time cleanup: show only running/total, remove end-time suffix, and use smart MM:SS/H:MM:SS formatting without leading 00 hours.
+
 ###2026.03.11.3
 - Compact stream cards by reducing media-area/footer height and removing excess bottom space beneath posters.
 
