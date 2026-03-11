@@ -106,8 +106,11 @@ function plexStreamsPlusEnsureDashboardStatusTicker() {
     }
 
     plexStreamsPlusDashboardStatusTicker = setInterval(function() {
-        plexStreamsPlusRenderDashboardRefreshState('dashboard_new');
-        plexStreamsPlusRenderDashboardRefreshState('dashboard_legacy');
+        Object.keys(plexStreamsPlusPollState).forEach(function(context) {
+            if (safeText(context).indexOf('dashboard_') === 0) {
+                plexStreamsPlusRenderDashboardRefreshState(context);
+            }
+        });
     }, 1000);
 }
 
@@ -116,6 +119,13 @@ function plexStreamsPlusDashboardRoot(context) {
     if ($contextRoot.length > 0) {
         return $contextRoot.first();
     }
+
+    // If context-aware widgets exist, never fall back across contexts.
+    var $contextAware = $('.psplus-dashboard-widget[data-psplus-context]');
+    if ($contextAware.length > 0) {
+        return $();
+    }
+
     var $fallback = $('.psplus-dashboard-widget');
     if ($fallback.length > 0) {
         return $fallback.first();
@@ -128,7 +138,7 @@ function plexStreamsPlusDashboardFind(context, selector) {
     if ($root.length > 0) {
         return $root.find(selector);
     }
-    return $(selector);
+    return $();
 }
 
 function plexStreamsPlusFormatClockTime(timestamp) {
@@ -421,6 +431,10 @@ function plexStreamsPlusStopPolling(context) {
 
 function plexStreamsPlusStartPolling(context, updater) {
     if (typeof updater !== 'function') {
+        return;
+    }
+
+    if (plexStreamsPlusPollers[context]) {
         return;
     }
 
