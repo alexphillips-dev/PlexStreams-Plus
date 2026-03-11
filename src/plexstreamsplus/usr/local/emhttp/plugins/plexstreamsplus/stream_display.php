@@ -66,7 +66,7 @@
     #psplus-streams-root .stream-media {
         position: relative;
         display: flex;
-        height: 224px;
+        height: 208px;
         overflow: hidden;
         background: #0a0f14;
     }
@@ -90,10 +90,10 @@
     #psplus-streams-root .stream-poster {
         position: relative;
         z-index: 2;
-        width: 112px;
-        min-width: 112px;
-        height: 168px;
-        margin: 12px 12px 0 14px;
+        width: 110px;
+        min-width: 110px;
+        height: 166px;
+        margin: 9px 12px 0 12px;
         background-position: center;
         background-repeat: no-repeat;
         background-size: cover;
@@ -106,14 +106,14 @@
         z-index: 2;
         flex: 1;
         min-width: 0;
-        padding: 12px 14px 30px 0;
+        padding: 10px 12px 24px 0;
     }
 
     #psplus-streams-root .stream-details .detail-list {
         display: flex;
         flex-direction: column;
         flex-wrap: nowrap;
-        gap: 3px;
+        gap: 2px;
         list-style: none;
         margin: 0;
         padding: 0;
@@ -125,9 +125,9 @@
         flex: 0 0 auto;
         align-items: baseline;
         gap: 6px;
-        padding: 1px 0;
+        padding: 0;
         margin-bottom: 0;
-        line-height: 15px;
+        line-height: 14px;
     }
 
     #psplus-streams-root .detail-list .label {
@@ -176,7 +176,7 @@
         left: 0;
         right: 0;
         bottom: 0;
-        height: 20px;
+        height: 18px;
         z-index: 4;
         background: linear-gradient(0deg, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.05));
     }
@@ -192,7 +192,7 @@
     #psplus-streams-root .position {
         position: absolute;
         right: 8px;
-        bottom: 4px;
+        bottom: 3px;
         font-size: 10px;
         font-weight: 600;
         color: #f3f7fb;
@@ -203,7 +203,7 @@
     #psplus-streams-root .stream-footer {
         border-top: 1px solid #27313d;
         background: #11171f;
-        padding: 7px 12px 8px;
+        padding: 6px 11px 7px;
     }
 
     #psplus-streams-root .footer-top {
@@ -247,7 +247,7 @@
     }
 
     #psplus-streams-root .footer-bottom {
-        margin-top: 5px;
+        margin-top: 4px;
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -325,15 +325,15 @@
 
     @media (max-width: 680px) {
         #psplus-streams-root .stream-media {
-            height: 212px;
+            height: 196px;
         }
 
         #psplus-streams-root .stream-poster {
-            width: 94px;
-            min-width: 94px;
-            height: 142px;
-            margin-top: 10px;
-            margin-left: 12px;
+            width: 90px;
+            min-width: 90px;
+            height: 136px;
+            margin-top: 8px;
+            margin-left: 10px;
             margin-right: 10px;
         }
 
