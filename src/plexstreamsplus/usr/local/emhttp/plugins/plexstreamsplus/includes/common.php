@@ -2,10 +2,11 @@
     if (isset($GLOBALS['unRaidSettings'])) {
         define('OS_VERSION', 'Unraid ' . $GLOBALS['unRaidSettings']['version']);
     }
-    define('PLUGIN_VERSION', '2026.03.13.2');
+    define('PLUGIN_VERSION', '2026.03.13.3');
 
     if (!function_exists('getInstalledPluginVersion')) {
         function getInstalledPluginVersion($fallbackVersion) {
+            $bestVersion = trim((string)$fallbackVersion);
             $candidateManifests = [
                 '/boot/config/plugins/plexstreamsplus/plexstreamsplus.plg',
                 '/boot/config/plugins/plexstreams/plexstreams.plg'
@@ -23,13 +24,24 @@
 
                 if (preg_match('/<!ENTITY\s+version\s+"([^"]+)"/', $manifestContents, $matches) === 1) {
                     $resolvedVersion = trim((string)($matches[1] ?? ''));
-                    if ($resolvedVersion !== '') {
-                        return $resolvedVersion;
+                    if ($resolvedVersion === '') {
+                        continue;
+                    }
+
+                    if ($bestVersion === '') {
+                        $bestVersion = $resolvedVersion;
+                        continue;
+                    }
+
+                    // Prefer the highest version so stale local manifests cannot
+                    // make the settings badge display an older release.
+                    if (version_compare($resolvedVersion, $bestVersion, '>')) {
+                        $bestVersion = $resolvedVersion;
                     }
                 }
             }
 
-            return $fallbackVersion;
+            return $bestVersion;
         }
     }
 
