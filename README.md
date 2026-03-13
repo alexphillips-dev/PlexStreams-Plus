@@ -32,5 +32,5 @@ https://raw.githubusercontent.com/alexphillips-dev/PlexStreams-Plus/main/plexstr
 
 ## Support
 
-- Issues: `https://github.com/alexphillips-dev/PlexStreams-Plus/issues`
+- Support Thread: `https://forums.unraid.net/topic/92459-plugin-plex-streams/`
 - Repository: `https://github.com/alexphillips-dev/PlexStreams-Plus`

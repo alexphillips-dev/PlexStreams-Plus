@@ -92,18 +92,19 @@ if [[ "${LEGACY_XML_DATE}" != "${EXPECTED_XML_DATE}" ]]; then
 fi
 
 EXPECTED_PROJECT_URL="https://github.com/alexphillips-dev/PlexStreams-Plus"
-EXPECTED_SUPPORT_URL="${EXPECTED_PROJECT_URL}/issues"
+EXPECTED_SUPPORT_URL="https://forums.unraid.net/topic/92459-plugin-plex-streams/"
 EXPECTED_RAW_BASE_URL="https://raw.githubusercontent.com/alexphillips-dev/PlexStreams-Plus/main"
 EXPECTED_PLUGIN_NAME="PlexStreams Plus"
 EXPECTED_CATEGORY="Tools:System"
 EXPECTED_CA_TYPE="AddOn"
 EXPECTED_PLUGIN_FLAG="True"
+EXPECTED_ICON_URL="${EXPECTED_RAW_BASE_URL}/src/plexstreamsplus/usr/local/emhttp/plugins/plexstreamsplus/PlexStreams-icon.png"
 
 assert_ca_metadata() {
   local xml_file="$1"
   local manifest_name="$2"
 
-  local plugin_flag ca_type category plugin_name plugin_author support_url project_url plugin_url
+  local plugin_flag ca_type category plugin_name plugin_author support_url project_url plugin_url icon_url
   plugin_flag="$(read_xml_tag "${xml_file}" "Plugin")"
   ca_type="$(read_xml_tag "${xml_file}" "CA")"
   category="$(read_xml_tag "${xml_file}" "Category")"
@@ -112,6 +113,7 @@ assert_ca_metadata() {
   support_url="$(read_xml_tag "${xml_file}" "Support")"
   project_url="$(read_xml_tag "${xml_file}" "Project")"
   plugin_url="$(read_xml_tag "${xml_file}" "PluginURL")"
+  icon_url="$(read_xml_tag "${xml_file}" "Icon")"
 
   [[ "${plugin_flag}" == "${EXPECTED_PLUGIN_FLAG}" ]] || psplus::fail "CA metadata mismatch in ${xml_file}: <Plugin>${plugin_flag}</Plugin>"
   [[ "${ca_type}" == "${EXPECTED_CA_TYPE}" ]] || psplus::fail "CA metadata mismatch in ${xml_file}: <CA>${ca_type}</CA>"
@@ -122,6 +124,7 @@ assert_ca_metadata() {
   local expected_plugin_url="${EXPECTED_RAW_BASE_URL}/${manifest_name}"
   [[ "${project_url}" == "${EXPECTED_PROJECT_URL}" ]] || psplus::fail "CA metadata mismatch in ${xml_file}: <Project>${project_url}</Project>"
   [[ "${plugin_url}" == "${expected_plugin_url}" ]] || psplus::fail "CA metadata mismatch in ${xml_file}: <PluginURL>${plugin_url}</PluginURL>"
+  [[ "${icon_url}" == "${EXPECTED_ICON_URL}" ]] || psplus::fail "CA metadata mismatch in ${xml_file}: <Icon>${icon_url}</Icon>"
   [[ "${plugin_url}" != *'$('* ]] || psplus::fail "CA metadata mismatch in ${xml_file}: PluginURL contains unsupported shell expansion syntax."
 }
 
