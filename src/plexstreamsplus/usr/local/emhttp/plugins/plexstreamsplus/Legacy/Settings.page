@@ -568,7 +568,7 @@ function clearToken() {
             <h1 class="psplus-hero-title">PlexStreams Plus Settings</h1>
             <p class="psplus-hero-subtitle">Connect Plex, choose servers, and control where PlexStreams Plus appears in Unraid.</p>
         </div>
-        <div class="psplus-version-pill">Version <?php echo(htmlspecialchars(PLUGIN_VERSION, ENT_QUOTES)); ?></div>
+        <div class="psplus-version-pill">Version <?php echo(htmlspecialchars(PLUGIN_DISPLAY_VERSION, ENT_QUOTES)); ?></div>
     </div>
 
     <form name="plexstreamsplus_settings" id="plexstreamsplus_settings" method="POST" action="/update.php" target="progressFrame" class="psplus-settings-form">
@@ -671,7 +671,7 @@ function clearToken() {
 </div>
 <script>
     var OS_VERSION = '<?php echo($GLOBALS['unRaidSettings']['version']); ?>';
-    var PLUGIN_VERSION = '<?php echo(PLUGIN_VERSION); ?>';
+    var PLUGIN_VERSION = '<?php echo(PLUGIN_DISPLAY_VERSION); ?>';
 </script>
 <script src="<?autov('/plugins/plexstreamsplus/js/plex.js')?>"></script>
 <script>

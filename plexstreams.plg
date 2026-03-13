@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
   <!ENTITY name       "plexstreams">
   <!ENTITY author     "alexphillips-dev">
-  <!ENTITY version    "2026.03.13.1">
+  <!ENTITY version    "2026.03.13.2">
   <!ENTITY launch     "Settings/PlexStreamsPlus">
   <!ENTITY branch     "main">
   <!ENTITY gitURL     "https://raw.githubusercontent.com/alexphillips-dev/PlexStreams-Plus/&branch;">
@@ -12,7 +12,7 @@
   <!ENTITY emhttp     "/usr/local/emhttp/plugins/plexstreamsplus">
   <!ENTITY plgPATH    "/boot/config/plugins/&name;">
   <!ENTITY plgNAME    "&name;-&version;-x86_64-1">
-  <!ENTITY md5        "d8adbfac0ba4e511dca3aa22f3106ff0">
+  <!ENTITY md5        "b8602db8c12cbd84574126215c87bf59">
 ]>
 
 <PLUGIN  name="&name;"
@@ -26,6 +26,9 @@
 
     <CHANGES>
     ##&name;
+###2026.03.13.2
+- Fix settings version badge to resolve from installed manifest so it always reflects the current release.
+
 ###2026.03.13.1
 - CA readiness: switch support links to Unraid forum thread and add CA icon metadata enforcement.
 

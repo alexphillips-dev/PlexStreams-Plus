@@ -2,7 +2,40 @@
     if (isset($GLOBALS['unRaidSettings'])) {
         define('OS_VERSION', 'Unraid ' . $GLOBALS['unRaidSettings']['version']);
     }
-    define('PLUGIN_VERSION', '2026.03.13.1');
+    define('PLUGIN_VERSION', '2026.03.13.2');
+
+    if (!function_exists('getInstalledPluginVersion')) {
+        function getInstalledPluginVersion($fallbackVersion) {
+            $candidateManifests = [
+                '/boot/config/plugins/plexstreamsplus/plexstreamsplus.plg',
+                '/boot/config/plugins/plexstreams/plexstreams.plg'
+            ];
+
+            foreach ($candidateManifests as $manifestPath) {
+                if (!is_readable($manifestPath)) {
+                    continue;
+                }
+
+                $manifestContents = @file_get_contents($manifestPath);
+                if ($manifestContents === false) {
+                    continue;
+                }
+
+                if (preg_match('/<!ENTITY\s+version\s+"([^"]+)"/', $manifestContents, $matches) === 1) {
+                    $resolvedVersion = trim((string)($matches[1] ?? ''));
+                    if ($resolvedVersion !== '') {
+                        return $resolvedVersion;
+                    }
+                }
+            }
+
+            return $fallbackVersion;
+        }
+    }
+
+    if (!defined('PLUGIN_DISPLAY_VERSION')) {
+        define('PLUGIN_DISPLAY_VERSION', getInstalledPluginVersion(PLUGIN_VERSION));
+    }
 
     function normalizeHostUrl($host) {
         $host = trim((string)$host);
