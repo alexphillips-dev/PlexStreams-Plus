@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
   <!ENTITY name       "plexstreamsplus">
   <!ENTITY author     "alexphillips-dev">
-  <!ENTITY version    "2026.03.13.3">
+  <!ENTITY version    "2026.03.13.4">
   <!ENTITY launch     "Settings/PlexStreamsPlus">
   <!ENTITY branch     "main">
   <!ENTITY gitURL     "https://raw.githubusercontent.com/alexphillips-dev/PlexStreams-Plus/&branch;">
@@ -12,7 +12,7 @@
   <!ENTITY emhttp     "/usr/local/emhttp/plugins/&name;">
   <!ENTITY plgPATH    "/boot/config/plugins/&name;">
   <!ENTITY plgNAME    "&name;-&version;-x86_64-1">
-  <!ENTITY md5        "c1a85444ed3eb1959394c2529fbad51c">
+  <!ENTITY md5        "d7da16f681addaacd236a3a7e4c39907">
 ]>
 
 <PLUGIN  name="&name;"
@@ -26,6 +26,9 @@
 
     <CHANGES>
     ##&name;
+###2026.03.13.4
+- Add health checks, session actions, privacy controls, and stronger test/guard automation.
+
 ###2026.03.13.3
 - Fix settings version badge to prefer the highest discovered version and prevent stale local manifests from showing older revisions.
 
@@ -398,6 +401,11 @@
       DISPLAY_WIDGET="1"
       DISPLAY_NAV="1"
       FORCE_PLEX_HTTPS="0"
+      AUTO_FAILOVER="1"
+      ALLOW_TERMINATE="0"
+      MASK_LOCATIONS="0"
+      MASK_USERNAMES="0"
+      PRIVACY_ROLE="non_admin"
       ]]>
       </INLINE>
     </FILE>
@@ -432,7 +440,19 @@
                 echo 'DISPLAY_WIDGET="1"' >> "$CFG_FILE"
                 echo 'DISPLAY_NAV="1"' >> "$CFG_FILE"
                 echo 'FORCE_PLEX_HTTPS="0"' >> "$CFG_FILE"
+                echo 'AUTO_FAILOVER="1"' >> "$CFG_FILE"
+                echo 'ALLOW_TERMINATE="0"' >> "$CFG_FILE"
+                echo 'MASK_LOCATIONS="0"' >> "$CFG_FILE"
+                echo 'MASK_USERNAMES="0"' >> "$CFG_FILE"
+                echo 'PRIVACY_ROLE="non_admin"' >> "$CFG_FILE"
             fi
+
+            for setting in 'AUTO_FAILOVER="1"' 'ALLOW_TERMINATE="0"' 'MASK_LOCATIONS="0"' 'MASK_USERNAMES="0"' 'PRIVACY_ROLE="non_admin"'; do
+                key="${setting%%=*}"
+                if ! grep -q "^${key}=" "$CFG_FILE" 2>/dev/null; then
+                    echo "$setting" >> "$CFG_FILE"
+                fi
+            done
 
             echo ""
             echo "-----------------------------------------------------------"

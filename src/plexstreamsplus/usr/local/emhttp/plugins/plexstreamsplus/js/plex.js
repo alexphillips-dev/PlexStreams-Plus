@@ -7,7 +7,8 @@ var plexStreamsPlusFocusStreamKey = null;
 var plexStreamsPlusFocusApplied = false;
 var PLEXSTREAMSPLUS_WIDGET_STALE_MS = 45000;
 var plexStreamsPlusSettingsState = {
-    customServersValid: true
+    customServersValid: true,
+    healthInFlight: false
 };
 
 function safeText(value) {
@@ -24,6 +25,21 @@ function plexStreamsPlusEscapeHtml(value) {
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#39;');
+}
+
+function plexStreamsPlusIsTruthy(value) {
+    return ['1', 'true', 'yes', 'on'].indexOf(safeText(value).toLowerCase()) !== -1;
+}
+
+function plexStreamsPlusCanTerminate(stream) {
+    if (stream && stream.canTerminate !== undefined) {
+        return !!stream.canTerminate;
+    }
+    var globalFlag = '';
+    if (typeof window !== 'undefined' && window && window.PLEXSTREAMSPLUS_ALLOW_TERMINATE !== undefined) {
+        globalFlag = window.PLEXSTREAMSPLUS_ALLOW_TERMINATE;
+    }
+    return plexStreamsPlusIsTruthy(globalFlag);
 }
 
 function streamServerName(stream) {
@@ -878,8 +894,15 @@ function buildFullStreamCard(stream) {
     var duration = plexStreamsPlusEscapeHtml(stream.duration || 0);
     var percentPlayed = plexStreamsPlusEscapeHtml(stream.percentPlayed || 0);
     var titleHtml = buildStreamTitleMarkup(stream);
+    var safeHost = plexStreamsPlusEscapeHtml(stream['@host'] || '');
+    var safeMediaKey = plexStreamsPlusEscapeHtml(stream.key || '');
+    var safeSessionId = plexStreamsPlusEscapeHtml(stream.sessionId || '');
+    var safeMachineId = plexStreamsPlusEscapeHtml(stream.machineIdentifier || '');
+    var terminateAction = plexStreamsPlusCanTerminate(stream)
+        ? '<button type="button" class="psplus-action-btn is-danger" data-psplus-action="terminate">' + _('Terminate') + '</button>'
+        : '';
 
-    return '<li class="stream-container" id="' + safeId + '" data-stream-id="' + safeStreamId + '" data-stream-legacy-id="' + plexStreamsPlusEscapeHtml(streamIdRaw) + '" data-stream-type="' + safeType + '">' +
+    return '<li class="stream-container" id="' + safeId + '" data-stream-id="' + safeStreamId + '" data-stream-legacy-id="' + plexStreamsPlusEscapeHtml(streamIdRaw) + '" data-stream-type="' + safeType + '" data-host="' + safeHost + '" data-media-key="' + safeMediaKey + '" data-session-id="' + safeSessionId + '" data-machine-id="' + safeMachineId + '">' +
         '<article class="stream-card">' +
             '<div class="stream-media">' +
                 '<div class="stream-backdrop" style="background-image:url(\'' + safeArt + '\');"></div>' +
@@ -913,9 +936,197 @@ function buildFullStreamCard(stream) {
                         '<span class="session-user-name">' + safeUser + '</span>' +
                     '</span>' +
                 '</div>' +
+                '<div class="footer-actions">' +
+                    '<button type="button" class="psplus-action-btn" data-psplus-action="open-plex">' + _('Open in Plex') + '</button>' +
+                    '<button type="button" class="psplus-action-btn" data-psplus-action="copy-details">' + _('Copy Details') + '</button>' +
+                    terminateAction +
+                '</div>' +
             '</div>' +
         '</article>' +
     '</li>';
+}
+
+function plexStreamsPlusBuildPlexWebUrl(stream) {
+    var key = safeText(stream && stream.key);
+    var machineId = safeText(stream && stream.machineIdentifier);
+    if (!key) {
+        return '';
+    }
+    if (machineId) {
+        return 'https://app.plex.tv/desktop/#!/server/' + encodeURIComponent(machineId) + '/details?key=' + encodeURIComponent(key);
+    }
+    return 'https://app.plex.tv/desktop/#!/details?key=' + encodeURIComponent(key);
+}
+
+function plexStreamsPlusBuildCopyDetailsPayload(stream) {
+    return {
+        title: safeText(stream.title),
+        user: safeText(stream.user),
+        server: streamServerName(stream),
+        state: safeText(stream.state),
+        quality: streamQualityValue(stream),
+        stream: decisionLabel(stream.streamDecision),
+        video: streamVideoValue(stream),
+        audio: streamAudioValue(stream),
+        location: safeText(stream.locationDisplay),
+        time: streamTimeHtml(stream, false, true).replace(/<[^>]+>/g, ''),
+        host: safeText(stream['@host']),
+        sessionId: safeText(stream.sessionId),
+        mediaKey: safeText(stream.key)
+    };
+}
+
+function plexStreamsPlusFlashActionMessage(message, isError) {
+    var $root = $('#psplus-streams-root');
+    if ($root.length === 0) {
+        return;
+    }
+
+    var $existing = $root.find('.psplus-action-banner');
+    if ($existing.length === 0) {
+        $existing = $('<div class="psplus-action-banner"></div>');
+        $root.prepend($existing);
+    }
+
+    $existing.removeClass('is-error is-ok').addClass(isError ? 'is-error' : 'is-ok').text(safeText(message)).stop(true, true).fadeIn(120);
+    clearTimeout($existing.data('hideTimer'));
+    $existing.data('hideTimer', setTimeout(function() {
+        $existing.fadeOut(300);
+    }, 3500));
+}
+
+function plexStreamsPlusCopyDetails(stream) {
+    var payload = plexStreamsPlusBuildCopyDetailsPayload(stream);
+    var text = JSON.stringify(payload, null, 2);
+    if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+        return navigator.clipboard.writeText(text).then(function() {
+            plexStreamsPlusFlashActionMessage(_('Session details copied.'), false);
+        }).catch(function() {
+            plexStreamsPlusFlashActionMessage(_('Unable to copy session details.'), true);
+        });
+    }
+
+    var $temp = $('<textarea style="position:absolute;left:-9999px;top:-9999px;"></textarea>').val(text).appendTo('body');
+    $temp[0].select();
+    var copied = false;
+    try {
+        copied = document.execCommand('copy');
+    } catch (error) {
+        copied = false;
+    }
+    $temp.remove();
+    plexStreamsPlusFlashActionMessage(copied ? _('Session details copied.') : _('Unable to copy session details.'), !copied);
+    return $.Deferred().resolve().promise();
+}
+
+function plexStreamsPlusOpenInPlex(stream) {
+    var url = plexStreamsPlusBuildPlexWebUrl(stream);
+    if (!url) {
+        plexStreamsPlusFlashActionMessage(_('Plex URL unavailable for this session.'), true);
+        return;
+    }
+    var win = window.open(url, '_blank');
+    if (win) {
+        win.opener = null;
+    }
+}
+
+function plexStreamsPlusTerminateSession(stream) {
+    if (!plexStreamsPlusCanTerminate(stream)) {
+        plexStreamsPlusFlashActionMessage(_('Terminate is disabled in settings.'), true);
+        return $.Deferred().reject().promise();
+    }
+
+    var host = safeText(stream['@host']);
+    var sessionId = safeText(stream.sessionId || stream.id);
+    if (!host || !sessionId) {
+        plexStreamsPlusFlashActionMessage(_('Missing host or session id.'), true);
+        return $.Deferred().reject().promise();
+    }
+
+    var title = safeText(stream.title || sessionId);
+    var confirmMessage = _('Terminate this stream?') + '\n' + title;
+    if (!window.confirm(confirmMessage)) {
+        return $.Deferred().resolve().promise();
+    }
+
+    return $.ajax({
+        url: '/plugins/plexstreamsplus/sessionAction.php',
+        method: 'POST',
+        dataType: 'json',
+        data: {
+            action: 'terminate',
+            host: host,
+            sessionId: sessionId,
+            reason: 'Terminated from PlexStreams Plus'
+        },
+        timeout: 15000
+    }).done(function() {
+        plexStreamsPlusFlashActionMessage(_('Terminate command sent.'), false);
+        updateFullStreamInfo('streams_page');
+    }).fail(function(jqXHR) {
+        var message = _('Terminate failed.');
+        if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) {
+            message = jqXHR.responseJSON.message;
+        }
+        plexStreamsPlusFlashActionMessage(message, true);
+    });
+}
+
+function plexStreamsPlusStreamFromContainer($container) {
+    if (!$container || $container.length === 0) {
+        return null;
+    }
+    var node = $container[0];
+    if (node.psplusStream) {
+        return node.psplusStream;
+    }
+
+    return {
+        id: safeText($container.attr('data-stream-legacy-id') || $container.attr('data-stream-id')),
+        sessionId: safeText($container.attr('data-session-id') || $container.attr('data-stream-legacy-id')),
+        key: safeText($container.attr('data-media-key')),
+        machineIdentifier: safeText($container.attr('data-machine-id')),
+        '@host': safeText($container.attr('data-host')),
+        title: safeText($container.find('.stream-title-link').text()),
+        user: safeText($container.find('.session-user-name').text()),
+        locationDisplay: safeText($container.find('.location-value').text()),
+        streamDecision: safeText($container.find('.stream-value').text()),
+        state: safeText($container.find('.status i').attr('title')),
+        canTerminate: plexStreamsPlusCanTerminate({})
+    };
+}
+
+function plexStreamsPlusBindStreamActions() {
+    var $root = $('#psplus-streams-root');
+    if ($root.length === 0 || $root.data('psplusActionBound')) {
+        return;
+    }
+    $root.data('psplusActionBound', true);
+    $root.on('click', '[data-psplus-action]', function(event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        var $button = $(this);
+        var action = safeText($button.attr('data-psplus-action'));
+        var $container = $button.closest('.stream-container');
+        var stream = plexStreamsPlusStreamFromContainer($container);
+        if (!stream) {
+            return;
+        }
+
+        if (action === 'open-plex') {
+            plexStreamsPlusOpenInPlex(stream);
+            return;
+        }
+        if (action === 'copy-details') {
+            plexStreamsPlusCopyDetails(stream);
+            return;
+        }
+        if (action === 'terminate') {
+            plexStreamsPlusTerminateSession(stream);
+        }
+    });
 }
 
 function streamStaticSignature(stream) {
@@ -945,6 +1156,7 @@ function refreshStreamCardDynamic($container, stream) {
     $container.find('.audio-value').text(streamAudioValue(stream));
     $container.find('.location-value').text(location).attr('title', location);
     $container.find('.progressBar').css('width', percentPlayed + '%').attr('duration', safeText(stream.duration || 0));
+    $container.attr('data-session-id', safeText(stream.sessionId || stream.id || ''));
 }
 
 function refreshStreamCard($container, stream) {
@@ -969,12 +1181,35 @@ function refreshStreamCard($container, stream) {
     $container.find('.location-value').text(location).attr('title', location);
 
     $container.find('.progressBar').css('width', percentPlayed + '%').attr('duration', safeText(stream.duration || 0));
+    $container.attr('data-host', safeText(stream['@host'] || ''));
+    $container.attr('data-media-key', safeText(stream.key || ''));
+    $container.attr('data-session-id', safeText(stream.sessionId || stream.id || ''));
+    $container.attr('data-machine-id', safeText(stream.machineIdentifier || ''));
+
+    var $actions = $container.find('.footer-actions');
+    if ($actions.length === 0) {
+        $actions = $('<div class="footer-actions">' +
+            '<button type="button" class="psplus-action-btn" data-psplus-action="open-plex">' + _('Open in Plex') + '</button>' +
+            '<button type="button" class="psplus-action-btn" data-psplus-action="copy-details">' + _('Copy Details') + '</button>' +
+        '</div>');
+        $container.find('.stream-footer').append($actions);
+    }
+
+    if (plexStreamsPlusCanTerminate(stream)) {
+        if ($actions.find('[data-psplus-action="terminate"]').length === 0) {
+            $actions.append('<button type="button" class="psplus-action-btn is-danger" data-psplus-action="terminate">' + _('Terminate') + '</button>');
+        }
+    } else {
+        $actions.find('[data-psplus-action="terminate"]').remove();
+    }
+
     $container.attr('data-static-signature', streamStaticSignature(stream));
 }
 
 function updateFullStreamInfo(pollContext) {
     var context = safeText(pollContext || 'streams_page');
     plexStreamsPlusInitFocusTarget();
+    plexStreamsPlusBindStreamActions();
     return $.ajax('/plugins/plexstreamsplus/ajax.php').done(function(streams){
         if (streams.length > 0) {
             var currentDate = new Date();
@@ -1022,9 +1257,14 @@ function updateFullStreamInfo(pollContext) {
                 $container.attr('id', streamDomId(sessionKey));
                 $container.attr('data-stream-id', sessionKey);
                 $container.attr('data-stream-legacy-id', legacyId);
+                $container.attr('data-host', safeText(stream['@host'] || ''));
+                $container.attr('data-media-key', safeText(stream.key || ''));
+                $container.attr('data-session-id', safeText(stream.sessionId || legacyId));
+                $container.attr('data-machine-id', safeText(stream.machineIdentifier || ''));
                 updateDuration(node, stream);
                 $container.attr('updatedat', lastUpdate);
                 node.prevState = stream.state;
+                node.psplusStream = stream;
                 plexStreamsPlusTryFocusStream($container, sessionKey);
             });
 
@@ -1102,6 +1342,112 @@ function plexStreamsPlusSetServerStatus(status, message) {
     if (message !== undefined) {
         $status.text(safeText(message));
     }
+}
+
+function plexStreamsPlusSetHealthStatus(status, message) {
+    var $status = $('#psplus-health-status');
+    if ($status.length === 0) {
+        return;
+    }
+    $status.removeClass('is-success is-warning is-error');
+    var normalized = safeText(status).toLowerCase();
+    if (normalized === 'success') {
+        $status.addClass('is-success');
+    } else if (normalized === 'warning') {
+        $status.addClass('is-warning');
+    } else if (normalized === 'error') {
+        $status.addClass('is-error');
+    }
+    $status.text(safeText(message));
+}
+
+function plexStreamsPlusRenderHealthRows(label, entries, target) {
+    var lines = [];
+    var safeLabel = plexStreamsPlusEscapeHtml(label);
+    if (!$.isArray(entries) || entries.length === 0) {
+        lines.push('<div class="psplus-health-row"><span class="psplus-health-host">' + safeLabel + '</span><span class="psplus-health-meta">None</span></div>');
+        target.append(lines.join(''));
+        return;
+    }
+
+    entries.forEach(function(entry) {
+        var host = plexStreamsPlusEscapeHtml(entry.host || entry.uri || 'unknown');
+        var status = !!entry.reachable;
+        var metaClass = status ? 'is-ok' : 'is-error';
+        var code = Number(entry.httpCode || 0);
+        var duration = Number(entry.durationMs || 0);
+        var meta = status ? ('OK' + (duration > 0 ? (' ' + duration + 'ms') : '')) : ((code > 0 ? ('HTTP ' + code) : safeText(entry.message || 'error')));
+        lines.push(
+            '<div class="psplus-health-row">' +
+                '<span class="psplus-health-host">' + host + '</span>' +
+                '<span class="psplus-health-meta ' + metaClass + '">' + plexStreamsPlusEscapeHtml(meta) + '</span>' +
+            '</div>'
+        );
+    });
+
+    target.append('<div class="psplus-health-row"><span class="psplus-health-host">' + safeLabel + '</span><span class="psplus-health-meta">' + entries.length + '</span></div>');
+    target.append(lines.join(''));
+}
+
+function plexStreamsPlusRunHealthCheck() {
+    var $button = $('#psplus-run-health-btn');
+    var $results = $('#psplus-health-results');
+    if ($button.length === 0 || $results.length === 0) {
+        return;
+    }
+    if (plexStreamsPlusSettingsState.healthInFlight) {
+        return;
+    }
+
+    plexStreamsPlusSettingsState.healthInFlight = true;
+    $button.prop('disabled', true);
+    $results.empty();
+    plexStreamsPlusSetHealthStatus('info', _('Running health checks...'));
+
+    $.ajax({
+        url: '/plugins/plexstreamsplus/health.php',
+        method: 'GET',
+        dataType: 'json',
+        timeout: 30000
+    }).done(function(data) {
+        var token = data && data.token ? data.token : {};
+        var selectedHosts = data && $.isArray(data.selectedHosts) ? data.selectedHosts : [];
+        var fallbackHealth = data && $.isArray(data.fallbackHealth) ? data.fallbackHealth : [];
+        var recommended = safeText(data && data.autoFailover ? data.autoFailover.recommendedHost : '');
+        var tokenValid = !!token.valid;
+
+        if (!token.configured) {
+            plexStreamsPlusSetHealthStatus('warning', _('No token configured.'));
+        } else if (!tokenValid) {
+            plexStreamsPlusSetHealthStatus('error', _('Token check failed: ') + safeText(token.message || 'Unauthorized.'));
+        } else {
+            var reachable = selectedHosts.filter(function(item) { return !!item.reachable; }).length;
+            if (reachable > 0) {
+                plexStreamsPlusSetHealthStatus('success', _('Token valid, ') + reachable + _(' host(s) reachable.'));
+            } else {
+                plexStreamsPlusSetHealthStatus('warning', _('Token valid but selected hosts are unreachable.'));
+            }
+        }
+
+        plexStreamsPlusRenderHealthRows(_('Selected Hosts'), selectedHosts, $results);
+        if (fallbackHealth.length > 0) {
+            plexStreamsPlusRenderHealthRows(_('Failover Candidates'), fallbackHealth, $results);
+            if (recommended) {
+                $results.append('<div class="psplus-health-row"><span class="psplus-health-host">' + _('Recommended Failover') + '</span><span class="psplus-health-meta is-ok">' + plexStreamsPlusEscapeHtml(recommended) + '</span></div>');
+            }
+        }
+    }).fail(function(jqXHR, textStatus) {
+        var message = textStatus === 'timeout'
+            ? _('Health check timed out.')
+            : _('Unable to run health check right now.');
+        if (jqXHR && jqXHR.status === 500) {
+            message = _('Health check failed: verify Plex token and server configuration.');
+        }
+        plexStreamsPlusSetHealthStatus('error', message);
+    }).always(function() {
+        plexStreamsPlusSettingsState.healthInFlight = false;
+        $button.prop('disabled', false);
+    });
 }
 
 function plexStreamsPlusSetTokenState(state, noteOverride) {
@@ -1321,6 +1667,10 @@ function plexStreamsPlusInitSettingsPage() {
         getServers('#hostcontainer', $('#HOST').val());
     });
 
+    $('#psplus-run-health-btn').on('click', function() {
+        plexStreamsPlusRunHealthCheck();
+    });
+
     $('#psplus-verify-token-btn').on('click', function() {
         plexStreamsPlusVerifyToken();
     });
@@ -1343,6 +1693,7 @@ function plexStreamsPlusInitSettingsPage() {
     plexStreamsPlusSetTokenMasked(true);
     plexStreamsPlusSetTokenState(safeText($('#plex-token').val()).trim().length > 0 ? 'connected' : 'disconnected');
     plexStreamsPlusSetServerStatus('info', _('Ready to load Plex servers.'));
+    plexStreamsPlusSetHealthStatus('info', _('No health check has run yet.'));
     plexStreamsPlusUpdateSaveButtonState();
 }
 
@@ -1655,6 +2006,9 @@ if (typeof module !== 'undefined' && module.exports) {
         streamEpisodeMeta: streamEpisodeMeta,
         streamDomId: streamDomId,
         streamStaticSignature: streamStaticSignature,
+        plexStreamsPlusBuildPlexWebUrl: plexStreamsPlusBuildPlexWebUrl,
+        plexStreamsPlusBuildCopyDetailsPayload: plexStreamsPlusBuildCopyDetailsPayload,
+        plexStreamsPlusIsTruthy: plexStreamsPlusIsTruthy,
         plexStreamsPlusParseCustomServerEntries: plexStreamsPlusParseCustomServerEntries,
         plexStreamsPlusResetPollState: plexStreamsPlusResetPollState,
         plexStreamsPlusMarkPoll: plexStreamsPlusMarkPoll,

@@ -43,6 +43,36 @@ function run() {
   const parsed = plex.plexStreamsPlusParseCustomServerEntries('192.168.1.2:32400, plex.local:32400, bad%%host');
   assert.deepStrictEqual(parsed.invalidEntries, ['bad%%host']);
 
+  assert.strictEqual(plex.plexStreamsPlusIsTruthy('1'), true);
+  assert.strictEqual(plex.plexStreamsPlusIsTruthy('true'), true);
+  assert.strictEqual(plex.plexStreamsPlusIsTruthy('on'), true);
+  assert.strictEqual(plex.plexStreamsPlusIsTruthy('0'), false);
+
+  const plexWebUrl = plex.plexStreamsPlusBuildPlexWebUrl({
+    key: '/library/metadata/42',
+    machineIdentifier: 'abc123'
+  });
+  assert.strictEqual(
+    plexWebUrl,
+    'https://app.plex.tv/desktop/#!/server/abc123/details?key=%2Flibrary%2Fmetadata%2F42'
+  );
+
+  const plexWebFallbackUrl = plex.plexStreamsPlusBuildPlexWebUrl({
+    key: '/library/metadata/99'
+  });
+  assert.strictEqual(
+    plexWebFallbackUrl,
+    'https://app.plex.tv/desktop/#!/details?key=%2Flibrary%2Fmetadata%2F99'
+  );
+
+  const copyPayload = plex.plexStreamsPlusBuildCopyDetailsPayload(fixture);
+  assert.strictEqual(copyPayload.title, fixture.title);
+  assert.strictEqual(copyPayload.user, fixture.user);
+  assert.strictEqual(copyPayload.mediaKey, fixture.key);
+  assert.strictEqual(copyPayload.host, fixture['@host'] || '');
+  assert.strictEqual(copyPayload.sessionId, fixture.sessionId || '');
+  assert.strictEqual(copyPayload.time.includes('<'), false);
+
   plex.plexStreamsPlusResetPollState('fixture-test');
   assert.strictEqual(plex.plexStreamsPlusNextPollDelay('fixture-test'), 5000);
   plex.plexStreamsPlusMarkPoll('fixture-test', 0, false);

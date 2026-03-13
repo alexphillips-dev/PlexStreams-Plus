@@ -41,6 +41,26 @@ if (!isset($cfg['TOKEN'])) {
     $cfg['TOKEN'] = "";
 }
 
+if (!isset($cfg['AUTO_FAILOVER'])) {
+    $cfg['AUTO_FAILOVER'] = "1";
+}
+
+if (!isset($cfg['ALLOW_TERMINATE'])) {
+    $cfg['ALLOW_TERMINATE'] = "0";
+}
+
+if (!isset($cfg['MASK_LOCATIONS'])) {
+    $cfg['MASK_LOCATIONS'] = "0";
+}
+
+if (!isset($cfg['MASK_USERNAMES'])) {
+    $cfg['MASK_USERNAMES'] = "0";
+}
+
+if (!isset($cfg['PRIVACY_ROLE'])) {
+    $cfg['PRIVACY_ROLE'] = "non_admin";
+}
+
 $pluginPath = '/usr/local/emhttp/plugins/plexstreamsplus/';
 
 if ($cfg['DISPLAY_NAV'] === '0' && file_exists($pluginPath . 'PlexStreamsPlusNav.page')) {
@@ -535,6 +555,88 @@ function clearToken() {
         gap: 8px;
     }
 
+    .psplus-health-status {
+        border: 1px solid #314458;
+        background: rgba(15, 27, 39, 0.68);
+        color: #d3e6fa;
+        font-size: 12px;
+        padding: 8px 10px;
+        line-height: 1.35;
+    }
+
+    .psplus-health-status.is-success {
+        border-color: #2c6544;
+        background: rgba(17, 54, 36, 0.62);
+        color: #cdeed8;
+    }
+
+    .psplus-health-status.is-warning {
+        border-color: #705f2a;
+        background: rgba(59, 44, 9, 0.62);
+        color: #f4e8bd;
+    }
+
+    .psplus-health-status.is-error {
+        border-color: #76424d;
+        background: rgba(57, 21, 30, 0.64);
+        color: #ffd2db;
+    }
+
+    .psplus-health-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .psplus-health-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        border-bottom: 1px dashed rgba(91, 114, 138, 0.45);
+        padding-bottom: 4px;
+        font-size: 12px;
+    }
+
+    .psplus-health-row:last-child {
+        border-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .psplus-health-host {
+        color: #d9e8fa;
+        font-weight: 600;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .psplus-health-meta {
+        color: #9db1c8;
+        white-space: nowrap;
+    }
+
+    .psplus-health-meta.is-ok {
+        color: #9de4bd;
+    }
+
+    .psplus-health-meta.is-error {
+        color: #f6b6c0;
+    }
+
+    .psplus-health-note {
+        color: #98adca;
+        font-size: 11px;
+    }
+
+    .psplus-select {
+        min-height: 37px;
+        border: 1px solid #344556;
+        background: #101922;
+        color: #f3f8ff;
+        padding: 8px 10px;
+        font-size: 13px;
+    }
+
     @media (max-width: 980px) {
         .psplus-settings-grid {
             grid-template-columns: 1fr;
@@ -621,6 +723,17 @@ function clearToken() {
             </section>
 
             <section class="psplus-card">
+                <div class="psplus-card-head">
+                    <h2>_(Health Checks)_</h2>
+                    <button type="button" class="psplus-btn psplus-btn-secondary" id="psplus-run-health-btn">_(Run Health Check)_</button>
+                </div>
+                <p>_(Validate token status, selected server reachability, and failover readiness.)_</p>
+                <div id="psplus-health-status" class="psplus-health-status">_(No health check has run yet.)_</div>
+                <div id="psplus-health-results" class="psplus-health-grid"></div>
+                <p class="psplus-health-note">_(Auto failover checks only run when selected hosts are unreachable.)_</p>
+            </section>
+
+            <section class="psplus-card">
                 <h2>_(Custom Servers)_</h2>
                 <p>_(Add manual Plex endpoints if discovery does not return all servers.)_</p>
                 <input type="text" class="psplus-input" name="CUSTOM_SERVERS" id="CUSTOM_SERVERS" placeholder="Example: 192.168.1.2:32400" value="<?php echo(htmlspecialchars($cfg['CUSTOM_SERVERS'], ENT_QUOTES)); ?>" />
@@ -630,6 +743,69 @@ function clearToken() {
             <section class="psplus-card">
                 <h2>_(Behavior)_</h2>
                 <div class="psplus-setting-stack">
+                    <div class="psplus-setting-row">
+                        <div>
+                            <div class="psplus-setting-title">_(Auto Failover)_</div>
+                            <div class="psplus-setting-help">_(When selected hosts fail, automatically try discovered fallback hosts.)_</div>
+                        </div>
+                        <div class="psplus-segment">
+                            <input type="radio" name="AUTO_FAILOVER" id="AUTO_FAILOVER_ON" value="1" <?php echo($cfg['AUTO_FAILOVER'] === "1" ? "checked" : ""); ?> />
+                            <label for="AUTO_FAILOVER_ON">_(On)_</label>
+                            <input type="radio" name="AUTO_FAILOVER" id="AUTO_FAILOVER_OFF" value="0" <?php echo($cfg['AUTO_FAILOVER'] === "0" ? "checked" : ""); ?> />
+                            <label for="AUTO_FAILOVER_OFF">_(Off)_</label>
+                        </div>
+                    </div>
+
+                    <div class="psplus-setting-row">
+                        <div>
+                            <div class="psplus-setting-title">_(Allow Session Terminate)_</div>
+                            <div class="psplus-setting-help">_(Show terminate controls on stream cards for admin sessions.)_</div>
+                        </div>
+                        <div class="psplus-segment">
+                            <input type="radio" name="ALLOW_TERMINATE" id="ALLOW_TERMINATE_ON" value="1" <?php echo($cfg['ALLOW_TERMINATE'] === "1" ? "checked" : ""); ?> />
+                            <label for="ALLOW_TERMINATE_ON">_(On)_</label>
+                            <input type="radio" name="ALLOW_TERMINATE" id="ALLOW_TERMINATE_OFF" value="0" <?php echo($cfg['ALLOW_TERMINATE'] === "0" ? "checked" : ""); ?> />
+                            <label for="ALLOW_TERMINATE_OFF">_(Off)_</label>
+                        </div>
+                    </div>
+
+                    <div class="psplus-setting-row">
+                        <div>
+                            <div class="psplus-setting-title">_(Mask Viewer Location)_</div>
+                            <div class="psplus-setting-help">_(Hide client IP and geo location in widgets and cards.)_</div>
+                        </div>
+                        <div class="psplus-segment">
+                            <input type="radio" name="MASK_LOCATIONS" id="MASK_LOCATIONS_ON" value="1" <?php echo($cfg['MASK_LOCATIONS'] === "1" ? "checked" : ""); ?> />
+                            <label for="MASK_LOCATIONS_ON">_(On)_</label>
+                            <input type="radio" name="MASK_LOCATIONS" id="MASK_LOCATIONS_OFF" value="0" <?php echo($cfg['MASK_LOCATIONS'] === "0" ? "checked" : ""); ?> />
+                            <label for="MASK_LOCATIONS_OFF">_(Off)_</label>
+                        </div>
+                    </div>
+
+                    <div class="psplus-setting-row">
+                        <div>
+                            <div class="psplus-setting-title">_(Mask Usernames)_</div>
+                            <div class="psplus-setting-help">_(Replace usernames with anonymous labels in stream views.)_</div>
+                        </div>
+                        <div class="psplus-segment">
+                            <input type="radio" name="MASK_USERNAMES" id="MASK_USERNAMES_ON" value="1" <?php echo($cfg['MASK_USERNAMES'] === "1" ? "checked" : ""); ?> />
+                            <label for="MASK_USERNAMES_ON">_(On)_</label>
+                            <input type="radio" name="MASK_USERNAMES" id="MASK_USERNAMES_OFF" value="0" <?php echo($cfg['MASK_USERNAMES'] === "0" ? "checked" : ""); ?> />
+                            <label for="MASK_USERNAMES_OFF">_(Off)_</label>
+                        </div>
+                    </div>
+
+                    <div class="psplus-setting-row">
+                        <div>
+                            <div class="psplus-setting-title">_(Privacy Scope)_</div>
+                            <div class="psplus-setting-help">_(Choose whether masking applies to non-admin viewers or all viewers.)_</div>
+                        </div>
+                        <select class="psplus-select" name="PRIVACY_ROLE" id="PRIVACY_ROLE">
+                            <option value="non_admin" <?php echo($cfg['PRIVACY_ROLE'] === "non_admin" ? "selected" : ""); ?>>_(Non-Admin Viewers)_</option>
+                            <option value="all" <?php echo($cfg['PRIVACY_ROLE'] === "all" ? "selected" : ""); ?>>_(All Viewers)_</option>
+                        </select>
+                    </div>
+
                     <div class="psplus-setting-row">
                         <div>
                             <div class="psplus-setting-title">_(Display in Navigation)_</div>
@@ -681,6 +857,8 @@ function clearToken() {
 <script>
     var OS_VERSION = '<?php echo($GLOBALS['unRaidSettings']['version']); ?>';
     var PLUGIN_VERSION = '<?php echo(PLUGIN_DISPLAY_VERSION); ?>';
+    var PLEXSTREAMSPLUS_VIEWER_ROLE = '<?php echo(getViewerRole()); ?>';
+    var PLEXSTREAMSPLUS_ALLOW_TERMINATE = '<?php echo(canViewerTerminateSessions($cfg) ? "1" : "0"); ?>';
 </script>
 <script src="<?autov('/plugins/plexstreamsplus/js/plex.js')?>"></script>
 <script>

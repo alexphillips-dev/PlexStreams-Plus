@@ -32,6 +32,26 @@ if (!isset($cfg['TOKEN'])) {
     $cfg['TOKEN'] = "";
 }
 
+if (!isset($cfg['AUTO_FAILOVER'])) {
+    $cfg['AUTO_FAILOVER'] = "1";
+}
+
+if (!isset($cfg['ALLOW_TERMINATE'])) {
+    $cfg['ALLOW_TERMINATE'] = "0";
+}
+
+if (!isset($cfg['MASK_LOCATIONS'])) {
+    $cfg['MASK_LOCATIONS'] = "0";
+}
+
+if (!isset($cfg['MASK_USERNAMES'])) {
+    $cfg['MASK_USERNAMES'] = "0";
+}
+
+if (!isset($cfg['PRIVACY_ROLE'])) {
+    $cfg['PRIVACY_ROLE'] = "non_admin";
+}
+
 $pluginPath = '/usr/local/emhttp/plugins/plexstreamsplus/';
 
 if ($cfg['DISPLAY_NAV'] === '0' && file_exists($pluginPath . 'PlexStreamsPlusNav.page')) {
@@ -575,6 +595,11 @@ function clearToken() {
         <input type="hidden" name="#file" value="plexstreamsplus/plexstreamsplus.cfg" />
         <input type="hidden" id="COMMAND" name="#command" value="" />
         <input type="hidden" id="HOST" name="HOST" value="<?php echo(htmlspecialchars($cfg['HOST'], ENT_QUOTES)); ?>" />
+        <input type="hidden" name="AUTO_FAILOVER" value="<?php echo(htmlspecialchars($cfg['AUTO_FAILOVER'], ENT_QUOTES)); ?>" />
+        <input type="hidden" name="ALLOW_TERMINATE" value="<?php echo(htmlspecialchars($cfg['ALLOW_TERMINATE'], ENT_QUOTES)); ?>" />
+        <input type="hidden" name="MASK_LOCATIONS" value="<?php echo(htmlspecialchars($cfg['MASK_LOCATIONS'], ENT_QUOTES)); ?>" />
+        <input type="hidden" name="MASK_USERNAMES" value="<?php echo(htmlspecialchars($cfg['MASK_USERNAMES'], ENT_QUOTES)); ?>" />
+        <input type="hidden" name="PRIVACY_ROLE" value="<?php echo(htmlspecialchars($cfg['PRIVACY_ROLE'], ENT_QUOTES)); ?>" />
 
         <div class="psplus-settings-grid">
             <section class="psplus-card">

@@ -301,6 +301,56 @@
         white-space: nowrap;
     }
 
+    #psplus-streams-root .footer-actions {
+        margin-top: 6px;
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+
+    #psplus-streams-root .psplus-action-btn {
+        border: 1px solid #355374;
+        background: #142437;
+        color: #d8e8fa;
+        font-size: 11px;
+        line-height: 1;
+        font-weight: 700;
+        padding: 6px 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        cursor: pointer;
+    }
+
+    #psplus-streams-root .psplus-action-btn:hover {
+        background: #1d3550;
+    }
+
+    #psplus-streams-root .psplus-action-btn.is-danger {
+        border-color: #7c3845;
+        background: #35151d;
+        color: #ffd4db;
+    }
+
+    #psplus-streams-root .psplus-action-btn.is-danger:hover {
+        background: #49212b;
+    }
+
+    #psplus-streams-root .psplus-action-banner {
+        display: none;
+        margin: 4px 0 8px;
+        border: 1px solid #365a7d;
+        background: rgba(18, 39, 61, 0.85);
+        color: #d7e9fb;
+        padding: 8px 10px;
+        font-size: 12px;
+    }
+
+    #psplus-streams-root .psplus-action-banner.is-error {
+        border-color: #7b3c48;
+        background: rgba(58, 21, 30, 0.84);
+        color: #ffd0d9;
+    }
+
     #psplus-streams-root #no-streams {
         text-align: center;
         font-style: italic;
@@ -461,6 +511,7 @@
     }
 
     $mergedStreams = [];
+    $allowTerminate = canViewerTerminateSessions($cfg);
 
     if (!empty($cfg['TOKEN'])) {
         $streams = getStreams($cfg);
@@ -482,6 +533,10 @@
                 $locationDisplayRaw = (string)($stream['locationDisplay'] ?? '');
                 $locationDisplay = h($locationDisplayRaw);
                 $streamBandwidthRaw = (string)($stream['bandwidth'] ?? '');
+                $streamHost = h((string)($stream['@host'] ?? ''));
+                $streamMediaKey = h((string)($stream['key'] ?? ''));
+                $streamSessionId = h((string)($stream['sessionId'] ?? ($stream['id'] ?? '')));
+                $streamMachineId = h((string)($stream['machineIdentifier'] ?? ''));
 
                 $videoAttrs = $stream['streamInfo']['video']['@attributes'] ?? [];
                 $audioAttrs = $stream['streamInfo']['audio']['@attributes'] ?? [];
@@ -525,8 +580,12 @@
                     ? '<a class="stream-title-link" href="#" onclick="openBox(\'' . h($movieDetailUrl) . '\',\'Details\',600,900); return false;">' . $streamTitle . '</a>'
                     : '<span class="stream-title-link">' . $streamTitle . '</span>';
 
+                $terminateButton = $allowTerminate
+                    ? '<button type="button" class="psplus-action-btn is-danger" data-psplus-action="terminate">' . _('Terminate') . '</button>'
+                    : '';
+
                 echo '
-                    <li class="stream-container" id="' . $streamId . '" data-stream-id="' . $streamDataId . '" data-stream-legacy-id="' . $streamLegacyDataId . '" data-stream-type="' . $streamType . '">
+                    <li class="stream-container" id="' . $streamId . '" data-stream-id="' . $streamDataId . '" data-stream-legacy-id="' . $streamLegacyDataId . '" data-stream-type="' . $streamType . '" data-host="' . $streamHost . '" data-media-key="' . $streamMediaKey . '" data-session-id="' . $streamSessionId . '" data-machine-id="' . $streamMachineId . '">
                         <article class="stream-card">
                             <div class="stream-media">
                                 <div class="stream-backdrop" style="background-image:url(\'' . $streamArt . '\');"></div>
@@ -560,6 +619,11 @@
                                         <span class="session-user-name">' . $streamUser . '</span>
                                     </span>
                                 </div>
+                                <div class="footer-actions">
+                                    <button type="button" class="psplus-action-btn" data-psplus-action="open-plex">' . _('Open in Plex') . '</button>
+                                    <button type="button" class="psplus-action-btn" data-psplus-action="copy-details">' . _('Copy Details') . '</button>
+                                    ' . $terminateButton . '
+                                </div>
                             </div>
                         </article>
                     </li>
@@ -579,6 +643,9 @@
 <script>
     var pageTitle = $('title').html();
     $('title').html(pageTitle.split('/')[0] + '/PlexStreams Plus');
+    var PLEXSTREAMSPLUS_VIEWER_ROLE = '<?php echo(h(getViewerRole())); ?>';
+    var PLEXSTREAMSPLUS_ALLOW_TERMINATE = '<?php echo($allowTerminate ? '1' : '0'); ?>';
+    plexStreamsPlusBindStreamActions();
     plexStreamsPlusStartPolling('streams_page', function() {
         return updateFullStreamInfo('streams_page');
     });

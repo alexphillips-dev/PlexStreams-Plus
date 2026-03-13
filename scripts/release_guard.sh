@@ -7,13 +7,15 @@ LEGACY_PLG="${ROOT_DIR}/plexstreams.plg"
 PLUS_CA_XML="${ROOT_DIR}/plexstreamsplus.xml"
 LEGACY_CA_XML="${ROOT_DIR}/plexstreams.xml"
 COMMON_FILE="${ROOT_DIR}/src/plexstreamsplus/usr/local/emhttp/plugins/plexstreamsplus/includes/common.php"
+SETTINGS_PAGE="${ROOT_DIR}/src/plexstreamsplus/usr/local/emhttp/plugins/plexstreamsplus/PlexStreamsPlusSettings.page"
+LEGACY_SETTINGS_PAGE="${ROOT_DIR}/src/plexstreamsplus/usr/local/emhttp/plugins/plexstreamsplus/Legacy/Settings.page"
 SOURCE_DIR="${ROOT_DIR}/src/plexstreamsplus"
 # shellcheck source=scripts/lib.sh
 source "${ROOT_DIR}/scripts/lib.sh"
 
 psplus::require_commands bash tar sed awk grep find md5sum date php
 
-for required_file in "${PLUS_PLG}" "${LEGACY_PLG}" "${PLUS_CA_XML}" "${LEGACY_CA_XML}" "${COMMON_FILE}"; do
+for required_file in "${PLUS_PLG}" "${LEGACY_PLG}" "${PLUS_CA_XML}" "${LEGACY_CA_XML}" "${COMMON_FILE}" "${SETTINGS_PAGE}" "${LEGACY_SETTINGS_PAGE}"; do
   if [[ ! -f "${required_file}" ]]; then
     psplus::fail "Missing required file: ${required_file}"
   fi
@@ -192,6 +194,10 @@ REQUIRED_ARCHIVE_ENTRIES=(
   "usr/local/emhttp/plugins/plexstreamsplus/PlexStreamsPlus.page"
   "usr/local/emhttp/plugins/plexstreamsplus/PlexStreamsPlusSettings.page"
   "usr/local/emhttp/plugins/plexstreamsplus/NewDashboard.page"
+  "usr/local/emhttp/plugins/plexstreamsplus/getServers.php"
+  "usr/local/emhttp/plugins/plexstreamsplus/health.php"
+  "usr/local/emhttp/plugins/plexstreamsplus/sessionAction.php"
+  "usr/local/emhttp/plugins/plexstreamsplus/stream_display.php"
   "usr/local/emhttp/plugins/plexstreamsplus/includes/common.php"
   "usr/local/emhttp/plugins/plexstreamsplus/PlexStreams-icon.png"
   "usr/local/emhttp/plugins/plexstreamsplus/README.md"
@@ -202,6 +208,44 @@ REQUIRED_ARCHIVE_ENTRIES=(
 for required_entry in "${REQUIRED_ARCHIVE_ENTRIES[@]}"; do
   if ! grep -Fxq "${required_entry}" <<< "${ARCHIVE_LIST_NORMALIZED}"; then
     psplus::fail "Missing required archive entry: ${required_entry}"
+  fi
+done
+
+REQUIRED_CFG_KEYS=(
+  "AUTO_FAILOVER"
+  "ALLOW_TERMINATE"
+  "MASK_LOCATIONS"
+  "MASK_USERNAMES"
+  "PRIVACY_ROLE"
+)
+
+for cfg_key in "${REQUIRED_CFG_KEYS[@]}"; do
+  if ! grep -Eq "^[[:space:]]*${cfg_key}=" "${PLUS_PLG}"; then
+    psplus::fail "Missing required config default '${cfg_key}' in plexstreamsplus.plg"
+  fi
+  if ! grep -Eq "^[[:space:]]*${cfg_key}=" "${LEGACY_PLG}"; then
+    psplus::fail "Missing required config default '${cfg_key}' in plexstreams.plg"
+  fi
+done
+
+REQUIRED_SETTINGS_FIELDS=(
+  "name=\"AUTO_FAILOVER\""
+  "name=\"ALLOW_TERMINATE\""
+  "name=\"MASK_LOCATIONS\""
+  "name=\"MASK_USERNAMES\""
+  "name=\"PRIVACY_ROLE\""
+  "id=\"psplus-run-health-btn\""
+)
+
+for settings_field in "${REQUIRED_SETTINGS_FIELDS[@]}"; do
+  if ! grep -Fq "${settings_field}" "${SETTINGS_PAGE}"; then
+    psplus::fail "Missing required settings control (${settings_field}) in PlexStreamsPlusSettings.page"
+  fi
+done
+
+for cfg_key in "${REQUIRED_CFG_KEYS[@]}"; do
+  if ! grep -Fq "name=\"${cfg_key}\"" "${LEGACY_SETTINGS_PAGE}"; then
+    psplus::fail "Missing required legacy hidden setting for '${cfg_key}' in Legacy/Settings.page"
   fi
 done
 

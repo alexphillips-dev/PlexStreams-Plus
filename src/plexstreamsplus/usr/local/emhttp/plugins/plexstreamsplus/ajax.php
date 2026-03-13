@@ -17,6 +17,14 @@
 
             $streams = getStreams($cfg);
             $mergedStreams = mergeStreams($streams, $cfg);
+            $allowTerminate = canViewerTerminateSessions($cfg);
+            foreach ($mergedStreams as &$mergedStream) {
+                if (is_array($mergedStream)) {
+                    $mergedStream['canTerminate'] = $allowTerminate;
+                    $mergedStream['viewerRole'] = getViewerRole();
+                }
+            }
+            unset($mergedStream);
             
             if (isset($_REQUEST['dbg'])) {
                 v_d($mergedStreams);

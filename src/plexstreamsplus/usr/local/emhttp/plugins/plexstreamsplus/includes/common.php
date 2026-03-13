@@ -2,7 +2,7 @@
     if (isset($GLOBALS['unRaidSettings'])) {
         define('OS_VERSION', 'Unraid ' . $GLOBALS['unRaidSettings']['version']);
     }
-    define('PLUGIN_VERSION', '2026.03.13.3');
+    define('PLUGIN_VERSION', '2026.03.13.4');
 
     if (!function_exists('getInstalledPluginVersion')) {
         function getInstalledPluginVersion($fallbackVersion) {
@@ -47,6 +47,140 @@
 
     if (!defined('PLUGIN_DISPLAY_VERSION')) {
         define('PLUGIN_DISPLAY_VERSION', getInstalledPluginVersion(PLUGIN_VERSION));
+    }
+
+    if (!function_exists('cfgEnabled')) {
+        function cfgEnabled($cfg, $key, $default = '0') {
+            $raw = isset($cfg[$key]) ? (string)$cfg[$key] : (string)$default;
+            return in_array(strtolower(trim($raw)), ['1', 'true', 'yes', 'on'], true);
+        }
+    }
+
+    if (!function_exists('getCurrentUiUser')) {
+        function getCurrentUiUser() {
+            $candidates = [
+                $_SERVER['REMOTE_USER'] ?? '',
+                $_SERVER['PHP_AUTH_USER'] ?? '',
+                $_SERVER['AUTH_USER'] ?? '',
+                $_SERVER['HTTP_X_AUTH_NAME'] ?? ''
+            ];
+            foreach ($candidates as $candidate) {
+                $value = trim((string)$candidate);
+                if ($value !== '') {
+                    return $value;
+                }
+            }
+            return '';
+        }
+    }
+
+    if (!function_exists('getViewerRole')) {
+        function getViewerRole() {
+            $user = strtolower(getCurrentUiUser());
+            if ($user === '' || $user === 'root' || $user === 'admin') {
+                return 'admin';
+            }
+            return 'user';
+        }
+    }
+
+    if (!function_exists('privacyRoleMode')) {
+        function privacyRoleMode($cfg) {
+            $mode = strtolower(trim((string)($cfg['PRIVACY_ROLE'] ?? 'non_admin')));
+            if (!in_array($mode, ['non_admin', 'all'], true)) {
+                return 'non_admin';
+            }
+            return $mode;
+        }
+    }
+
+    if (!function_exists('privacyRuleApplies')) {
+        function privacyRuleApplies($cfg) {
+            $mode = privacyRoleMode($cfg);
+            if ($mode === 'all') {
+                return true;
+            }
+            return getViewerRole() !== 'admin';
+        }
+    }
+
+    if (!function_exists('shouldMaskUsernames')) {
+        function shouldMaskUsernames($cfg) {
+            return cfgEnabled($cfg, 'MASK_USERNAMES', '0') && privacyRuleApplies($cfg);
+        }
+    }
+
+    if (!function_exists('shouldMaskLocations')) {
+        function shouldMaskLocations($cfg) {
+            return cfgEnabled($cfg, 'MASK_LOCATIONS', '0') && privacyRuleApplies($cfg);
+        }
+    }
+
+    if (!function_exists('canViewerTerminateSessions')) {
+        function canViewerTerminateSessions($cfg) {
+            return cfgEnabled($cfg, 'ALLOW_TERMINATE', '0') && getViewerRole() === 'admin';
+        }
+    }
+
+    if (!function_exists('maskDisplayName')) {
+        function maskDisplayName($rawName, &$knownUsers, &$counter) {
+            $name = trim((string)$rawName);
+            if ($name === '') {
+                return 'User Hidden';
+            }
+            if (!isset($knownUsers[$name])) {
+                $counter += 1;
+                $knownUsers[$name] = 'User ' . $counter;
+            }
+            return $knownUsers[$name];
+        }
+    }
+
+    if (!function_exists('maskedLocationLabel')) {
+        function maskedLocationLabel($location) {
+            $scope = strtoupper(trim((string)$location));
+            if ($scope === '' || $scope === 'UNKNOWN') {
+                return 'UNKNOWN (hidden)';
+            }
+            if (strpos($scope, 'LAN') !== false || strpos($scope, 'LOCAL') !== false) {
+                return 'LAN (hidden)';
+            }
+            return 'WAN (hidden)';
+        }
+    }
+
+    if (!function_exists('applyPrivacyRules')) {
+        function applyPrivacyRules($streams, $cfg) {
+            if (!is_array($streams) || count($streams) === 0) {
+                return $streams;
+            }
+
+            $maskUsers = shouldMaskUsernames($cfg);
+            $maskLocations = shouldMaskLocations($cfg);
+            if (!$maskUsers && !$maskLocations) {
+                return $streams;
+            }
+
+            $knownUsers = [];
+            $counter = 0;
+            foreach ($streams as &$stream) {
+                if ($maskUsers) {
+                    $stream['userOriginal'] = $stream['user'] ?? '';
+                    $stream['user'] = maskDisplayName($stream['user'] ?? '', $knownUsers, $counter);
+                    $stream['userAvatar'] = '/plugins/plexstreamsplus/PlexStreams-icon.png';
+                }
+
+                if ($maskLocations) {
+                    $stream['locationDisplayOriginal'] = $stream['locationDisplay'] ?? '';
+                    $stream['addressOriginal'] = $stream['address'] ?? '';
+                    $stream['locationDisplay'] = maskedLocationLabel($stream['location'] ?? '');
+                    $stream['address'] = 'hidden';
+                }
+            }
+            unset($stream);
+
+            return $streams;
+        }
     }
 
     function normalizeHostUrl($host) {
@@ -156,7 +290,7 @@
         return json_decode(json_encode($xml), true);
     }
 
-    function buildCurlHandle($url, $timeout = 30) {
+    function buildCurlHandle($url, $timeout = 30, $headers = []) {
         $ch = curl_init();
         $skipSslVerification = shouldSkipSslVerification($url);
         curl_setopt($ch, CURLOPT_URL, $url);
@@ -170,6 +304,9 @@
         if (defined('CURLOPT_PROTOCOLS') && defined('CURLPROTO_HTTP') && defined('CURLPROTO_HTTPS')) {
             curl_setopt($ch, CURLOPT_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);
         }
+        if (is_array($headers) && count($headers) > 0) {
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        }
 
         return $ch;
     }
@@ -180,6 +317,226 @@
         }
 
         return $url . (strpos($url, '?') !== false ? '&' : '?') . 'X-Plex-Token=' . urlencode($token);
+    }
+
+    function executeCurlRequest($url, $timeout = 15, $headers = [], $method = 'GET', $body = null) {
+        $requestMethod = strtoupper(trim((string)$method));
+        if ($requestMethod === '') {
+            $requestMethod = 'GET';
+        }
+
+        $start = microtime(true);
+        $ch = buildCurlHandle($url, $timeout, $headers);
+        if ($requestMethod !== 'GET') {
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $requestMethod);
+        }
+        if ($body !== null) {
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
+        }
+
+        $responseBody = curl_exec($ch);
+        $httpCode = (int)curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+        $errno = curl_errno($ch);
+        $error = curl_error($ch);
+        curl_close($ch);
+        $elapsedMs = (int)round((microtime(true) - $start) * 1000);
+
+        return [
+            'url' => $url,
+            'body' => ($responseBody !== false) ? $responseBody : '',
+            'httpCode' => $httpCode,
+            'errno' => $errno,
+            'error' => $error,
+            'durationMs' => $elapsedMs,
+            'ok' => ($errno === 0 && $httpCode >= 200 && $httpCode < 300)
+        ];
+    }
+
+    function normalizeHostCollection($hosts) {
+        $normalized = [];
+        foreach ((array)$hosts as $host) {
+            $uri = normalizeHostUrl($host);
+            if ($uri !== null) {
+                $normalized[$uri] = true;
+            }
+        }
+        return array_keys($normalized);
+    }
+
+    function getDiscoveredConnections($cfg) {
+        $servers = getServers($cfg);
+        if (!is_array($servers)) {
+            return [];
+        }
+
+        $connections = [];
+        foreach ($servers as $server) {
+            $serverName = (string)($server['Name'] ?? '');
+            foreach ((array)($server['Connections'] ?? []) as $connection) {
+                $uri = normalizeHostUrl($connection['uri'] ?? '');
+                if ($uri === null) {
+                    continue;
+                }
+                $connections[$uri] = [
+                    'uri' => $uri,
+                    'name' => $serverName,
+                    'address' => (string)($connection['address'] ?? ''),
+                    'local' => (string)($connection['local'] ?? '0')
+                ];
+            }
+        }
+
+        $ordered = array_values($connections);
+        usort($ordered, function ($a, $b) {
+            $aLocal = (($a['local'] ?? '0') === '1') ? 1 : 0;
+            $bLocal = (($b['local'] ?? '0') === '1') ? 1 : 0;
+            if ($aLocal !== $bLocal) {
+                return $bLocal <=> $aLocal;
+            }
+            return strcmp((string)($a['uri'] ?? ''), (string)($b['uri'] ?? ''));
+        });
+
+        return $ordered;
+    }
+
+    function getAllowedHosts($cfg) {
+        $allowed = [];
+        foreach (normalizeHostCollection(getConfiguredHosts($cfg)) as $uri) {
+            $allowed[$uri] = true;
+        }
+        foreach (getDiscoveredConnections($cfg) as $connection) {
+            $uri = (string)($connection['uri'] ?? '');
+            if ($uri !== '') {
+                $allowed[$uri] = true;
+            }
+        }
+        return array_keys($allowed);
+    }
+
+    function probePlexToken($token) {
+        $trimmed = trim((string)$token);
+        if ($trimmed === '') {
+            return [
+                'configured' => false,
+                'valid' => false,
+                'status' => 'missing',
+                'httpCode' => 0,
+                'durationMs' => 0,
+                'message' => 'No Plex token configured.'
+            ];
+        }
+
+        $url = appendTokenToUrl('https://plex.tv/api/v2/user', $trimmed);
+        $probe = executeCurlRequest($url, 15, ['Accept: application/json']);
+        $isUnauthorized = in_array((int)$probe['httpCode'], [401, 403], true);
+        $isValid = ($probe['ok'] && !$isUnauthorized);
+        $status = $isValid ? 'ok' : ($isUnauthorized ? 'expired' : 'error');
+        $message = $isValid ? 'Token is valid.' : ($isUnauthorized ? 'Token is unauthorized or expired.' : 'Unable to verify token.');
+
+        return [
+            'configured' => true,
+            'valid' => $isValid,
+            'status' => $status,
+            'httpCode' => (int)$probe['httpCode'],
+            'durationMs' => (int)$probe['durationMs'],
+            'message' => $message,
+            'error' => (string)($probe['error'] ?? '')
+        ];
+    }
+
+    function probePlexHostSessionEndpoint($host, $token, $timeout = 12) {
+        $normalizedHost = normalizeHostUrl($host);
+        if ($normalizedHost === null) {
+            return [
+                'host' => (string)$host,
+                'reachable' => false,
+                'activeStreams' => 0,
+                'httpCode' => 0,
+                'durationMs' => 0,
+                'status' => 'invalid_host',
+                'message' => 'Invalid host URI.'
+            ];
+        }
+
+        $url = appendTokenToUrl($normalizedHost . '/status/sessions?_m=' . time(), $token);
+        $probe = executeCurlRequest($url, $timeout, ['Accept: application/xml']);
+        $content = safeLoadXml($probe['body']);
+        $video = (isset($content['Video']) ? $content['Video'] : []);
+        $track = (isset($content['Track']) ? $content['Track'] : []);
+        $videoCount = isset($video['@attributes']) ? 1 : count((array)$video);
+        $trackCount = isset($track['@attributes']) ? 1 : count((array)$track);
+        $activeStreams = max(0, $videoCount + $trackCount);
+
+        $httpCode = (int)$probe['httpCode'];
+        $reachable = ((int)$probe['errno'] === 0 && $httpCode >= 200 && $httpCode < 400);
+        $status = $reachable ? 'ok' : (($httpCode === 401 || $httpCode === 403) ? 'unauthorized' : 'unreachable');
+        $message = $reachable ? 'Reachable' : (((int)$probe['errno'] !== 0) ? (string)$probe['error'] : ('HTTP ' . $httpCode));
+
+        return [
+            'host' => $normalizedHost,
+            'reachable' => $reachable,
+            'activeStreams' => $activeStreams,
+            'httpCode' => $httpCode,
+            'durationMs' => (int)$probe['durationMs'],
+            'status' => $status,
+            'message' => $message
+        ];
+    }
+
+    function collectHostHealth($hosts, $token, $timeout = 12) {
+        $results = [];
+        foreach (normalizeHostCollection($hosts) as $host) {
+            $results[] = probePlexHostSessionEndpoint($host, $token, $timeout);
+        }
+        return $results;
+    }
+
+    function hasReachableSessionResponse($responses) {
+        if (!is_array($responses)) {
+            return false;
+        }
+        foreach ($responses as $idx => $details) {
+            if (strpos((string)$idx, 'streams-') !== 0) {
+                continue;
+            }
+            $httpCode = (int)($details['httpCode'] ?? 0);
+            $errno = (int)($details['curlErrno'] ?? 0);
+            if ($errno === 0 && $httpCode >= 200 && $httpCode < 400) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function terminatePlexSession($host, $token, $sessionId, $reason = '') {
+        $normalizedHost = normalizeHostUrl($host);
+        $trimmedToken = trim((string)$token);
+        $trimmedSessionId = trim((string)$sessionId);
+        if ($normalizedHost === null || $trimmedToken === '' || $trimmedSessionId === '') {
+            return [
+                'ok' => false,
+                'status' => 'invalid_request',
+                'message' => 'Missing required termination details.',
+                'httpCode' => 0
+            ];
+        }
+
+        $query = 'sessionId=' . rawurlencode($trimmedSessionId);
+        $trimmedReason = trim((string)$reason);
+        if ($trimmedReason !== '') {
+            $query .= '&reason=' . rawurlencode($trimmedReason);
+        }
+        $url = appendTokenToUrl($normalizedHost . '/status/sessions/terminate?' . $query, $trimmedToken);
+        $probe = executeCurlRequest($url, 15, ['Accept: application/xml']);
+        $httpCode = (int)$probe['httpCode'];
+        $ok = ((int)$probe['errno'] === 0 && $httpCode >= 200 && $httpCode < 300);
+
+        return [
+            'ok' => $ok,
+            'status' => $ok ? 'ok' : (($httpCode === 401 || $httpCode === 403) ? 'unauthorized' : 'error'),
+            'message' => $ok ? 'Session terminate command accepted.' : (((int)$probe['errno'] !== 0) ? (string)$probe['error'] : ('HTTP ' . $httpCode)),
+            'httpCode' => $httpCode
+        ];
     }
 
     function getGeo($ip) {
@@ -321,7 +678,55 @@
         }
         $combined = $streams;
         array_push($combined, ...$schedules);
-        return getUrl($combined);
+        $primaryResults = getUrl($combined);
+        if (!cfgEnabled($cfg, 'AUTO_FAILOVER', '1')) {
+            return $primaryResults;
+        }
+        if (hasReachableSessionResponse($primaryResults)) {
+            return $primaryResults;
+        }
+
+        $configuredSet = [];
+        foreach ($hosts as $configuredHost) {
+            $configuredSet[(string)$configuredHost] = true;
+        }
+
+        $fallbackHosts = [];
+        foreach (getDiscoveredConnections($cfg) as $connection) {
+            $uri = (string)($connection['uri'] ?? '');
+            if ($uri === '' || isset($configuredSet[$uri])) {
+                continue;
+            }
+            $fallbackHosts[] = $uri;
+            if (count($fallbackHosts) >= 3) {
+                break;
+            }
+        }
+
+        if (count($fallbackHosts) === 0) {
+            return $primaryResults;
+        }
+
+        $fallbackStreams = [];
+        $fallbackSchedules = [];
+        foreach ($fallbackHosts as $fallbackHost) {
+            $fallbackStreams[] = appendTokenToUrl($fallbackHost . '/status/sessions?_m=' . time(), $token);
+            $fallbackSchedules[] = appendTokenToUrl($fallbackHost . '/media/subscriptions/scheduled', $token);
+        }
+        $fallbackCombined = $fallbackStreams;
+        array_push($fallbackCombined, ...$fallbackSchedules);
+        $fallbackResults = getUrl($fallbackCombined);
+        if (hasReachableSessionResponse($fallbackResults)) {
+            foreach ($fallbackResults as &$fallbackResult) {
+                if (is_array($fallbackResult)) {
+                    $fallbackResult['usedFailover'] = true;
+                }
+            }
+            unset($fallbackResult);
+            return $fallbackResults;
+        }
+
+        return $primaryResults;
     }
 
     function v_d($obj) {
@@ -374,6 +779,10 @@
                     $effectiveUrl = $requestUrls[$idx];
                 }
                 $rets[$idx]['url'] = $effectiveUrl;
+                $rets[$idx]['httpCode'] = (int)curl_getinfo($m, CURLINFO_RESPONSE_CODE);
+                $rets[$idx]['curlErrno'] = curl_errno($m);
+                $rets[$idx]['curlError'] = curl_error($m);
+                $rets[$idx]['durationMs'] = (int)round(((float)curl_getinfo($m, CURLINFO_TOTAL_TIME)) * 1000);
                 $content = safeLoadXml($contentString);
                 $rets[$idx]['content'] = ($content !== false) ? $content : [];
 
@@ -486,6 +895,8 @@
                                 '@host' => $streams['@host'],
                                 'alias' => $alias,
                                 'id' => $media['@attributes']['id'],
+                                'sessionId' => $video['@attributes']['sessionKey'] ?? ($video['Session']['@attributes']['id'] ?? null),
+                                'machineIdentifier' => $video['@attributes']['machineIdentifier'] ?? '',
                                 'type' => 'video',
                                 'product' => $video['Player']['@attributes']['product'],
                                 'player' => $video['Player']['@attributes']['title'] ?? $video['Player']['@attributes']['product'],
@@ -639,6 +1050,8 @@
                                         '@host' => $streams['@host'],
                                         'alias'=> $alias,
                                         'id' => $media['@attributes']['id'],
+                                        'sessionId' => $audio['@attributes']['sessionKey'] ?? ($audio['Session']['@attributes']['id'] ?? null),
+                                        'machineIdentifier' => $audio['@attributes']['machineIdentifier'] ?? '',
                                         'type' => 'audio',
                                         'product' => $audio['Player']['@attributes']['product'],
                                         'player' => $audio['Player']['@attributes']['title'] ?? $audio['Player']['@attributes']['product'],
@@ -722,7 +1135,7 @@
         //     }
         // }
 
-        return $mergedStreams;
+        return applyPrivacyRules($mergedStreams, $cfg);
     }
 
 ?>

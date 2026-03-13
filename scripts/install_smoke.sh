@@ -46,6 +46,10 @@ REQUIRED_ARCHIVE_ENTRIES=(
   "usr/local/emhttp/plugins/plexstreamsplus/Legacy/Settings.page"
   "usr/local/emhttp/plugins/plexstreamsplus/includes/common.php"
   "usr/local/emhttp/plugins/plexstreamsplus/includes/config.php"
+  "usr/local/emhttp/plugins/plexstreamsplus/getServers.php"
+  "usr/local/emhttp/plugins/plexstreamsplus/health.php"
+  "usr/local/emhttp/plugins/plexstreamsplus/sessionAction.php"
+  "usr/local/emhttp/plugins/plexstreamsplus/stream_display.php"
   "usr/local/emhttp/plugins/plexstreamsplus/README.md"
   "usr/local/emhttp/plugins/plexstreamsplus/${ICON_NAME}"
   "usr/local/emhttp/plugins/plexstreams/${ICON_NAME}"
@@ -81,4 +85,3 @@ fi
 echo "Install smoke checks passed:"
 echo "  version: ${VERSION_PLUS}"
 echo "  archive: ${PLUS_ARCHIVE##*/}"
-
