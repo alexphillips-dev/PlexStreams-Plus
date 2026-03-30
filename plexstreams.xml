@@ -10,7 +10,7 @@
 <Description>
 Legacy compatibility entry for PlexStreams Plus. Displays active Plex streams in Unraid with dashboard and tools views.
 </Description>
-<Date>2026-03-13</Date>
+<Date>2026-03-30</Date>
 <MinVer>6.9.0</MinVer>
 <ExtraSearchTerms>plex streams dashboard monitoring playback transcoding sessions legacy</ExtraSearchTerms>
 <Support>https://forums.unraid.net/topic/92459-plugin-plex-streams/</Support>
